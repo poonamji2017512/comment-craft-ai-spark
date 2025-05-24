@@ -46,41 +46,41 @@
   }
 
   .dark {
-    --background: 220 13% 9%;
+    --background: 0 0% 10%;
     --foreground: 0 0% 98%;
 
-    --card: 220 13% 9%;
+    --card: 0 0% 16.5%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 220 13% 9%;
+    --popover: 0 0% 16.5%;
     --popover-foreground: 0 0% 98%;
 
     --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 220 13% 9%;
+    --primary-foreground: 0 0% 10%;
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 0 0% 16.5%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 0 0% 16.5%;
+    --muted-foreground: 0 0% 63.9%;
 
     --accent: 217.2 91.2% 59.8%;
-    --accent-foreground: 220 13% 9%;
+    --accent-foreground: 0 0% 10%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
+    --border: 0 0% 41.2%;
+    --input: 0 0% 16.5%;
     --ring: 217.2 91.2% 59.8%;
 
-    --sidebar-background: 220 13% 9%;
+    --sidebar-background: 0 0% 10%;
     --sidebar-foreground: 0 0% 98%;
     --sidebar-primary: 217.2 91.2% 59.8%;
-    --sidebar-primary-foreground: 220 13% 9%;
-    --sidebar-accent: 217.2 32.6% 17.5%;
+    --sidebar-primary-foreground: 0 0% 10%;
+    --sidebar-accent: 0 0% 16.5%;
     --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 217.2 32.6% 17.5%;
+    --sidebar-border: 0 0% 41.2%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
@@ -93,4 +93,36 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Custom scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #404040;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Perplexity-style animations */
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
