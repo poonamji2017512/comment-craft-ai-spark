@@ -16,8 +16,6 @@ interface AuthContextType {
   user: User | null;
   userProfile: UserProfile | null;
   session: Session | null;
-  login: () => Promise<void>;
-  loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   isLoading: boolean;
 }
@@ -107,7 +105,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           // Log login event
           if (event === 'SIGNED_IN') {
             setTimeout(() => {
-              logEvent('user_login', { provider: session.user.app_metadata?.provider });
+              logEvent('user_login', { provider: 'email' });
             }, 0);
           }
         } else {
@@ -132,33 +130,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     return () => subscription.unsubscribe();
   }, []);
-
-  const loginWithGoogle = async () => {
-    setIsLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin
-        }
-      });
-      
-      if (error) {
-        console.error('Error with Google login:', error);
-        throw error;
-      }
-    } catch (error) {
-      console.error('Google login failed:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const login = async () => {
-    // Default to Google login for now
-    await loginWithGoogle();
-  };
 
   const logout = async () => {
     setIsLoading(true);
@@ -189,8 +160,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       user, 
       userProfile, 
       session, 
-      login, 
-      loginWithGoogle, 
       logout, 
       isLoading 
     }}>

@@ -1,14 +1,14 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Settings, User, Sparkles, Moon, Sun, LogIn, LogOut, History } from "lucide-react";
+import { Settings, User, Sparkles, Moon, Sun, LogOut, History } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 const Header = () => {
   const { theme, setTheme, isDark } = useTheme();
-  const { user, userProfile, login, logout, isLoading } = useAuth();
+  const { user, userProfile, logout, isLoading } = useAuth();
   const navigate = useNavigate();
 
   const toggleTheme = () => {
@@ -65,7 +65,7 @@ const Header = () => {
             Settings
           </Button>
           
-          {user ? (
+          {user && (
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-2 bg-muted rounded-full py-1 px-3 h-8">
                 <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center">
@@ -88,17 +88,6 @@ const Header = () => {
                 <LogOut className="w-4 h-4" />
               </Button>
             </div>
-          ) : (
-            <Button
-              variant="default"
-              size="sm"
-              onClick={login}
-              disabled={isLoading}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground h-8"
-            >
-              <LogIn className="w-4 h-4 mr-2" />
-              {isLoading ? 'Signing in...' : 'Sign in'}
-            </Button>
           )}
         </div>
       </div>
