@@ -19,8 +19,14 @@ interface CommentCardProps {
 }
 
 const CommentCard: React.FC<CommentCardProps> = ({ suggestion, index }) => {
+  // Add safety check for suggestion prop
+  if (!suggestion) {
+    console.error('CommentCard: suggestion prop is undefined');
+    return null;
+  }
+
   const [isEditing, setIsEditing] = useState(false);
-  const [editedText, setEditedText] = useState(suggestion.text);
+  const [editedText, setEditedText] = useState(suggestion.text || '');
   const [feedback, setFeedback] = useState<'up' | 'down' | null>(null);
   const { toast } = useToast();
 
@@ -53,7 +59,7 @@ const CommentCard: React.FC<CommentCardProps> = ({ suggestion, index }) => {
   };
 
   const cancelEdit = () => {
-    setEditedText(suggestion.text);
+    setEditedText(suggestion.text || '');
     setIsEditing(false);
   };
 
@@ -103,8 +109,8 @@ const CommentCard: React.FC<CommentCardProps> = ({ suggestion, index }) => {
             <span className="text-sm font-medium text-gray-500">
               Suggestion #{index + 1}
             </span>
-            <span className={`text-xs px-2 py-1 rounded-full border ${getPlatformColor(suggestion.platform)}`}>
-              {suggestion.platform.charAt(0).toUpperCase() + suggestion.platform.slice(1)}
+            <span className={`text-xs px-2 py-1 rounded-full border ${getPlatformColor(suggestion.platform || 'twitter')}`}>
+              {(suggestion.platform || 'twitter').charAt(0).toUpperCase() + (suggestion.platform || 'twitter').slice(1)}
             </span>
           </div>
           
