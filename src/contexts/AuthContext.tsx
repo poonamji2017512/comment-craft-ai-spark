@@ -1,17 +1,24 @@
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { User, Session } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 
-interface User {
+interface UserProfile {
   id: string;
-  name: string;
-  email: string;
-  avatar?: string;
+  email?: string;
+  full_name?: string;
+  avatar_url?: string;
+  daily_prompt_count?: number;
+  last_login?: string;
 }
 
 interface AuthContextType {
   user: User | null;
+  userProfile: UserProfile | null;
+  session: Session | null;
   login: () => Promise<void>;
-  logout: () => void;
+  loginWithGoogle: () => Promise<void>;
+  logout: () => Promise<void>;
   isLoading: boolean;
 }
 
@@ -31,32 +38,162 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const login = async () => {
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching user profile:', error);
+        return;
+      }
+
+      if (data) {
+        setUserProfile(data);
+      }
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    }
+  };
+
+  const logEvent = async (eventType: string, metadata?: any) => {
+    if (!user) return;
+    
+    try {
+      await supabase
+        .from('event_logs')
+        .insert({
+          user_id: user.id,
+          event_type: eventType,
+          metadata: metadata || {}
+        });
+    } catch (error) {
+      console.error('Error logging event:', error);
+    }
+  };
+
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          // Fetch user profile when user logs in
+          setTimeout(() => {
+            fetchUserProfile(session.user.id);
+          }, 0);
+          
+          // Update last login
+          setTimeout(async () => {
+            try {
+              await supabase
+                .from('user_profiles')
+                .update({ last_login: new Date().toISOString() })
+                .eq('id', session.user.id);
+            } catch (error) {
+              console.error('Error updating last login:', error);
+            }
+          }, 0);
+
+          // Log login event
+          if (event === 'SIGNED_IN') {
+            setTimeout(() => {
+              logEvent('user_login', { provider: session.user.app_metadata?.provider });
+            }, 0);
+          }
+        } else {
+          setUserProfile(null);
+        }
+        
+        setIsLoading(false);
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        fetchUserProfile(session.user.id);
+      }
+      
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const loginWithGoogle = async () => {
     setIsLoading(true);
     try {
-      // Mock Google login for now
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setUser({
-        id: '1',
-        name: 'AI Companion User',
-        email: 'user@company.com',
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face'
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin
+        }
       });
+      
+      if (error) {
+        console.error('Error with Google login:', error);
+        throw error;
+      }
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error('Google login failed:', error);
+      throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const logout = () => {
-    setUser(null);
+  const login = async () => {
+    // Default to Google login for now
+    await loginWithGoogle();
+  };
+
+  const logout = async () => {
+    setIsLoading(true);
+    try {
+      // Log logout event before signing out
+      if (user) {
+        await logEvent('user_logout');
+      }
+      
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Error signing out:', error);
+        throw error;
+      }
+      
+      setUser(null);
+      setUserProfile(null);
+      setSession(null);
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      userProfile, 
+      session, 
+      login, 
+      loginWithGoogle, 
+      logout, 
+      isLoading 
+    }}>
       {children}
     </AuthContext.Provider>
   );

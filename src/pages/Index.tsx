@@ -1,14 +1,15 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import CommentCard from "@/components/CommentCard";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -22,7 +23,7 @@ const Index = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
 
   const platforms = [
     { value: 'twitter', label: 'Twitter/X' },
@@ -40,32 +41,115 @@ const Index = () => {
     { value: 'critical', label: 'Critical' }
   ];
 
-  const mockSuggestions = [
-    {
-      id: 1,
-      text: "This is incredibly insightful! The way you've broken down the complexity into actionable steps really resonates. Thanks for sharing your expertise! 🚀",
-      platform: "twitter",
-      length: 145
-    },
-    {
-      id: 2,
-      text: "Absolutely brilliant perspective! I've been thinking about this exact challenge, and your approach offers a fresh angle I hadn't considered. Looking forward to implementing some of these ideas.",
-      platform: "linkedin",
-      length: 198
-    },
-    {
-      id: 3,
-      text: "Great post! This really highlights the importance of strategic thinking in today's fast-paced environment. Would love to hear more about your experience with implementation.",
-      platform: "twitter",
-      length: 178
-    },
-    {
-      id: 4,
-      text: "This hits different! 💯 The authenticity in your approach is exactly what the industry needs right now. Keep pushing boundaries! 🔥",
-      platform: "twitter",
-      length: 134
+  const checkRateLimit = async (): Promise<boolean> => {
+    if (!user) return false;
+    
+    try {
+      const { data, error } = await supabase.rpc('check_rate_limit', {
+        user_uuid: user.id
+      });
+      
+      if (error) {
+        console.error('Error checking rate limit:', error);
+        return false;
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error checking rate limit:', error);
+      return false;
     }
-  ];
+  };
+
+  const createSession = async (topic: string, platform: string) => {
+    if (!user) return null;
+    
+    try {
+      const { data, error } = await supabase
+        .from('sessions')
+        .insert({
+          user_id: user.id,
+          topic: topic,
+          platform: platform
+        })
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Error creating session:', error);
+        return null;
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error creating session:', error);
+      return null;
+    }
+  };
+
+  const createPrompt = async (sessionId: string, inputText: string, tone: string) => {
+    if (!user) return null;
+    
+    try {
+      const { data, error } = await supabase
+        .from('prompts')
+        .insert({
+          session_id: sessionId,
+          user_id: user.id,
+          input_text: inputText,
+          tone: tone
+        })
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Error creating prompt:', error);
+        return null;
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error creating prompt:', error);
+      return null;
+    }
+  };
+
+  const saveResponses = async (promptId: string, responses: string[]) => {
+    if (!user) return;
+    
+    try {
+      const responseData = responses.map(response => ({
+        prompt_id: promptId,
+        response_text: response
+      }));
+      
+      const { error } = await supabase
+        .from('responses')
+        .insert(responseData);
+      
+      if (error) {
+        console.error('Error saving responses:', error);
+      }
+    } catch (error) {
+      console.error('Error saving responses:', error);
+    }
+  };
+
+  const logEvent = async (eventType: string, metadata?: any) => {
+    if (!user) return;
+    
+    try {
+      await supabase
+        .from('event_logs')
+        .insert({
+          user_id: user.id,
+          event_type: eventType,
+          metadata: metadata || {}
+        });
+    } catch (error) {
+      console.error('Error logging event:', error);
+    }
+  };
 
   const generateComments = async () => {
     if (!user) {
@@ -82,22 +166,75 @@ const Index = () => {
       return;
     }
 
+    // Check rate limit
+    const canProceed = await checkRateLimit();
+    if (!canProceed) {
+      toast({
+        title: "Rate Limit Exceeded",
+        description: "You've reached your daily limit of 20 prompts. Please try again tomorrow.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsGenerating(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      const platformSpecificSuggestions = mockSuggestions.filter(s => 
-        s.platform === platform || platform === 'linkedin'
-      ).slice(0, 4);
+    try {
+      // Create session
+      const session = await createSession(input.substring(0, 50) + '...', platform);
+      if (!session) {
+        throw new Error('Failed to create session');
+      }
       
-      setSuggestions(platformSpecificSuggestions);
-      setIsGenerating(false);
+      // Create prompt
+      const prompt = await createPrompt(session.id, input, tone);
+      if (!prompt) {
+        throw new Error('Failed to create prompt');
+      }
+      
+      // Log the generation event
+      await logEvent('comment_generation', {
+        platform,
+        tone,
+        input_length: input.length
+      });
+      
+      // Mock AI responses for now (replace with actual AI integration later)
+      const mockResponses = [
+        `This is incredibly insightful! The way you've broken down the complexity into actionable steps really resonates. Thanks for sharing your expertise! 🚀`,
+        `Absolutely brilliant perspective! I've been thinking about this exact challenge, and your approach offers a fresh angle I hadn't considered. Looking forward to implementing some of these ideas.`,
+        `Great post! This really highlights the importance of strategic thinking in today's fast-paced environment. Would love to hear more about your experience with implementation.`,
+        `This hits different! 💯 The authenticity in your approach is exactly what the industry needs right now. Keep pushing boundaries! 🔥`
+      ];
+      
+      // Format suggestions for display
+      const formattedSuggestions = mockResponses.map((text, index) => ({
+        id: index + 1,
+        text,
+        platform,
+        length: text.length
+      }));
+      
+      // Save responses to database
+      await saveResponses(prompt.id, mockResponses);
+      
+      setSuggestions(formattedSuggestions);
       
       toast({
         title: "Comments Generated!",
-        description: `Generated ${platformSpecificSuggestions.length} comment suggestions for ${platforms.find(p => p.value === platform)?.label}.`,
+        description: `Generated ${formattedSuggestions.length} comment suggestions for ${platforms.find(p => p.value === platform)?.label}.`,
       });
-    }, 2000);
+      
+    } catch (error) {
+      console.error('Error generating comments:', error);
+      toast({
+        title: "Generation Failed",
+        description: "Something went wrong while generating comments. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -118,6 +255,11 @@ const Index = () => {
             Create engaging, human-like comments for any social platform using AI. 
             Input your post and get multiple suggestions tailored to your audience.
           </p>
+          {user && userProfile && (
+            <div className="mt-4 text-sm text-muted-foreground">
+              Daily prompts used: {userProfile.daily_prompt_count || 0} / 20
+            </div>
+          )}
         </div>
 
         {/* Input Section */}
@@ -180,7 +322,7 @@ const Index = () => {
             
             <Button 
               onClick={generateComments}
-              disabled={isGenerating}
+              disabled={isGenerating || !user}
               className="w-full md:w-auto"
             >
               {isGenerating ? (
@@ -191,7 +333,7 @@ const Index = () => {
               ) : (
                 <>
                   <Sparkles className="w-4 h-4 mr-2" />
-                  Generate Comments
+                  {user ? 'Generate Comments' : 'Sign in to Generate Comments'}
                 </>
               )}
             </Button>
@@ -231,7 +373,10 @@ const Index = () => {
                 Ready to Generate Comments
               </h3>
               <p className="text-muted-foreground">
-                Enter your post content and platform to get started with AI-generated comment suggestions.
+                {user 
+                  ? "Enter your post content and platform to get started with AI-generated comment suggestions."
+                  : "Sign in to start generating AI-powered comment suggestions."
+                }
               </p>
             </CardContent>
           </Card>

@@ -9,16 +9,173 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      event_logs: {
+        Row: {
+          event_type: string
+          id: string
+          metadata: Json | null
+          timestamp: string
+          user_id: string
+        }
+        Insert: {
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          timestamp?: string
+          user_id: string
+        }
+        Update: {
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          timestamp?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      prompts: {
+        Row: {
+          created_at: string
+          id: string
+          input_text: string
+          session_id: string
+          tone: Database["public"]["Enums"]["tone_type"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          input_text: string
+          session_id: string
+          tone?: Database["public"]["Enums"]["tone_type"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          input_text?: string
+          session_id?: string
+          tone?: Database["public"]["Enums"]["tone_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prompts_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      responses: {
+        Row: {
+          created_at: string
+          id: string
+          prompt_id: string
+          response_text: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          prompt_id: string
+          response_text: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          prompt_id?: string
+          response_text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "responses_prompt_id_fkey"
+            columns: ["prompt_id"]
+            isOneToOne: false
+            referencedRelation: "prompts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sessions: {
+        Row: {
+          created_at: string
+          id: string
+          platform: Database["public"]["Enums"]["platform_type"]
+          topic: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          platform: Database["public"]["Enums"]["platform_type"]
+          topic: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          platform?: Database["public"]["Enums"]["platform_type"]
+          topic?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          daily_prompt_count: number | null
+          email: string | null
+          full_name: string | null
+          id: string
+          last_login: string | null
+          last_prompt_reset: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          daily_prompt_count?: number | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+          last_login?: string | null
+          last_prompt_reset?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          daily_prompt_count?: number | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          last_login?: string | null
+          last_prompt_reset?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_rate_limit: {
+        Args: { user_uuid: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      platform_type: "twitter" | "linkedin" | "reddit" | "bluesky"
+      tone_type:
+        | "professional"
+        | "casual"
+        | "enthusiastic"
+        | "supportive"
+        | "humorous"
+        | "critical"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +290,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      platform_type: ["twitter", "linkedin", "reddit", "bluesky"],
+      tone_type: [
+        "professional",
+        "casual",
+        "enthusiastic",
+        "supportive",
+        "humorous",
+        "critical",
+      ],
+    },
   },
 } as const
