@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 
 const Header = () => {
   const { theme, setTheme, isDark } = useTheme();
-  const { user, login, logout, isLoading } = useAuth();
+  const { user, userProfile, login, logout, isLoading } = useAuth();
   const navigate = useNavigate();
 
   const toggleTheme = () => {
@@ -69,13 +69,15 @@ const Header = () => {
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-2 bg-muted rounded-full py-1 px-3 h-8">
                 <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center">
-                  {user.avatar ? (
-                    <img src={user.avatar} alt={user.name} className="w-5 h-5 rounded-full" />
+                  {userProfile?.avatar_url ? (
+                    <img src={userProfile.avatar_url} alt={userProfile.full_name || 'User'} className="w-5 h-5 rounded-full" />
                   ) : (
                     <User className="w-3 h-3 text-primary-foreground" />
                   )}
                 </div>
-                <span className="text-sm font-medium text-foreground">{user.name}</span>
+                <span className="text-sm font-medium text-foreground">
+                  {userProfile?.full_name || user.email?.split('@')[0] || 'User'}
+                </span>
               </div>
               <Button
                 variant="ghost"

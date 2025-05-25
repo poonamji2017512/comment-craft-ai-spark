@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -70,7 +69,7 @@ const Index = () => {
         .insert({
           user_id: user.id,
           topic: topic,
-          platform: platform
+          platform: platform as 'twitter' | 'linkedin' | 'reddit' | 'bluesky'
         })
         .select()
         .single();
@@ -97,7 +96,7 @@ const Index = () => {
           session_id: sessionId,
           user_id: user.id,
           input_text: inputText,
-          tone: tone
+          tone: tone as 'professional' | 'casual' | 'enthusiastic' | 'supportive' | 'humorous' | 'critical'
         })
         .select()
         .single();
