@@ -6,6 +6,14 @@ import CommentCard from "@/components/CommentCard";
 import AutoAuthModal from "@/components/AutoAuthModal";
 
 const Index = () => {
+  // Sample data for the comment card
+  const sampleSuggestion = {
+    id: 1,
+    text: "This is a great post! Thanks for sharing your insights. I particularly found the section about AI integration very helpful.",
+    platform: "twitter",
+    length: 125
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
@@ -21,7 +29,7 @@ const Index = () => {
         </div>
 
         <div className="max-w-4xl mx-auto">
-          <CommentCard />
+          <CommentCard suggestion={sampleSuggestion} index={0} />
         </div>
       </main>
 
