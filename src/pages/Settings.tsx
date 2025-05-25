@@ -30,11 +30,11 @@ import Header from "@/components/Header";
 
 const Settings = () => {
   const { theme, setTheme } = useTheme();
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
   const { toast } = useToast();
 
   // Settings state
-  const [displayName, setDisplayName] = useState(user?.name || '');
+  const [displayName, setDisplayName] = useState(userProfile?.full_name || '');
   const [defaultTone, setDefaultTone] = useState('friendly');
   const [commentLength, setCommentLength] = useState('balanced');
   const [aiLearning, setAiLearning] = useState(true);
