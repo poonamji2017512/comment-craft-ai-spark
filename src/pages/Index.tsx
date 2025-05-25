@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,9 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import CommentCard from "@/components/CommentCard";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import AuthModal from "@/components/AuthModal";
 
 const Index = () => {
   const [input, setInput] = useState('');
@@ -19,7 +20,9 @@ const Index = () => {
   const [tone, setTone] = useState('professional');
   const [suggestions, setSuggestions] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const platforms = [
     { value: 'twitter', label: 'Twitter/X' },
@@ -65,6 +68,11 @@ const Index = () => {
   ];
 
   const generateComments = async () => {
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
+
     if (!input.trim() || !platform) {
       toast({
         title: "Missing Information",
@@ -231,6 +239,12 @@ const Index = () => {
       </main>
 
       <Footer />
+      
+      {/* Auth Modal */}
+      <AuthModal 
+        open={showAuthModal} 
+        onOpenChange={setShowAuthModal} 
+      />
     </div>
   );
 };
