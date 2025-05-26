@@ -1,11 +1,6 @@
 
-import React from 'react';
-import { Button } from "@/components/ui/button";
-import { Settings, User, Sparkles, Moon, Sun, LogOut, History, LogIn, Crown, Heart, Star, HelpCircle, FileText, Shield, Cookie, Globe, Twitter, Linkedin, Github, MessageCircle, Phone, BookOpen, Code } from "lucide-react";
-import { useTheme } from "@/contexts/ThemeContext";
-import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
-import AuthModal from "./AuthModal";
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -14,281 +9,191 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
+  useSidebar,
 } from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { 
+  Sparkles, 
+  BarChart3, 
+  History, 
+  Settings, 
+  LogOut, 
+  Crown,
+  Home,
+  Github,
+  Twitter,
+  Mail
+} from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 const AppSidebar = () => {
-  const { theme, setTheme, isDark } = useTheme();
-  const { user, userProfile, logout } = useAuth();
-  const navigate = useNavigate();
-  const [showAuthModal, setShowAuthModal] = React.useState(false);
-
-  const toggleTheme = () => {
-    setTheme(isDark ? 'light' : 'dark');
-  };
-
-  const handleSettingsClick = () => {
-    navigate('/settings');
-  };
-
-  const handleHistoryClick = () => {
-    navigate('/history');
-  };
-
-  const handleDashboardClick = () => {
-    navigate('/dashboard');
-  };
-
-  const handleSignInClick = () => {
-    setShowAuthModal(true);
-  };
-
-  const handleUpgradeClick = () => {
-    console.log('Upgrade clicked');
-  };
+  const location = useLocation();
+  const { isDark, setTheme } = useTheme();
+  const { user, signOut } = useAuth();
+  const { state } = useSidebar();
 
   const navigationItems = [
-    {
-      title: "Dashboard",
-      icon: User,
-      onClick: handleDashboardClick,
-      show: !!user,
+    { 
+      title: "Home", 
+      url: "/", 
+      icon: Home,
+      isActive: location.pathname === "/"
     },
-    {
-      title: "History",
+    { 
+      title: "Dashboard", 
+      url: "/dashboard", 
+      icon: BarChart3,
+      isActive: location.pathname === "/dashboard"
+    },
+    { 
+      title: "History", 
+      url: "/history", 
       icon: History,
-      onClick: handleHistoryClick,
-      show: !!user,
+      isActive: location.pathname === "/history"
     },
-    {
-      title: "Settings",
+    { 
+      title: "Settings", 
+      url: "/settings", 
       icon: Settings,
-      onClick: handleSettingsClick,
-      show: true,
+      isActive: location.pathname === "/settings"
     },
   ];
 
-  const productLinks = [
-    { title: "Features", href: "#", icon: Star },
-    { title: "Pricing", href: "#", icon: Crown },
-    { title: "API", href: "#", icon: Code },
-    { title: "Documentation", href: "#", icon: BookOpen },
+  const footerLinks = [
+    { title: "GitHub", url: "https://github.com", icon: Github },
+    { title: "Twitter", url: "https://twitter.com", icon: Twitter },
+    { title: "Contact", url: "mailto:contact@example.com", icon: Mail },
   ];
 
-  const supportLinks = [
-    { title: "Help Center", href: "#", icon: HelpCircle },
-    { title: "Contact Us", href: "#", icon: Phone },
-  ];
-
-  const legalLinks = [
-    { title: "Privacy Policy", href: "#", icon: Shield },
-    { title: "Terms of Service", href: "#", icon: FileText },
-  ];
-
-  const socialLinks = [
-    { title: "Twitter", href: "#", icon: Twitter },
-    { title: "LinkedIn", href: "#", icon: Linkedin },
-    { title: "GitHub", href: "#", icon: Github },
-    { title: "Discord", href: "#", icon: MessageCircle },
-  ];
+  const isCollapsed = state === "collapsed";
 
   return (
-    <>
-      <Sidebar collapsible="icon" className="group-data-[state=collapsed]:hover:w-64 transition-all duration-300 ease-in-out border-r">
-        <SidebarHeader className="p-4 border-b">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-md">
-              <Sparkles className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <div className="group-data-[collapsible=icon]:group-data-[state=collapsed]:opacity-0 group-data-[collapsible=icon]:group-data-[state=collapsed]:hover:opacity-100 transition-opacity duration-300">
-              <h1 className="font-bold text-foreground text-base truncate">AI Comment Companion</h1>
-            </div>
+    <Sidebar 
+      collapsible="icon" 
+      className="group/sidebar border-r border-sidebar-border transition-all duration-300 ease-in-out"
+    >
+      <SidebarHeader className="p-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600">
+            <Sparkles className="h-4 w-4 text-white" />
           </div>
-        </SidebarHeader>
+          <div className={`transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0 overflow-hidden group-hover/sidebar:opacity-100 group-hover/sidebar:w-auto' : 'opacity-100'}`}>
+            <h1 className="font-semibold text-sidebar-foreground whitespace-nowrap">AI Comment</h1>
+            <p className="text-xs text-sidebar-foreground/60 whitespace-nowrap">Generate & Engage</p>
+          </div>
+        </div>
+      </SidebarHeader>
 
-        <SidebarContent className="flex-1 overflow-y-auto">
-          <SidebarGroup>
-            <SidebarGroupLabel className="group-data-[collapsible=icon]:group-data-[state=collapsed]:opacity-0 group-data-[collapsible=icon]:group-data-[state=collapsed]:hover:opacity-100 transition-opacity duration-300">
-              Navigation
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {navigationItems.filter(item => item.show).map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton onClick={item.onClick} className="hover:bg-accent hover:text-accent-foreground transition-colors duration-200">
-                      <item.icon className="w-4 h-4 flex-shrink-0" />
-                      <span className="group-data-[collapsible=icon]:group-data-[state=collapsed]:opacity-0 group-data-[collapsible=icon]:group-data-[state=collapsed]:hover:opacity-100 transition-opacity duration-300 truncate">
-                        {item.title}
-                      </span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-                
-                <SidebarMenuItem>
-                  <SidebarMenuButton onClick={handleUpgradeClick} className="bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 shadow-md transition-all duration-200 hover:shadow-lg">
-                    <Crown className="w-4 h-4 flex-shrink-0" />
-                    <span className="group-data-[collapsible=icon]:group-data-[state=collapsed]:opacity-0 group-data-[collapsible=icon]:group-data-[state=collapsed]:hover:opacity-100 transition-opacity duration-300 truncate font-medium">
-                      Upgrade
-                    </span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-
-                <SidebarMenuItem>
-                  <SidebarMenuButton onClick={toggleTheme} className="hover:bg-accent hover:text-accent-foreground transition-colors duration-200">
-                    {isDark ? <Sun className="w-4 h-4 flex-shrink-0" /> : <Moon className="w-4 h-4 flex-shrink-0" />}
-                    <span className="group-data-[collapsible=icon]:group-data-[state=collapsed]:opacity-0 group-data-[collapsible=icon]:group-data-[state=collapsed]:hover:opacity-100 transition-opacity duration-300 truncate">
-                      {isDark ? 'Light Mode' : 'Dark Mode'}
-                    </span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-
-          <SidebarGroup>
-            <SidebarGroupLabel className="group-data-[collapsible=icon]:group-data-[state=collapsed]:opacity-0 group-data-[collapsible=icon]:group-data-[state=collapsed]:hover:opacity-100 transition-opacity duration-300">
-              Product
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {productLinks.map((link) => (
-                  <SidebarMenuItem key={link.title}>
-                    <SidebarMenuButton asChild>
-                      <a href={link.href} className="text-sm hover:bg-accent hover:text-accent-foreground transition-colors duration-200">
-                        <link.icon className="w-4 h-4 flex-shrink-0" />
-                        <span className="group-data-[collapsible=icon]:group-data-[state=collapsed]:opacity-0 group-data-[collapsible=icon]:group-data-[state=collapsed]:hover:opacity-100 transition-opacity duration-300 truncate">
-                          {link.title}
-                        </span>
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-
-          <SidebarGroup>
-            <SidebarGroupLabel className="group-data-[collapsible=icon]:group-data-[state=collapsed]:opacity-0 group-data-[collapsible=icon]:group-data-[state=collapsed]:hover:opacity-100 transition-opacity duration-300">
-              Support
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {supportLinks.map((link) => (
-                  <SidebarMenuItem key={link.title}>
-                    <SidebarMenuButton asChild>
-                      <a href={link.href} className="text-sm hover:bg-accent hover:text-accent-foreground transition-colors duration-200">
-                        <link.icon className="w-4 h-4 flex-shrink-0" />
-                        <span className="group-data-[collapsible=icon]:group-data-[state=collapsed]:opacity-0 group-data-[collapsible=icon]:group-data-[state=collapsed]:hover:opacity-100 transition-opacity duration-300 truncate">
-                          {link.title}
-                        </span>
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-
-          <SidebarGroup>
-            <SidebarGroupLabel className="group-data-[collapsible=icon]:group-data-[state=collapsed]:opacity-0 group-data-[collapsible=icon]:group-data-[state=collapsed]:hover:opacity-100 transition-opacity duration-300">
-              Legal
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {legalLinks.map((link) => (
-                  <SidebarMenuItem key={link.title}>
-                    <SidebarMenuButton asChild>
-                      <a href={link.href} className="text-sm hover:bg-accent hover:text-accent-foreground transition-colors duration-200">
-                        <link.icon className="w-4 h-4 flex-shrink-0" />
-                        <span className="group-data-[collapsible=icon]:group-data-[state=collapsed]:opacity-0 group-data-[collapsible=icon]:group-data-[state=collapsed]:hover:opacity-100 transition-opacity duration-300 truncate">
-                          {link.title}
-                        </span>
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-
-          <SidebarGroup>
-            <SidebarGroupLabel className="group-data-[collapsible=icon]:group-data-[state=collapsed]:opacity-0 group-data-[collapsible=icon]:group-data-[state=collapsed]:hover:opacity-100 transition-opacity duration-300">
-              Social
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {socialLinks.map((link) => (
-                  <SidebarMenuItem key={link.title}>
-                    <SidebarMenuButton asChild>
-                      <a href={link.href} className="text-sm hover:bg-accent hover:text-accent-foreground transition-colors duration-200">
-                        <link.icon className="w-4 h-4 flex-shrink-0" />
-                        <span className="group-data-[collapsible=icon]:group-data-[state=collapsed]:opacity-0 group-data-[collapsible=icon]:group-data-[state=collapsed]:hover:opacity-100 transition-opacity duration-300 truncate">
-                          {link.title}
-                        </span>
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
-
-        <SidebarFooter className="p-4 border-t">
-          {user ? (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 bg-muted/50 rounded-lg py-2 px-3 transition-colors duration-200">
-                <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                  {userProfile?.avatar_url ? (
-                    <img src={userProfile.avatar_url} alt={userProfile.full_name || 'User'} className="w-6 h-6 rounded-full object-cover" />
-                  ) : (
-                    <User className="w-4 h-4 text-primary-foreground" />
-                  )}
-                </div>
-                <span className="text-sm font-medium text-foreground group-data-[collapsible=icon]:group-data-[state=collapsed]:opacity-0 group-data-[collapsible=icon]:group-data-[state=collapsed]:hover:opacity-100 transition-opacity duration-300 truncate">
-                  {userProfile?.full_name || user.email?.split('@')[0] || 'User'}
-                </span>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={logout}
-                className="w-full justify-start hover:bg-destructive hover:text-destructive-foreground transition-colors duration-200"
+      <SidebarContent className="px-2">
+        <SidebarMenu>
+          {navigationItems.map((item) => (
+            <SidebarMenuItem key={item.url}>
+              <SidebarMenuButton 
+                asChild 
+                isActive={item.isActive}
+                className="group/button relative"
               >
-                <LogOut className="w-4 h-4 mr-2 flex-shrink-0" />
-                <span className="group-data-[collapsible=icon]:group-data-[state=collapsed]:opacity-0 group-data-[collapsible=icon]:group-data-[state=collapsed]:hover:opacity-100 transition-opacity duration-300 truncate">
-                  Sign Out
-                </span>
-              </Button>
+                <Link to={item.url} className="flex items-center gap-3 px-3 py-2">
+                  <item.icon className="h-4 w-4 shrink-0" />
+                  <span className={`transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0 overflow-hidden group-hover/sidebar:opacity-100 group-hover/sidebar:w-auto group-hover/sidebar:ml-0' : 'opacity-100'}`}>
+                    {item.title}
+                  </span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+
+        {/* Theme Toggle */}
+        <div className="mt-6 px-3">
+          <div className="flex items-center gap-3 py-2">
+            <div className="h-4 w-4 shrink-0 rounded-sm bg-gradient-to-br from-yellow-400 to-orange-500" />
+            <div className={`flex items-center justify-between flex-1 transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0 overflow-hidden group-hover/sidebar:opacity-100 group-hover/sidebar:w-auto' : 'opacity-100'}`}>
+              <span className="text-sm font-medium text-sidebar-foreground whitespace-nowrap">Dark Mode</span>
+              <Switch
+                checked={isDark}
+                onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+                size="sm"
+              />
             </div>
-          ) : (
-            <Button
-              variant="default"
-              size="sm"
-              onClick={handleSignInClick}
-              className="w-full justify-start"
-            >
-              <LogIn className="w-4 h-4 mr-2 flex-shrink-0" />
-              <span className="group-data-[collapsible=icon]:group-data-[state=collapsed]:opacity-0 group-data-[collapsible=icon]:group-data-[state=collapsed]:hover:opacity-100 transition-opacity duration-300 truncate">
-                Sign In
-              </span>
-            </Button>
-          )}
-
-          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-4 group-data-[collapsible=icon]:group-data-[state=collapsed]:opacity-0 group-data-[collapsible=icon]:group-data-[state=collapsed]:hover:opacity-100 transition-opacity duration-300">
-            <span>© 2024 Made with</span>
-            <Heart className="w-3 h-3 text-red-500 fill-current flex-shrink-0" />
           </div>
-        </SidebarFooter>
-      </Sidebar>
+        </div>
 
-      <AuthModal 
-        open={showAuthModal} 
-        onOpenChange={setShowAuthModal}
-      />
-    </>
+        {/* Upgrade Button */}
+        <div className="mt-4 px-3">
+          <Button 
+            className={`w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 border-0 ${isCollapsed ? 'px-0 group-hover/sidebar:px-3' : 'px-3'}`}
+            size={isCollapsed ? "icon" : "sm"}
+          >
+            <Crown className="h-4 w-4 shrink-0" />
+            <span className={`ml-2 transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0 overflow-hidden group-hover/sidebar:opacity-100 group-hover/sidebar:w-auto' : 'opacity-100'}`}>
+              Upgrade to Pro
+            </span>
+          </Button>
+        </div>
+      </SidebarContent>
+
+      <SidebarFooter className="p-4 space-y-4">
+        {/* User Profile */}
+        {user && (
+          <div className="flex items-center gap-3">
+            <Avatar className="h-8 w-8 shrink-0">
+              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-sm">
+                {user.email?.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className={`flex-1 min-w-0 transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0 overflow-hidden group-hover/sidebar:opacity-100 group-hover/sidebar:w-auto' : 'opacity-100'}`}>
+              <p className="text-sm font-medium text-sidebar-foreground truncate">
+                {user.user_metadata?.full_name || user.email}
+              </p>
+              <p className="text-xs text-sidebar-foreground/60 truncate">
+                {user.email}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Footer Links */}
+        <div className="flex items-center gap-2 justify-center">
+          {footerLinks.map((link) => (
+            <Button
+              key={link.title}
+              variant="ghost"
+              size="icon"
+              asChild
+              className="h-8 w-8 text-sidebar-foreground/60 hover:text-sidebar-foreground"
+            >
+              <a 
+                href={link.url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                title={link.title}
+              >
+                <link.icon className="h-4 w-4" />
+              </a>
+            </Button>
+          ))}
+        </div>
+
+        {/* Sign Out */}
+        {user && (
+          <Button
+            variant="ghost"
+            onClick={signOut}
+            className={`w-full justify-start text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent ${isCollapsed ? 'px-0 group-hover/sidebar:px-3' : 'px-3'}`}
+            size={isCollapsed ? "icon" : "sm"}
+          >
+            <LogOut className="h-4 w-4 shrink-0" />
+            <span className={`ml-2 transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0 overflow-hidden group-hover/sidebar:opacity-100 group-hover/sidebar:w-auto' : 'opacity-100'}`}>
+              Sign Out
+            </span>
+          </Button>
+        )}
+      </SidebarFooter>
+    </Sidebar>
   );
 };
 

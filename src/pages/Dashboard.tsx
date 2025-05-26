@@ -1,23 +1,114 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, MessageSquare, Clock, TrendingUp } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+
+interface DashboardStats {
+  totalComments: number;
+  thisWeek: number;
+  mostUsedPlatform: string;
+  mostUsedTone: string;
+}
+
+interface RecentActivity {
+  platform: string;
+  tone: string;
+  time: string;
+}
 
 const Dashboard = () => {
-  // Mock data - in a real app this would come from an API
-  const stats = {
-    totalComments: 42,
-    thisWeek: 8,
-    mostUsedPlatform: "LinkedIn",
-    mostUsedTone: "Professional"
+  const [stats, setStats] = useState<DashboardStats>({
+    totalComments: 0,
+    thisWeek: 0,
+    mostUsedPlatform: 'Twitter',
+    mostUsedTone: 'Friendly'
+  });
+  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      // Fetch total comments
+      const { count: totalComments } = await supabase
+        .from('generated_comments')
+        .select('*', { count: 'exact', head: true });
+
+      // Fetch comments from this week
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      
+      const { count: thisWeekCount } = await supabase
+        .from('generated_comments')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', weekAgo.toISOString());
+
+      // Fetch recent activity
+      const { data: recentData } = await supabase
+        .from('generated_comments')
+        .select('platform, tone, created_at')
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      // Calculate most used platform and tone
+      const { data: allComments } = await supabase
+        .from('generated_comments')
+        .select('platform, tone');
+
+      let mostUsedPlatform = 'Twitter';
+      let mostUsedTone = 'Friendly';
+
+      if (allComments && allComments.length > 0) {
+        const platformCounts: Record<string, number> = {};
+        const toneCounts: Record<string, number> = {};
+
+        allComments.forEach(comment => {
+          platformCounts[comment.platform] = (platformCounts[comment.platform] || 0) + 1;
+          toneCounts[comment.tone] = (toneCounts[comment.tone] || 0) + 1;
+        });
+
+        mostUsedPlatform = Object.keys(platformCounts).reduce((a, b) => 
+          platformCounts[a] > platformCounts[b] ? a : b
+        );
+        
+        mostUsedTone = Object.keys(toneCounts).reduce((a, b) => 
+          toneCounts[a] > toneCounts[b] ? a : b
+        );
+      }
+
+      setStats({
+        totalComments: totalComments || 0,
+        thisWeek: thisWeekCount || 0,
+        mostUsedPlatform,
+        mostUsedTone
+      });
+
+      if (recentData) {
+        const activities = recentData.map(item => ({
+          platform: item.platform,
+          tone: item.tone,
+          time: getRelativeTime(item.created_at)
+        }));
+        setRecentActivity(activities);
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    }
   };
 
-  const recentActivity = [
-    { platform: "LinkedIn", tone: "Professional", time: "2 hours ago" },
-    { platform: "Twitter", tone: "Casual", time: "5 hours ago" },
-    { platform: "Instagram", tone: "Friendly", time: "1 day ago" },
-  ];
+  const getRelativeTime = (dateString: string) => {
+    const now = new Date();
+    const date = new Date(dateString);
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return 'Just now';
+    if (diffInHours < 24) return `${diffInHours} hours ago`;
+    return `${Math.floor(diffInHours / 24)} days ago`;
+  };
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
@@ -80,20 +171,26 @@ const Dashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {recentActivity.map((activity, index) => (
-              <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center gap-3">
-                  <MessageSquare className="w-5 h-5 text-primary" />
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary">{activity.platform}</Badge>
-                      <Badge variant="outline">{activity.tone}</Badge>
+            {recentActivity.length > 0 ? (
+              recentActivity.map((activity, index) => (
+                <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <MessageSquare className="w-5 h-5 text-primary" />
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary">{activity.platform}</Badge>
+                        <Badge variant="outline">{activity.tone}</Badge>
+                      </div>
                     </div>
                   </div>
+                  <span className="text-sm text-muted-foreground">{activity.time}</span>
                 </div>
-                <span className="text-sm text-muted-foreground">{activity.time}</span>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-muted-foreground text-center py-4">
+                No recent activity. Generate your first comment to see activity here!
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>

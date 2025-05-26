@@ -6,15 +6,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
-import { Sparkles, Copy, RefreshCw, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Sparkles, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import CommentCard from "./CommentCard";
+
+interface CommentSuggestion {
+  id: number;
+  text: string;
+  platform: string;
+  length: number;
+}
 
 const CommentGenerator = () => {
   const [originalPost, setOriginalPost] = useState('');
   const [platform, setPlatform] = useState('twitter');
   const [tone, setTone] = useState('friendly');
-  const [length, setLength] = useState([100]);
-  const [generatedComments, setGeneratedComments] = useState<string[]>([]);
+  const [length, setLength] = useState([280]);
+  const [generatedComments, setGeneratedComments] = useState<CommentSuggestion[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
 
   const platforms = [
@@ -43,30 +52,42 @@ const CommentGenerator = () => {
 
     setIsGenerating(true);
     
-    // Simulate AI generation with mock data
-    setTimeout(() => {
-      const mockComments = [
-        `Great insights! Thanks for sharing this perspective on ${originalPost.slice(0, 20)}...`,
-        `This really resonates with me. I've had similar experiences and appreciate you bringing this up.`,
-        `Interesting point! I'd love to hear more about your thoughts on this topic.`
-      ];
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
       
-      setGeneratedComments(mockComments);
+      if (!session) {
+        toast.error('Please sign in to generate comments');
+        setIsGenerating(false);
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke('generate-ai-comment', {
+        body: {
+          originalPost,
+          platform,
+          tone,
+          maxLength: length[0]
+        }
+      });
+
+      if (error) {
+        console.error('Error generating comments:', error);
+        toast.error('Failed to generate comments. Please try again.');
+        return;
+      }
+
+      if (data?.comments) {
+        setGeneratedComments(data.comments);
+        toast.success('Comments generated successfully!');
+      } else {
+        toast.error('No comments were generated. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('An unexpected error occurred. Please try again.');
+    } finally {
       setIsGenerating(false);
-      toast.success('Comments generated successfully!');
-    }, 2000);
-  };
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success('Comment copied to clipboard!');
-  };
-
-  const regenerateComment = (index: number) => {
-    const newComments = [...generatedComments];
-    newComments[index] = `Regenerated comment for "${originalPost.slice(0, 30)}..." - This is a fresh perspective!`;
-    setGeneratedComments(newComments);
-    toast.success('Comment regenerated!');
+    }
   };
 
   return (
@@ -133,7 +154,7 @@ const CommentGenerator = () => {
               <Slider
                 value={length}
                 onValueChange={setLength}
-                max={280}
+                max={platform === 'linkedin' ? 3000 : platform === 'reddit' ? 10000 : 280}
                 min={50}
                 step={10}
                 className="mt-2"
@@ -174,46 +195,11 @@ const CommentGenerator = () => {
           <CardContent>
             <div className="space-y-4">
               {generatedComments.map((comment, index) => (
-                <div key={index} className="border rounded-lg p-4 space-y-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="flex-1 text-sm leading-relaxed">{comment}</p>
-                    <div className="flex items-center gap-1">
-                      <Badge variant="secondary" className="text-xs">
-                        {comment.length} chars
-                      </Badge>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm">
-                        <ThumbsUp className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <ThumbsDown className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => regenerateComment(index)}
-                      >
-                        <RefreshCw className="w-4 h-4 mr-1" />
-                        Regenerate
-                      </Button>
-                      <Button 
-                        variant="default" 
-                        size="sm"
-                        onClick={() => copyToClipboard(comment)}
-                      >
-                        <Copy className="w-4 h-4 mr-1" />
-                        Copy
-                      </Button>
-                    </div>
-                  </div>
-                </div>
+                <CommentCard
+                  key={comment.id}
+                  suggestion={comment}
+                  index={index}
+                />
               ))}
             </div>
           </CardContent>
