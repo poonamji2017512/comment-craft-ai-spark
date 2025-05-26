@@ -1,15 +1,11 @@
 
 import React from "react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import CommentGenerator from "@/components/CommentGenerator";
 import AutoAuthModal from "@/components/AutoAuthModal";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
-      
+    <div className="min-h-full bg-background flex flex-col">
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
@@ -25,7 +21,6 @@ const Index = () => {
         </div>
       </main>
 
-      <Footer />
       <AutoAuthModal />
     </div>
   );
