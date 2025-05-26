@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Settings, User, Sparkles, Moon, Sun, LogOut, History, LogIn } from "lucide-react";
+import { Settings, User, Sparkles, Moon, Sun, LogOut, History, LogIn, Crown } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -31,6 +31,11 @@ const Header = () => {
 
   const handleSignInClick = () => {
     setShowAuthModal(true);
+  };
+
+  const handleUpgradeClick = () => {
+    // TODO: Implement upgrade functionality
+    console.log('Upgrade clicked');
   };
 
   return (
@@ -70,6 +75,16 @@ const Header = () => {
                 </Button>
               </>
             )}
+
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleUpgradeClick}
+              className="h-8 px-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 hover:from-amber-600 hover:to-orange-600"
+            >
+              <Crown className="w-4 h-4 mr-2" />
+              Upgrade
+            </Button>
 
             <Button 
               variant="ghost" 
