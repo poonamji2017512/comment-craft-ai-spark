@@ -24,7 +24,10 @@ import {
   Home,
   Github,
   Twitter,
-  Mail
+  Mail,
+  MessageCircle,
+  HelpCircle,
+  FileText
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -65,6 +68,9 @@ const AppSidebar = () => {
   const footerLinks = [
     { title: "GitHub", url: "https://github.com", icon: Github },
     { title: "Twitter", url: "https://twitter.com", icon: Twitter },
+    { title: "Discord", url: "https://discord.com", icon: MessageCircle },
+    { title: "Help", url: "https://help.example.com", icon: HelpCircle },
+    { title: "Docs", url: "https://docs.example.com", icon: FileText },
     { title: "Contact", url: "mailto:contact@example.com", icon: Mail },
   ];
 
@@ -156,7 +162,7 @@ const AppSidebar = () => {
         )}
 
         {/* Footer Links */}
-        <div className="flex items-center gap-2 justify-center">
+        <div className={`grid transition-all duration-300 ${isCollapsed ? 'grid-cols-2 gap-1 group-hover/sidebar:grid-cols-3' : 'grid-cols-3 gap-2'}`}>
           {footerLinks.map((link) => (
             <Button
               key={link.title}

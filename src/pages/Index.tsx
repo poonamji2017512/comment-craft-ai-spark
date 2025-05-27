@@ -2,6 +2,7 @@
 import React from "react";
 import CommentGenerator from "@/components/CommentGenerator";
 import AutoAuthModal from "@/components/AutoAuthModal";
+import FloatingAuthModal from "@/components/FloatingAuthModal";
 
 const Index = () => {
   return (
@@ -22,6 +23,7 @@ const Index = () => {
       </main>
 
       <AutoAuthModal />
+      <FloatingAuthModal />
     </div>
   );
 };

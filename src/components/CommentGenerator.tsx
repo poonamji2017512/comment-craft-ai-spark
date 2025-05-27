@@ -25,6 +25,7 @@ const CommentGenerator = () => {
   const [length, setLength] = useState([280]);
   const [generatedComments, setGeneratedComments] = useState<CommentSuggestion[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [lastGenerationTime, setLastGenerationTime] = useState<number>(0);
 
   const platforms = [
     { value: 'twitter', label: 'Twitter/X' },
@@ -77,7 +78,9 @@ const CommentGenerator = () => {
       }
 
       if (data?.comments) {
+        // Clear previous comments and set new ones
         setGeneratedComments(data.comments);
+        setLastGenerationTime(Date.now());
         toast.success('Comments generated successfully!');
       } else {
         toast.error('No comments were generated. Please try again.');
@@ -88,6 +91,17 @@ const CommentGenerator = () => {
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const regenerateComments = async () => {
+    // Add a small delay to prevent too frequent regenerations
+    const timeSinceLastGeneration = Date.now() - lastGenerationTime;
+    if (timeSinceLastGeneration < 3000) {
+      toast.error('Please wait a moment before regenerating');
+      return;
+    }
+    
+    await generateComments();
   };
 
   return (
@@ -186,17 +200,29 @@ const CommentGenerator = () => {
       {/* Generated Comments Section */}
       {generatedComments.length > 0 && (
         <Card>
-          <CardHeader>
-            <CardTitle>Generated Comments</CardTitle>
-            <CardDescription>
-              AI-generated comments ready to use
-            </CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <div>
+              <CardTitle>Generated Comments</CardTitle>
+              <CardDescription>
+                AI-generated comments ready to use
+              </CardDescription>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={regenerateComments}
+              disabled={isGenerating}
+              className="ml-4"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Regenerate
+            </Button>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {generatedComments.map((comment, index) => (
                 <CommentCard
-                  key={comment.id}
+                  key={`${comment.id}-${lastGenerationTime}`}
                   suggestion={comment}
                   index={index}
                 />
