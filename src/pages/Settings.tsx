@@ -97,9 +97,8 @@ const Settings = () => {
     if (!user) return;
 
     try {
-      // Use raw SQL query as a workaround until types are regenerated
       const { data, error } = await supabase
-        .from('user_settings' as any)
+        .from('user_settings')
         .select('*')
         .eq('user_id', user.id)
         .single();
@@ -133,7 +132,7 @@ const Settings = () => {
     setIsLoading(true);
     try {
       const { error } = await supabase
-        .from('user_settings' as any)
+        .from('user_settings')
         .upsert({
           user_id: user.id,
           ...userSettings,
@@ -190,7 +189,6 @@ const Settings = () => {
     
     setIsLoading(true);
     try {
-      // Test the API key with a simple request
       const response = await fetch('https://generativelanguage.googleapis.com/v1/models?key=' + userSettings.custom_api_key);
       if (response.ok) {
         setApiKeyValid(true);

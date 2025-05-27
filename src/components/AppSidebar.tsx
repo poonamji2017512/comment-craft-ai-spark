@@ -113,30 +113,50 @@ const AppSidebar = () => {
           ))}
         </SidebarMenu>
 
-        {/* Theme Toggle */}
+        {/* Theme Toggle - Improved for collapsed mode */}
         <div className="mt-6 px-3">
-          <div className="flex items-center gap-3 py-2">
+          <div className={`flex items-center py-2 transition-all duration-300 ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
             <div className="h-4 w-4 shrink-0 rounded-sm bg-gradient-to-br from-yellow-400 to-orange-500" />
-            <div className={`flex items-center justify-between flex-1 transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0 overflow-hidden group-hover/sidebar:opacity-100 group-hover/sidebar:w-auto' : 'opacity-100'}`}>
-              <span className="text-sm font-medium text-sidebar-foreground whitespace-nowrap">Dark Mode</span>
-              <Switch
-                checked={isDark}
-                onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
-              />
-            </div>
+            {!isCollapsed && (
+              <div className="flex items-center justify-between flex-1">
+                <span className="text-sm font-medium text-sidebar-foreground whitespace-nowrap">Dark Mode</span>
+                <Switch
+                  checked={isDark}
+                  onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+                />
+              </div>
+            )}
+            {isCollapsed && (
+              <div className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 absolute left-16 bg-sidebar border border-sidebar-border rounded-md shadow-lg p-2 z-50">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-sidebar-foreground whitespace-nowrap">Dark Mode</span>
+                  <Switch
+                    checked={isDark}
+                    onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Upgrade Button */}
+        {/* Upgrade Button - Better collapsed design */}
         <div className="mt-4 px-3">
           <Button 
-            className={`w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 border-0 ${isCollapsed ? 'px-0 group-hover/sidebar:px-3' : 'px-3'}`}
+            className={`w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 border-0 ${
+              isCollapsed ? 'px-2 aspect-square' : 'px-3'
+            }`}
             size={isCollapsed ? "icon" : "sm"}
           >
             <Crown className="h-4 w-4 shrink-0" />
-            <span className={`ml-2 transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0 overflow-hidden group-hover/sidebar:opacity-100 group-hover/sidebar:w-auto' : 'opacity-100'}`}>
-              Upgrade to Pro
-            </span>
+            {!isCollapsed && (
+              <span className="ml-2">Upgrade to Pro</span>
+            )}
+            {isCollapsed && (
+              <div className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 absolute left-16 bg-sidebar border border-sidebar-border rounded-md shadow-lg p-2 z-50">
+                <span className="text-sm font-medium text-sidebar-foreground whitespace-nowrap">Upgrade to Pro</span>
+              </div>
+            )}
           </Button>
         </div>
       </SidebarContent>
@@ -144,32 +164,44 @@ const AppSidebar = () => {
       <SidebarFooter className="p-4 space-y-4">
         {/* User Profile */}
         {user && (
-          <div className="flex items-center gap-3">
+          <div className={`flex items-center transition-all duration-300 ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
             <Avatar className="h-8 w-8 shrink-0">
               <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-sm">
                 {user.email?.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <div className={`flex-1 min-w-0 transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0 overflow-hidden group-hover/sidebar:opacity-100 group-hover/sidebar:w-auto' : 'opacity-100'}`}>
-              <p className="text-sm font-medium text-sidebar-foreground truncate">
-                {user.user_metadata?.full_name || user.email}
-              </p>
-              <p className="text-xs text-sidebar-foreground/60 truncate">
-                {user.email}
-              </p>
-            </div>
+            {!isCollapsed && (
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-sidebar-foreground truncate">
+                  {user.user_metadata?.full_name || user.email}
+                </p>
+                <p className="text-xs text-sidebar-foreground/60 truncate">
+                  {user.email}
+                </p>
+              </div>
+            )}
+            {isCollapsed && (
+              <div className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 absolute left-16 bg-sidebar border border-sidebar-border rounded-md shadow-lg p-2 z-50">
+                <p className="text-sm font-medium text-sidebar-foreground whitespace-nowrap">
+                  {user.user_metadata?.full_name || user.email}
+                </p>
+                <p className="text-xs text-sidebar-foreground/60 whitespace-nowrap">
+                  {user.email}
+                </p>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Footer Links */}
-        <div className={`grid transition-all duration-300 ${isCollapsed ? 'grid-cols-2 gap-1 group-hover/sidebar:grid-cols-3' : 'grid-cols-3 gap-2'}`}>
+        {/* Footer Links - Better collapsed layout */}
+        <div className={`transition-all duration-300 ${isCollapsed ? 'flex flex-col gap-1' : 'grid grid-cols-3 gap-2'}`}>
           {footerLinks.map((link) => (
             <Button
               key={link.title}
               variant="ghost"
               size="icon"
               asChild
-              className="h-8 w-8 text-sidebar-foreground/60 hover:text-sidebar-foreground"
+              className="h-8 w-8 text-sidebar-foreground/60 hover:text-sidebar-foreground relative group/footer-link"
             >
               <a 
                 href={link.url} 
@@ -178,6 +210,11 @@ const AppSidebar = () => {
                 title={link.title}
               >
                 <link.icon className="h-4 w-4" />
+                {isCollapsed && (
+                  <div className="opacity-0 group-hover/footer-link:opacity-100 transition-opacity duration-300 absolute left-12 bg-sidebar border border-sidebar-border rounded-md shadow-lg p-1 px-2 z-50">
+                    <span className="text-xs text-sidebar-foreground whitespace-nowrap">{link.title}</span>
+                  </div>
+                )}
               </a>
             </Button>
           ))}
@@ -188,13 +225,20 @@ const AppSidebar = () => {
           <Button
             variant="ghost"
             onClick={logout}
-            className={`w-full justify-start text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent ${isCollapsed ? 'px-0 group-hover/sidebar:px-3' : 'px-3'}`}
+            className={`w-full text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-all duration-300 ${
+              isCollapsed ? 'px-2 justify-center' : 'justify-start px-3'
+            }`}
             size={isCollapsed ? "icon" : "sm"}
           >
             <LogOut className="h-4 w-4 shrink-0" />
-            <span className={`ml-2 transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0 overflow-hidden group-hover/sidebar:opacity-100 group-hover/sidebar:w-auto' : 'opacity-100'}`}>
-              Sign Out
-            </span>
+            {!isCollapsed && (
+              <span className="ml-2">Sign Out</span>
+            )}
+            {isCollapsed && (
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute left-16 bg-sidebar border border-sidebar-border rounded-md shadow-lg p-2 z-50">
+                <span className="text-sm font-medium text-sidebar-foreground whitespace-nowrap">Sign Out</span>
+              </div>
+            )}
           </Button>
         )}
       </SidebarFooter>
