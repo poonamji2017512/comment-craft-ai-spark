@@ -33,6 +33,39 @@ export type Database = {
         }
         Relationships: []
       }
+      generated_comments: {
+        Row: {
+          character_count: number
+          created_at: string
+          generated_text: string
+          id: string
+          original_post: string
+          platform: string
+          tone: string
+          user_id: string
+        }
+        Insert: {
+          character_count: number
+          created_at?: string
+          generated_text: string
+          id?: string
+          original_post: string
+          platform: string
+          tone: string
+          user_id: string
+        }
+        Update: {
+          character_count?: number
+          created_at?: string
+          generated_text?: string
+          id?: string
+          original_post?: string
+          platform?: string
+          tone?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       prompts: {
         Row: {
           created_at: string

@@ -32,7 +32,7 @@ import { useAuth } from "@/contexts/AuthContext";
 const AppSidebar = () => {
   const location = useLocation();
   const { isDark, setTheme } = useTheme();
-  const { user, signOut } = useAuth();
+  const { user, logout } = useAuth();
   const { state } = useSidebar();
 
   const navigationItems = [
@@ -73,7 +73,7 @@ const AppSidebar = () => {
   return (
     <Sidebar 
       collapsible="icon" 
-      className="group/sidebar border-r border-sidebar-border transition-all duration-300 ease-in-out"
+      className="group/sidebar border-r border-sidebar-border transition-all duration-300 ease-in-out data-[state=collapsed]:hover:w-64"
     >
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
@@ -116,7 +116,6 @@ const AppSidebar = () => {
               <Switch
                 checked={isDark}
                 onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
-                size="sm"
               />
             </div>
           </div>
@@ -182,7 +181,7 @@ const AppSidebar = () => {
         {user && (
           <Button
             variant="ghost"
-            onClick={signOut}
+            onClick={logout}
             className={`w-full justify-start text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent ${isCollapsed ? 'px-0 group-hover/sidebar:px-3' : 'px-3'}`}
             size={isCollapsed ? "icon" : "sm"}
           >
