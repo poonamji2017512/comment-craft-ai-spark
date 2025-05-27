@@ -190,6 +190,54 @@ export type Database = {
         }
         Relationships: []
       }
+      user_settings: {
+        Row: {
+          ai_features: Json | null
+          ai_tone: string | null
+          created_at: string
+          custom_api_key: string | null
+          dashboard_view: string | null
+          id: string
+          language: string | null
+          notification_prefs: Json | null
+          summary_length: string | null
+          theme: string | null
+          updated_at: string
+          use_custom_api_key: boolean | null
+          user_id: string
+        }
+        Insert: {
+          ai_features?: Json | null
+          ai_tone?: string | null
+          created_at?: string
+          custom_api_key?: string | null
+          dashboard_view?: string | null
+          id?: string
+          language?: string | null
+          notification_prefs?: Json | null
+          summary_length?: string | null
+          theme?: string | null
+          updated_at?: string
+          use_custom_api_key?: boolean | null
+          user_id: string
+        }
+        Update: {
+          ai_features?: Json | null
+          ai_tone?: string | null
+          created_at?: string
+          custom_api_key?: string | null
+          dashboard_view?: string | null
+          id?: string
+          language?: string | null
+          notification_prefs?: Json | null
+          summary_length?: string | null
+          theme?: string | null
+          updated_at?: string
+          use_custom_api_key?: boolean | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

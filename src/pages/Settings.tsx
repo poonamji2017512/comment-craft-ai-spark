@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -23,7 +22,6 @@ import {
   Download,
   Eye,
   EyeOff,
-  AlertTriangle,
   Check,
   X
 } from "lucide-react";
@@ -99,8 +97,9 @@ const Settings = () => {
     if (!user) return;
 
     try {
+      // Use raw SQL query as a workaround until types are regenerated
       const { data, error } = await supabase
-        .from('user_settings')
+        .from('user_settings' as any)
         .select('*')
         .eq('user_id', user.id)
         .single();
@@ -134,7 +133,7 @@ const Settings = () => {
     setIsLoading(true);
     try {
       const { error } = await supabase
-        .from('user_settings')
+        .from('user_settings' as any)
         .upsert({
           user_id: user.id,
           ...userSettings,

@@ -6,10 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
-import { Sparkles, RefreshCw } from "lucide-react";
+import { Sparkles, RefreshCw, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import CommentCard from "./CommentCard";
 
 interface CommentSuggestion {
   id: number;
@@ -104,40 +103,67 @@ const CommentGenerator = () => {
     await generateComments();
   };
 
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Comment copied to clipboard!");
+    } catch (err) {
+      toast.error("Failed to copy comment");
+    }
+  };
+
+  const platformIcons = {
+    twitter: '𝕏',
+    linkedin: '💼',
+    facebook: '📘',
+    instagram: '📷',
+    reddit: '🔴',
+    youtube: '📺',
+  };
+
+  const platformColors = {
+    twitter: "bg-blue-500",
+    linkedin: "bg-blue-700",
+    facebook: "bg-blue-600",
+    instagram: "bg-pink-500",
+    reddit: "bg-orange-500",
+    youtube: "bg-red-500",
+  };
+
   return (
     <div className="space-y-6">
       {/* Input Section */}
-      <Card>
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-foreground">
             <Sparkles className="w-5 h-5 text-primary" />
             Generate AI Comments
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-muted-foreground">
             Enter the original post content and customize your comment preferences
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <label className="text-sm font-medium mb-2 block">Original Post Content</label>
+            <label className="text-sm font-medium mb-2 block text-foreground">Original Post Content</label>
             <Textarea
               placeholder="Paste the original post content here..."
               value={originalPost}
               onChange={(e) => setOriginalPost(e.target.value)}
-              className="min-h-[120px]"
+              className="min-h-[120px] bg-background border-border text-foreground"
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="text-sm font-medium mb-2 block">Platform</label>
+              <label className="text-sm font-medium mb-2 block text-foreground">Platform</label>
               <Select value={platform} onValueChange={setPlatform}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-background border-border text-foreground">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-background border-border">
                   {platforms.map((p) => (
-                    <SelectItem key={p.value} value={p.value}>
+                    <SelectItem key={p.value} value={p.value} className="text-foreground hover:bg-muted">
                       {p.label}
                     </SelectItem>
                   ))}
@@ -146,14 +172,14 @@ const CommentGenerator = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Tone</label>
+              <label className="text-sm font-medium mb-2 block text-foreground">Tone</label>
               <Select value={tone} onValueChange={setTone}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-background border-border text-foreground">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-background border-border">
                   {tones.map((t) => (
-                    <SelectItem key={t.value} value={t.value}>
+                    <SelectItem key={t.value} value={t.value} className="text-foreground hover:bg-muted">
                       {t.label}
                     </SelectItem>
                   ))}
@@ -162,7 +188,7 @@ const CommentGenerator = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">
+              <label className="text-sm font-medium mb-2 block text-foreground">
                 Length: {length[0]} characters
               </label>
               <Slider
@@ -199,11 +225,11 @@ const CommentGenerator = () => {
 
       {/* Generated Comments Section */}
       {generatedComments.length > 0 && (
-        <Card>
+        <Card className="bg-card border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div>
-              <CardTitle>Generated Comments</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-foreground">Generated Comments</CardTitle>
+              <CardDescription className="text-muted-foreground">
                 AI-generated comments ready to use
               </CardDescription>
             </div>
@@ -212,7 +238,7 @@ const CommentGenerator = () => {
               size="sm"
               onClick={regenerateComments}
               disabled={isGenerating}
-              className="ml-4"
+              className="ml-4 border-border text-foreground hover:bg-muted"
             >
               <RefreshCw className="w-4 h-4 mr-2" />
               Regenerate
@@ -221,11 +247,53 @@ const CommentGenerator = () => {
           <CardContent>
             <div className="space-y-4">
               {generatedComments.map((comment, index) => (
-                <CommentCard
-                  key={`${comment.id}-${lastGenerationTime}`}
-                  suggestion={comment}
-                  index={index}
-                />
+                <Card key={`${comment.id}-${lastGenerationTime}`} className="bg-background border-border">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className={`${platformColors[platform as keyof typeof platformColors] || "bg-gray-500"} p-2 rounded-lg`}>
+                          <span className="text-white text-sm">
+                            {platformIcons[platform as keyof typeof platformIcons] || '💬'}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="font-medium text-foreground capitalize">{platform}</p>
+                          <p className="text-sm text-muted-foreground">
+                            Comment #{index + 1}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="bg-muted text-muted-foreground">
+                          {tone}
+                        </Badge>
+                        <Badge variant="outline" className="border-border text-foreground">
+                          {comment.text.length} chars
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-sm text-foreground bg-muted p-3 rounded-lg border border-border">
+                          {comment.text}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end mt-3">
+                      <Button 
+                        onClick={() => copyToClipboard(comment.text)} 
+                        variant="outline" 
+                        size="sm"
+                        className="border-border text-foreground hover:bg-muted"
+                      >
+                        <Copy className="h-4 w-4 mr-2" />
+                        Copy
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </CardContent>
