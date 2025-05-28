@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Textarea } from "@/components/ui/textarea";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,8 +24,27 @@ import {
   Eye,
   EyeOff,
   Check,
-  X
+  X,
+  Palette,
+  MessageSquare,
+  Shield,
+  CreditCard,
+  Users
 } from "lucide-react";
+
+interface NotificationPrefs {
+  email_notifications: boolean;
+  meeting_processed: boolean;
+  summary_ready: boolean;
+  task_due: boolean;
+  frequency: string;
+}
+
+interface AIFeatures {
+  auto_summarization: boolean;
+  action_item_detection: boolean;
+  topic_extraction: boolean;
+}
 
 interface UserSettings {
   theme: string;
@@ -34,18 +54,8 @@ interface UserSettings {
   dashboard_view: string;
   use_custom_api_key: boolean;
   custom_api_key?: string;
-  notification_prefs: {
-    email_notifications: boolean;
-    meeting_processed: boolean;
-    summary_ready: boolean;
-    task_due: boolean;
-    frequency: string;
-  };
-  ai_features: {
-    auto_summarization: boolean;
-    action_item_detection: boolean;
-    topic_extraction: boolean;
-  };
+  notification_prefs: NotificationPrefs;
+  ai_features: AIFeatures;
 }
 
 const Settings = () => {
@@ -54,11 +64,13 @@ const Settings = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
   const [apiKeyValid, setApiKeyValid] = useState<boolean | null>(null);
-  const [activeSection, setActiveSection] = useState("profile");
+  const [activeSection, setActiveSection] = useState("account");
   
   const [profileData, setProfileData] = useState({
     full_name: userProfile?.full_name || '',
     email: user?.email || '',
+    introduction: '',
+    preferred_tone: 'Bold Founder',
   });
 
   const [userSettings, setUserSettings] = useState<UserSettings>({
@@ -88,6 +100,8 @@ const Settings = () => {
       setProfileData({
         full_name: userProfile.full_name || '',
         email: userProfile.email || user?.email || '',
+        introduction: '',
+        preferred_tone: 'Bold Founder',
       });
     }
     loadUserSettings();
@@ -117,8 +131,8 @@ const Settings = () => {
           dashboard_view: data.dashboard_view || 'recent',
           use_custom_api_key: data.use_custom_api_key || false,
           custom_api_key: data.custom_api_key || '',
-          notification_prefs: data.notification_prefs || userSettings.notification_prefs,
-          ai_features: data.ai_features || userSettings.ai_features
+          notification_prefs: (data.notification_prefs as NotificationPrefs) || userSettings.notification_prefs,
+          ai_features: (data.ai_features as AIFeatures) || userSettings.ai_features
         });
       }
     } catch (error) {
@@ -222,6 +236,7 @@ const Settings = () => {
       const exportData = {
         user_profile: userProfile,
         generated_comments: data,
+        user_settings: userSettings,
         exported_at: new Date().toISOString()
       };
 
@@ -265,17 +280,24 @@ const Settings = () => {
   };
 
   const sections = [
-    { id: 'profile', label: 'Profile', icon: User },
-    { id: 'preferences', label: 'App Preferences', icon: SettingsIcon },
-    { id: 'ai', label: 'AI Settings', icon: Key },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
-    { id: 'data', label: 'Data & Privacy', icon: Database }
+    { id: 'account', label: 'Account', icon: User },
+    { id: 'platforms', label: 'Platforms', icon: Users },
+    { id: 'tone', label: 'Tone & Style', icon: Palette },
+    { id: 'voice', label: 'Voice', icon: MessageSquare },
+    { id: 'workflow', label: 'Workflow', icon: SettingsIcon },
+    { id: 'ai', label: 'AI & API', icon: Key },
+    { id: 'safety', label: 'Safety', icon: Shield },
+    { id: 'history', label: 'History', icon: Database },
+    { id: 'billing', label: 'Billing', icon: CreditCard }
   ];
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-foreground">Settings</h1>
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Settings</h1>
+          <p className="text-muted-foreground mt-1">Customize your AI comment experience</p>
+        </div>
         {userProfile && (
           <Badge variant="secondary" className="bg-muted text-muted-foreground">
             Daily Comments: {userProfile.daily_prompt_count || 0}/20
@@ -286,9 +308,9 @@ const Settings = () => {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Sidebar Navigation */}
         <div className="lg:col-span-1">
-          <Card className="bg-card border-border">
+          <Card className="bg-card border-border sticky top-4">
             <CardContent className="p-4">
-              <nav className="space-y-2">
+              <nav className="space-y-1">
                 {sections.map((section) => (
                   <button
                     key={section.id}
@@ -310,47 +332,67 @@ const Settings = () => {
 
         {/* Main Content */}
         <div className="lg:col-span-3 space-y-6">
-          {/* Profile Section */}
-          {activeSection === 'profile' && (
-            <Card className="bg-card border-border">
-              <CardHeader>
-                <CardTitle className="text-foreground">Profile Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="full-name" className="text-foreground">Full Name</Label>
-                  <Input
-                    id="full-name"
-                    value={profileData.full_name}
-                    onChange={(e) => setProfileData(prev => ({ ...prev, full_name: e.target.value }))}
-                    placeholder="Enter your full name"
-                    className="bg-background border-border text-foreground"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-foreground">Email</Label>
-                  <Input
-                    id="email"
-                    value={profileData.email}
-                    disabled
-                    className="bg-muted border-border text-muted-foreground"
-                  />
-                  <p className="text-xs text-muted-foreground">Email cannot be changed</p>
-                </div>
-                <Button 
-                  onClick={handleProfileUpdate} 
-                  disabled={isLoading}
-                  className="w-full"
-                >
-                  {isLoading ? 'Updating...' : 'Update Profile'}
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* App Preferences Section */}
-          {activeSection === 'preferences' && (
+          {/* Account Section */}
+          {activeSection === 'account' && (
             <div className="space-y-6">
+              <Card className="bg-card border-border">
+                <CardHeader>
+                  <CardTitle className="text-foreground">Profile Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="full-name" className="text-foreground">Display Name</Label>
+                    <Input
+                      id="full-name"
+                      value={profileData.full_name}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, full_name: e.target.value }))}
+                      placeholder="Enter your display name"
+                      className="bg-background border-border text-foreground"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-foreground">Email</Label>
+                    <Input
+                      id="email"
+                      value={profileData.email}
+                      disabled
+                      className="bg-muted border-border text-muted-foreground"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="introduction" className="text-foreground">Introduction</Label>
+                    <Textarea
+                      id="introduction"
+                      value={profileData.introduction}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, introduction: e.target.value }))}
+                      placeholder="Describe yourself (used for AI context)"
+                      className="bg-background border-border text-foreground"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-foreground">Preferred Tone</Label>
+                    <select
+                      value={profileData.preferred_tone}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, preferred_tone: e.target.value }))}
+                      className="w-full px-3 py-2 border border-border bg-background text-foreground rounded-md"
+                    >
+                      <option value="Bold Founder">Bold Founder</option>
+                      <option value="Curious Maker">Curious Maker</option>
+                      <option value="Corporate Executive">Corporate Executive</option>
+                      <option value="Indie Hacker">Indie Hacker</option>
+                    </select>
+                  </div>
+                  <Button 
+                    onClick={handleProfileUpdate} 
+                    disabled={isLoading}
+                    className="w-full"
+                  >
+                    {isLoading ? 'Updating...' : 'Update Profile'}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Appearance */}
               <Card className="bg-card border-border">
                 <CardHeader>
                   <CardTitle className="text-foreground">Appearance</CardTitle>
@@ -367,37 +409,17 @@ const Settings = () => {
                       }}
                     />
                   </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-card border-border">
-                <CardHeader>
-                  <CardTitle className="text-foreground">Default Settings</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label className="text-foreground">Summary Length</Label>
+                    <Label className="text-foreground">Language</Label>
                     <select
-                      value={userSettings.summary_length}
-                      onChange={(e) => saveUserSettings({ summary_length: e.target.value })}
+                      value={userSettings.language}
+                      onChange={(e) => saveUserSettings({ language: e.target.value })}
                       className="w-full px-3 py-2 border border-border bg-background text-foreground rounded-md"
                     >
-                      <option value="short">Short</option>
-                      <option value="medium">Medium</option>
-                      <option value="detailed">Detailed</option>
-                    </select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label className="text-foreground">Dashboard View</Label>
-                    <select
-                      value={userSettings.dashboard_view}
-                      onChange={(e) => saveUserSettings({ dashboard_view: e.target.value })}
-                      className="w-full px-3 py-2 border border-border bg-background text-foreground rounded-md"
-                    >
-                      <option value="recent">Recent Activity</option>
-                      <option value="spaces">Spaces</option>
-                      <option value="chat">Chat</option>
+                      <option value="en">English</option>
+                      <option value="es">Spanish</option>
+                      <option value="fr">French</option>
+                      <option value="de">German</option>
                     </select>
                   </div>
                 </CardContent>
@@ -405,7 +427,7 @@ const Settings = () => {
             </div>
           )}
 
-          {/* AI Settings Section */}
+          {/* AI & API Section */}
           {activeSection === 'ai' && (
             <div className="space-y-6">
               <Card className="bg-card border-border">
@@ -473,11 +495,24 @@ const Settings = () => {
 
               <Card className="bg-card border-border">
                 <CardHeader>
-                  <CardTitle className="text-foreground">AI Behavior</CardTitle>
+                  <CardTitle className="text-foreground">AI Settings</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label className="text-foreground">Response Tone</Label>
+                    <Label className="text-foreground">Comment Length</Label>
+                    <select
+                      value={userSettings.summary_length}
+                      onChange={(e) => saveUserSettings({ summary_length: e.target.value })}
+                      className="w-full px-3 py-2 border border-border bg-background text-foreground rounded-md"
+                    >
+                      <option value="short">Short</option>
+                      <option value="medium">Medium</option>
+                      <option value="detailed">Long</option>
+                    </select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label className="text-foreground">AI Response Tone</Label>
                     <select
                       value={userSettings.ai_tone}
                       onChange={(e) => saveUserSettings({ ai_tone: e.target.value })}
@@ -515,55 +550,8 @@ const Settings = () => {
             </div>
           )}
 
-          {/* Notifications Section */}
-          {activeSection === 'notifications' && (
-            <Card className="bg-card border-border">
-              <CardHeader>
-                <CardTitle className="text-foreground">Notification Preferences</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-foreground">Notification Frequency</Label>
-                  <select
-                    value={userSettings.notification_prefs.frequency}
-                    onChange={(e) => saveUserSettings({ 
-                      notification_prefs: { ...userSettings.notification_prefs, frequency: e.target.value }
-                    })}
-                    className="w-full px-3 py-2 border border-border bg-background text-foreground rounded-md"
-                  >
-                    <option value="real-time">Real-time</option>
-                    <option value="daily">Daily Digest</option>
-                    <option value="weekly">Weekly Summary</option>
-                  </select>
-                </div>
-
-                <Separator className="bg-border" />
-
-                <div className="space-y-3">
-                  {Object.entries(userSettings.notification_prefs).map(([key, value]) => (
-                    key !== 'frequency' && (
-                      <div key={key} className="flex items-center justify-between">
-                        <Label className="text-foreground capitalize">
-                          {key.replace(/_/g, ' ')}
-                        </Label>
-                        <Switch
-                          checked={value as boolean}
-                          onCheckedChange={(checked) => 
-                            saveUserSettings({ 
-                              notification_prefs: { ...userSettings.notification_prefs, [key]: checked }
-                            })
-                          }
-                        />
-                      </div>
-                    )
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Data & Privacy Section */}
-          {activeSection === 'data' && (
+          {/* History Section */}
+          {activeSection === 'history' && (
             <div className="space-y-6">
               <Card className="bg-card border-border">
                 <CardHeader>
@@ -598,6 +586,25 @@ const Settings = () => {
                 </CardContent>
               </Card>
             </div>
+          )}
+
+          {/* Placeholder sections for other tabs */}
+          {(activeSection === 'platforms' || activeSection === 'tone' || activeSection === 'voice' || 
+            activeSection === 'workflow' || activeSection === 'safety' || activeSection === 'billing') && (
+            <Card className="bg-card border-border">
+              <CardHeader>
+                <CardTitle className="text-foreground capitalize">{activeSection}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-12">
+                  <div className="text-muted-foreground mb-4">
+                    <SettingsIcon className="h-12 w-12 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium">Coming Soon</h3>
+                    <p className="text-sm">This feature is currently under development</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           )}
         </div>
       </div>

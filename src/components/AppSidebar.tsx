@@ -79,9 +79,12 @@ const AppSidebar = () => {
   return (
     <Sidebar 
       collapsible="icon" 
-      className="group/sidebar border-r border-sidebar-border transition-all duration-300 ease-in-out data-[state=collapsed]:hover:w-64"
+      className="group/sidebar border-r border-sidebar-border transition-all duration-300 ease-in-out"
+      style={{
+        '--sidebar-width-icon': isCollapsed ? '62px' : '3rem'
+      } as React.CSSProperties}
     >
-      <SidebarHeader className="p-4">
+      <SidebarHeader className={`transition-all duration-300 ${isCollapsed ? 'p-2' : 'p-4'}`}>
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600">
             <Sparkles className="h-4 w-4 text-white" />
@@ -93,7 +96,7 @@ const AppSidebar = () => {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="px-2">
+      <SidebarContent className={`transition-all duration-300 ${isCollapsed ? 'px-1' : 'px-2'}`}>
         <SidebarMenu>
           {navigationItems.map((item) => (
             <SidebarMenuItem key={item.url}>
@@ -101,8 +104,9 @@ const AppSidebar = () => {
                 asChild 
                 isActive={item.isActive}
                 className="group/button relative"
+                tooltip={isCollapsed ? item.title : undefined}
               >
-                <Link to={item.url} className="flex items-center gap-3 px-3 py-2">
+                <Link to={item.url} className={`flex items-center gap-3 transition-all duration-300 ${isCollapsed ? 'px-2 py-3 justify-center' : 'px-3 py-2'}`}>
                   <item.icon className="h-4 w-4 shrink-0" />
                   <span className={`transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0 overflow-hidden group-hover/sidebar:opacity-100 group-hover/sidebar:w-auto group-hover/sidebar:ml-0' : 'opacity-100'}`}>
                     {item.title}
@@ -113,8 +117,8 @@ const AppSidebar = () => {
           ))}
         </SidebarMenu>
 
-        {/* Theme Toggle - Improved for collapsed mode */}
-        <div className="mt-6 px-3">
+        {/* Theme Toggle */}
+        <div className={`mt-6 transition-all duration-300 ${isCollapsed ? 'px-1' : 'px-3'}`}>
           <div className={`flex items-center py-2 transition-all duration-300 ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
             <div className="h-4 w-4 shrink-0 rounded-sm bg-gradient-to-br from-yellow-400 to-orange-500" />
             {!isCollapsed && (
@@ -126,42 +130,27 @@ const AppSidebar = () => {
                 />
               </div>
             )}
-            {isCollapsed && (
-              <div className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 absolute left-16 bg-sidebar border border-sidebar-border rounded-md shadow-lg p-2 z-50">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-sidebar-foreground whitespace-nowrap">Dark Mode</span>
-                  <Switch
-                    checked={isDark}
-                    onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
-                  />
-                </div>
-              </div>
-            )}
           </div>
         </div>
 
-        {/* Upgrade Button - Better collapsed design */}
-        <div className="mt-4 px-3">
+        {/* Upgrade Button */}
+        <div className={`mt-4 transition-all duration-300 ${isCollapsed ? 'px-1' : 'px-3'}`}>
           <Button 
             className={`w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 border-0 ${
-              isCollapsed ? 'px-2 aspect-square' : 'px-3'
+              isCollapsed ? 'p-2 aspect-square' : 'px-3 py-2'
             }`}
             size={isCollapsed ? "icon" : "sm"}
+            title={isCollapsed ? "Upgrade to Pro" : undefined}
           >
             <Crown className="h-4 w-4 shrink-0" />
             {!isCollapsed && (
               <span className="ml-2">Upgrade to Pro</span>
             )}
-            {isCollapsed && (
-              <div className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 absolute left-16 bg-sidebar border border-sidebar-border rounded-md shadow-lg p-2 z-50">
-                <span className="text-sm font-medium text-sidebar-foreground whitespace-nowrap">Upgrade to Pro</span>
-              </div>
-            )}
           </Button>
         </div>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 space-y-4">
+      <SidebarFooter className={`space-y-4 transition-all duration-300 ${isCollapsed ? 'p-2' : 'p-4'}`}>
         {/* User Profile */}
         {user && (
           <div className={`flex items-center transition-all duration-300 ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
@@ -180,20 +169,10 @@ const AppSidebar = () => {
                 </p>
               </div>
             )}
-            {isCollapsed && (
-              <div className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 absolute left-16 bg-sidebar border border-sidebar-border rounded-md shadow-lg p-2 z-50">
-                <p className="text-sm font-medium text-sidebar-foreground whitespace-nowrap">
-                  {user.user_metadata?.full_name || user.email}
-                </p>
-                <p className="text-xs text-sidebar-foreground/60 whitespace-nowrap">
-                  {user.email}
-                </p>
-              </div>
-            )}
           </div>
         )}
 
-        {/* Footer Links - Better collapsed layout */}
+        {/* Footer Links */}
         <div className={`transition-all duration-300 ${isCollapsed ? 'flex flex-col gap-1' : 'grid grid-cols-3 gap-2'}`}>
           {footerLinks.map((link) => (
             <Button
@@ -201,20 +180,15 @@ const AppSidebar = () => {
               variant="ghost"
               size="icon"
               asChild
-              className="h-8 w-8 text-sidebar-foreground/60 hover:text-sidebar-foreground relative group/footer-link"
+              className="h-8 w-8 text-sidebar-foreground/60 hover:text-sidebar-foreground"
+              title={link.title}
             >
               <a 
                 href={link.url} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                title={link.title}
               >
                 <link.icon className="h-4 w-4" />
-                {isCollapsed && (
-                  <div className="opacity-0 group-hover/footer-link:opacity-100 transition-opacity duration-300 absolute left-12 bg-sidebar border border-sidebar-border rounded-md shadow-lg p-1 px-2 z-50">
-                    <span className="text-xs text-sidebar-foreground whitespace-nowrap">{link.title}</span>
-                  </div>
-                )}
               </a>
             </Button>
           ))}
@@ -229,15 +203,11 @@ const AppSidebar = () => {
               isCollapsed ? 'px-2 justify-center' : 'justify-start px-3'
             }`}
             size={isCollapsed ? "icon" : "sm"}
+            title={isCollapsed ? "Sign Out" : undefined}
           >
             <LogOut className="h-4 w-4 shrink-0" />
             {!isCollapsed && (
               <span className="ml-2">Sign Out</span>
-            )}
-            {isCollapsed && (
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute left-16 bg-sidebar border border-sidebar-border rounded-md shadow-lg p-2 z-50">
-                <span className="text-sm font-medium text-sidebar-foreground whitespace-nowrap">Sign Out</span>
-              </div>
             )}
           </Button>
         )}
