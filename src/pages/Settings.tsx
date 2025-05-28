@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -73,6 +72,20 @@ const Settings = () => {
     preferred_tone: 'Bold Founder',
   });
 
+  const defaultNotificationPrefs: NotificationPrefs = {
+    email_notifications: false,
+    meeting_processed: true,
+    summary_ready: true,
+    task_due: true,
+    frequency: 'real-time'
+  };
+
+  const defaultAIFeatures: AIFeatures = {
+    auto_summarization: true,
+    action_item_detection: true,
+    topic_extraction: true
+  };
+
   const [userSettings, setUserSettings] = useState<UserSettings>({
     theme: isDark ? 'dark' : 'light',
     language: 'en',
@@ -81,18 +94,8 @@ const Settings = () => {
     dashboard_view: 'recent',
     use_custom_api_key: false,
     custom_api_key: '',
-    notification_prefs: {
-      email_notifications: false,
-      meeting_processed: true,
-      summary_ready: true,
-      task_due: true,
-      frequency: 'real-time'
-    },
-    ai_features: {
-      auto_summarization: true,
-      action_item_detection: true,
-      topic_extraction: true
-    }
+    notification_prefs: defaultNotificationPrefs,
+    ai_features: defaultAIFeatures
   });
 
   useEffect(() => {
@@ -106,6 +109,24 @@ const Settings = () => {
     }
     loadUserSettings();
   }, [userProfile, user]);
+
+  const isValidNotificationPrefs = (data: any): data is NotificationPrefs => {
+    return data && 
+           typeof data === 'object' && 
+           typeof data.email_notifications === 'boolean' &&
+           typeof data.meeting_processed === 'boolean' &&
+           typeof data.summary_ready === 'boolean' &&
+           typeof data.task_due === 'boolean' &&
+           typeof data.frequency === 'string';
+  };
+
+  const isValidAIFeatures = (data: any): data is AIFeatures => {
+    return data && 
+           typeof data === 'object' && 
+           typeof data.auto_summarization === 'boolean' &&
+           typeof data.action_item_detection === 'boolean' &&
+           typeof data.topic_extraction === 'boolean';
+  };
 
   const loadUserSettings = async () => {
     if (!user) return;
@@ -123,6 +144,14 @@ const Settings = () => {
       }
 
       if (data) {
+        const notificationPrefs = isValidNotificationPrefs(data.notification_prefs) 
+          ? data.notification_prefs 
+          : defaultNotificationPrefs;
+        
+        const aiFeatures = isValidAIFeatures(data.ai_features) 
+          ? data.ai_features 
+          : defaultAIFeatures;
+
         setUserSettings({
           theme: data.theme || 'dark',
           language: data.language || 'en',
@@ -131,8 +160,8 @@ const Settings = () => {
           dashboard_view: data.dashboard_view || 'recent',
           use_custom_api_key: data.use_custom_api_key || false,
           custom_api_key: data.custom_api_key || '',
-          notification_prefs: (data.notification_prefs as NotificationPrefs) || userSettings.notification_prefs,
-          ai_features: (data.ai_features as AIFeatures) || userSettings.ai_features
+          notification_prefs: notificationPrefs,
+          ai_features: aiFeatures
         });
       }
     } catch (error) {
@@ -145,12 +174,21 @@ const Settings = () => {
 
     setIsLoading(true);
     try {
+      const settingsToSave = { ...userSettings, ...updatedSettings };
+      
       const { error } = await supabase
         .from('user_settings')
         .upsert({
           user_id: user.id,
-          ...userSettings,
-          ...updatedSettings,
+          theme: settingsToSave.theme,
+          language: settingsToSave.language,
+          summary_length: settingsToSave.summary_length,
+          ai_tone: settingsToSave.ai_tone,
+          dashboard_view: settingsToSave.dashboard_view,
+          use_custom_api_key: settingsToSave.use_custom_api_key,
+          custom_api_key: settingsToSave.custom_api_key,
+          notification_prefs: settingsToSave.notification_prefs as any,
+          ai_features: settingsToSave.ai_features as any,
           updated_at: new Date().toISOString()
         });
 
@@ -160,7 +198,7 @@ const Settings = () => {
         return;
       }
 
-      setUserSettings(prev => ({ ...prev, ...updatedSettings }));
+      setUserSettings(settingsToSave);
       toast.success('Settings saved successfully!');
     } catch (error) {
       console.error('Error:', error);
