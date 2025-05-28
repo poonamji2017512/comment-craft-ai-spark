@@ -31,7 +31,14 @@ import {
   Shield,
   CreditCard,
   Users,
-  Workflow
+  Workflow,
+  Crown,
+  Mail,
+  ExternalLink,
+  Puzzle,
+  Twitter,
+  Linkedin,
+  Globe
 } from "lucide-react";
 
 interface NotificationPrefs {
@@ -113,22 +120,28 @@ const Settings = () => {
     loadUserSettings();
   }, [userProfile, user]);
 
-  const isValidNotificationPrefs = (data: any): data is NotificationPrefs => {
-    return data && 
-           typeof data === 'object' && 
-           typeof data.email_notifications === 'boolean' &&
-           typeof data.meeting_processed === 'boolean' &&
-           typeof data.summary_ready === 'boolean' &&
-           typeof data.task_due === 'boolean' &&
-           typeof data.frequency === 'string';
+  const validateNotificationPrefs = (data: any): NotificationPrefs => {
+    if (data && typeof data === 'object' && !Array.isArray(data)) {
+      return {
+        email_notifications: typeof data.email_notifications === 'boolean' ? data.email_notifications : defaultNotificationPrefs.email_notifications,
+        meeting_processed: typeof data.meeting_processed === 'boolean' ? data.meeting_processed : defaultNotificationPrefs.meeting_processed,
+        summary_ready: typeof data.summary_ready === 'boolean' ? data.summary_ready : defaultNotificationPrefs.summary_ready,
+        task_due: typeof data.task_due === 'boolean' ? data.task_due : defaultNotificationPrefs.task_due,
+        frequency: typeof data.frequency === 'string' ? data.frequency : defaultNotificationPrefs.frequency
+      };
+    }
+    return defaultNotificationPrefs;
   };
 
-  const isValidAIFeatures = (data: any): data is AIFeatures => {
-    return data && 
-           typeof data === 'object' && 
-           typeof data.auto_summarization === 'boolean' &&
-           typeof data.action_item_detection === 'boolean' &&
-           typeof data.topic_extraction === 'boolean';
+  const validateAIFeatures = (data: any): AIFeatures => {
+    if (data && typeof data === 'object' && !Array.isArray(data)) {
+      return {
+        auto_summarization: typeof data.auto_summarization === 'boolean' ? data.auto_summarization : defaultAIFeatures.auto_summarization,
+        action_item_detection: typeof data.action_item_detection === 'boolean' ? data.action_item_detection : defaultAIFeatures.action_item_detection,
+        topic_extraction: typeof data.topic_extraction === 'boolean' ? data.topic_extraction : defaultAIFeatures.topic_extraction
+      };
+    }
+    return defaultAIFeatures;
   };
 
   const loadUserSettings = async () => {
@@ -147,13 +160,8 @@ const Settings = () => {
       }
 
       if (data) {
-        const notificationPrefs = isValidNotificationPrefs(data.notification_prefs) 
-          ? data.notification_prefs 
-          : defaultNotificationPrefs;
-        
-        const aiFeatures = isValidAIFeatures(data.ai_features) 
-          ? data.ai_features 
-          : defaultAIFeatures;
+        const notificationPrefs = validateNotificationPrefs(data.notification_prefs);
+        const aiFeatures = validateAIFeatures(data.ai_features);
 
         setUserSettings({
           theme: data.theme || 'dark',
@@ -191,8 +199,7 @@ const Settings = () => {
           use_custom_api_key: settingsToSave.use_custom_api_key,
           custom_api_key: settingsToSave.custom_api_key,
           notification_prefs: settingsToSave.notification_prefs as any,
-          ai_features: settingsToSave.ai_features as any,
-          updated_at: new Date().toISOString()
+          ai_features: settingsToSave.ai_features as any
         });
 
       if (error) {
@@ -219,8 +226,7 @@ const Settings = () => {
       const { error } = await supabase
         .from('user_profiles')
         .update({
-          full_name: profileData.full_name,
-          updated_at: new Date().toISOString(),
+          full_name: profileData.full_name
         })
         .eq('id', user.id);
 
@@ -299,7 +305,7 @@ const Settings = () => {
   };
 
   const handleClearData = async () => {
-    if (!user) return;
+    if (!user || !confirm('Are you sure you want to clear all your data? This action cannot be undone.')) return;
     
     try {
       const { error } = await supabase
@@ -320,20 +326,8 @@ const Settings = () => {
     }
   };
 
-  const sections = [
-    { id: 'account', label: 'Account', icon: User },
-    { id: 'platforms', label: 'Platforms', icon: Users },
-    { id: 'tone', label: 'Tone & Style', icon: Palette },
-    { id: 'voice', label: 'Voice', icon: MessageSquare },
-    { id: 'workflow', label: 'Workflow', icon: SettingsIcon },
-    { id: 'ai', label: 'AI & API', icon: Key },
-    { id: 'safety', label: 'Safety', icon: Shield },
-    { id: 'history', label: 'History', icon: Database },
-    { id: 'billing', label: 'Billing', icon: CreditCard }
-  ];
-
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Settings</h1>
@@ -347,40 +341,40 @@ const Settings = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-9 mb-8">
-          <TabsTrigger value="account" className="flex items-center gap-2">
+        <TabsList className="grid w-full grid-cols-9 mb-8 h-12">
+          <TabsTrigger value="account" className="flex items-center gap-2 px-4">
             <User className="h-4 w-4" />
             <span className="hidden sm:inline">Account</span>
           </TabsTrigger>
-          <TabsTrigger value="platforms" className="flex items-center gap-2">
+          <TabsTrigger value="platforms" className="flex items-center gap-2 px-4">
             <Users className="h-4 w-4" />
             <span className="hidden sm:inline">Platforms</span>
           </TabsTrigger>
-          <TabsTrigger value="tone" className="flex items-center gap-2">
+          <TabsTrigger value="tone" className="flex items-center gap-2 px-4">
             <Palette className="h-4 w-4" />
             <span className="hidden sm:inline">Tone & Style</span>
           </TabsTrigger>
-          <TabsTrigger value="voice" className="flex items-center gap-2">
+          <TabsTrigger value="voice" className="flex items-center gap-2 px-4">
             <MessageSquare className="h-4 w-4" />
             <span className="hidden sm:inline">Voice</span>
           </TabsTrigger>
-          <TabsTrigger value="workflow" className="flex items-center gap-2">
+          <TabsTrigger value="workflow" className="flex items-center gap-2 px-4">
             <Workflow className="h-4 w-4" />
             <span className="hidden sm:inline">Workflow</span>
           </TabsTrigger>
-          <TabsTrigger value="ai" className="flex items-center gap-2">
+          <TabsTrigger value="ai" className="flex items-center gap-2 px-4">
             <Key className="h-4 w-4" />
             <span className="hidden sm:inline">AI & API</span>
           </TabsTrigger>
-          <TabsTrigger value="safety" className="flex items-center gap-2">
+          <TabsTrigger value="safety" className="flex items-center gap-2 px-4">
             <Shield className="h-4 w-4" />
             <span className="hidden sm:inline">Safety</span>
           </TabsTrigger>
-          <TabsTrigger value="history" className="flex items-center gap-2">
+          <TabsTrigger value="history" className="flex items-center gap-2 px-4">
             <Database className="h-4 w-4" />
             <span className="hidden sm:inline">History</span>
           </TabsTrigger>
-          <TabsTrigger value="billing" className="flex items-center gap-2">
+          <TabsTrigger value="billing" className="flex items-center gap-2 px-4">
             <CreditCard className="h-4 w-4" />
             <span className="hidden sm:inline">Billing</span>
           </TabsTrigger>
@@ -388,6 +382,25 @@ const Settings = () => {
 
         {/* Account Tab */}
         <TabsContent value="account" className="space-y-6">
+          {/* Interact Pro Banner */}
+          <Card className="bg-gradient-to-r from-orange-500 to-pink-500 border-0 text-white overflow-hidden">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Crown className="h-6 w-6" />
+                    <h3 className="text-xl font-bold">Unlock the most powerful AI experience</h3>
+                  </div>
+                  <p className="text-white/90">Get the most out of AI Comment Agent with Pro. Learn more</p>
+                </div>
+                <Button variant="secondary" className="bg-white text-orange-600 hover:bg-white/90">
+                  Learn more
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Profile Information */}
           <Card className="bg-card border-border">
             <CardHeader>
               <CardTitle className="text-foreground">Profile Information</CardTitle>
@@ -435,16 +448,27 @@ const Settings = () => {
                   <option value="Indie Hacker">Indie Hacker</option>
                 </select>
               </div>
-              <Button 
-                onClick={handleProfileUpdate} 
-                disabled={isLoading}
-                className="w-full"
-              >
-                {isLoading ? 'Updating...' : 'Update Profile'}
-              </Button>
+              <div className="flex gap-3">
+                <Button 
+                  onClick={handleProfileUpdate} 
+                  disabled={isLoading}
+                  className="flex-1"
+                >
+                  {isLoading ? 'Updating...' : 'Update Profile'}
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => window.open('mailto:support@interactai.com', '_blank')}
+                  className="flex items-center gap-2"
+                >
+                  <Mail className="h-4 w-4" />
+                  Support
+                </Button>
+              </div>
             </CardContent>
           </Card>
 
+          {/* Appearance */}
           <Card className="bg-card border-border">
             <CardHeader>
               <CardTitle className="text-foreground">Appearance</CardTitle>
@@ -485,25 +509,73 @@ const Settings = () => {
               <CardTitle className="text-foreground">Connected Platforms</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12">
-                <div className="text-muted-foreground mb-4">
-                  <Users className="h-12 w-12 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium">Platform Integration</h3>
-                  <p className="text-sm">Connect your social media platforms to start generating AI comments</p>
-                </div>
-                <div className="space-y-3 max-w-md mx-auto">
-                  <Button variant="outline" className="w-full" disabled>
-                    Connect X (Twitter)
-                  </Button>
-                  <Button variant="outline" className="w-full" disabled>
-                    Connect LinkedIn
-                  </Button>
-                  <Button variant="outline" className="w-full" disabled>
-                    Connect Reddit
-                  </Button>
-                  <Button variant="outline" className="w-full" disabled>
-                    Connect Bluesky
-                  </Button>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="border border-border rounded-lg p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Twitter className="h-8 w-8 text-blue-400" />
+                      <div>
+                        <h3 className="font-medium">X (Twitter)</h3>
+                        <p className="text-sm text-muted-foreground">Not connected</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" disabled>
+                      Connect
+                    </Button>
+                  </div>
+                  
+                  <div className="border border-border rounded-lg p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Linkedin className="h-8 w-8 text-blue-600" />
+                      <div>
+                        <h3 className="font-medium">LinkedIn</h3>
+                        <p className="text-sm text-muted-foreground">Not connected</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" disabled>
+                      Connect
+                    </Button>
+                  </div>
+                  
+                  <div className="border border-border rounded-lg p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Globe className="h-8 w-8 text-orange-500" />
+                      <div>
+                        <h3 className="font-medium">Reddit</h3>
+                        <p className="text-sm text-muted-foreground">Not connected</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" disabled>
+                      Connect
+                    </Button>
+                  </div>
+                  
+                  <div className="border border-border rounded-lg p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Globe className="h-8 w-8 text-blue-500" />
+                      <div>
+                        <h3 className="font-medium">Bluesky</h3>
+                        <p className="text-sm text-muted-foreground">Not connected</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" disabled>
+                      Connect
+                    </Button>
+                  </div>
+                  
+                  <div className="border border-border rounded-lg p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Puzzle className="h-8 w-8 text-purple-500" />
+                      <div>
+                        <h3 className="font-medium">Interact Extension</h3>
+                        <p className="text-sm text-muted-foreground">Browser extension for all platforms</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <ExternalLink className="h-4 w-4" />
+                      Install
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -820,22 +892,102 @@ const Settings = () => {
               <CardTitle className="text-foreground">Billing & Plan</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12">
-                <div className="text-muted-foreground mb-4">
-                  <CreditCard className="h-12 w-12 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium">Billing Management</h3>
-                  <p className="text-sm">Manage your subscription and billing details</p>
-                </div>
-                <div className="space-y-4 max-w-md mx-auto">
-                  <div className="p-4 border rounded-lg">
-                    <h4 className="font-medium">Free Plan</h4>
-                    <p className="text-sm text-muted-foreground">20 comments per day</p>
-                    <p className="text-2xl font-bold mt-2">$0/month</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Free Plan */}
+                <div className="border border-border rounded-lg p-6 space-y-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground">Free</h3>
+                    <div className="mt-2">
+                      <span className="text-3xl font-bold text-foreground">$0.00</span>
+                      <span className="text-muted-foreground ml-1">Forever</span>
+                    </div>
                   </div>
-                  <Button className="w-full" disabled>
-                    Upgrade to Pro
+                  
+                  <p className="text-sm text-muted-foreground">
+                    Start for free, no credit card needed.
+                  </p>
+                  
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-green-500" />
+                      <span>Unlimited basic searches</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-green-500" />
+                      <span>3 Pro searches per day</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-green-500" />
+                      <span>Upload 3 files per day</span>
+                    </li>
+                  </ul>
+                  
+                  <Button variant="outline" className="w-full" disabled>
+                    Continue with free
                   </Button>
                 </div>
+
+                {/* Pro Plan */}
+                <div className="border border-border rounded-lg p-6 space-y-4 relative">
+                  <div className="absolute -top-3 right-4">
+                    <Badge className="bg-blue-600 text-white">Popular</Badge>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground">Pro</h3>
+                    <div className="mt-2">
+                      <span className="text-3xl font-bold text-foreground">$20.00</span>
+                      <span className="text-muted-foreground ml-1">/ month</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      $8.67 when billed annually
+                    </p>
+                  </div>
+                  
+                  <p className="text-sm text-muted-foreground">
+                    Unlimited access to AI Comment Agent and enjoy new perks as they are added.
+                  </p>
+                  
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-green-500" />
+                      <span>Everything in Free</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-green-500" />
+                      <span>Access to Deep Search</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-green-500" />
+                      <span>10x as many questions in answers</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-green-500" />
+                      <span>Powered by the latest top AI models</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-green-500" />
+                      <span>Upload unlimited documents and images</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Crown className="h-4 w-4 text-orange-500" />
+                      <span>And much more</span>
+                    </li>
+                  </ul>
+                  
+                  <Button className="w-full bg-white text-black hover:bg-gray-100">
+                    Continue with Pro
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="mt-8 text-center">
+                <p className="text-sm text-muted-foreground">
+                  AI Comment Agent for teams or business?{' '}
+                  <Button variant="link" className="p-0 h-auto text-blue-600">
+                    Learn more
+                  </Button>
+                </p>
               </div>
             </CardContent>
           </Card>
