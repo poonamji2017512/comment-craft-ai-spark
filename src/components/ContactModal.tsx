@@ -58,12 +58,11 @@ const ContactModal = ({ open, onOpenChange }: ContactModalProps) => {
         </DialogHeader>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
-          {/* Contact Form */}
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold mb-2">Send us a message</h3>
               <p className="text-muted-foreground text-sm">
-                Have a question or need help? We'd love to hear from you.
+                Have a question or need help? We&apos;d love to hear from you.
               </p>
             </div>
             
@@ -142,12 +141,11 @@ const ContactModal = ({ open, onOpenChange }: ContactModalProps) => {
             </form>
           </div>
 
-          {/* Contact Information */}
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold mb-2">Get in touch</h3>
               <p className="text-muted-foreground text-sm">
-                Choose the best way to reach us. We're here to help!
+                Choose the best way to reach us. We&apos;re here to help!
               </p>
             </div>
             
@@ -197,11 +195,11 @@ const ContactModal = ({ open, onOpenChange }: ContactModalProps) => {
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Email:</span>
-                  <span>< 24 hours</span>
+                  <span>&lt; 24 hours</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Chat:</span>
-                  <span>< 2 minutes</span>
+                  <span>&lt; 2 minutes</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Phone:</span>
@@ -209,7 +207,7 @@ const ContactModal = ({ open, onOpenChange }: ContactModalProps) => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Priority:</span>
-                  <span>< 1 hour</span>
+                  <span>&lt; 1 hour</span>
                 </div>
               </div>
             </div>
