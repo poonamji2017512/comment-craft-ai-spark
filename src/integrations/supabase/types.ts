@@ -193,6 +193,7 @@ export type Database = {
       user_settings: {
         Row: {
           ai_features: Json | null
+          ai_model: string | null
           ai_tone: string | null
           created_at: string
           custom_api_key: string | null
@@ -208,6 +209,7 @@ export type Database = {
         }
         Insert: {
           ai_features?: Json | null
+          ai_model?: string | null
           ai_tone?: string | null
           created_at?: string
           custom_api_key?: string | null
@@ -223,6 +225,7 @@ export type Database = {
         }
         Update: {
           ai_features?: Json | null
+          ai_model?: string | null
           ai_tone?: string | null
           created_at?: string
           custom_api_key?: string | null

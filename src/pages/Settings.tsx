@@ -180,7 +180,7 @@ const Settings = () => {
           language: data.language || 'en',
           summary_length: data.summary_length || 'medium',
           ai_tone: data.ai_tone || 'friendly',
-          ai_model: data.ai_model || 'gemini-2.5-pro',
+          ai_model: (data as any).ai_model || 'gemini-2.5-pro',
           dashboard_view: data.dashboard_view || 'recent',
           use_custom_api_key: data.use_custom_api_key || false,
           custom_api_key: data.custom_api_key || '',
