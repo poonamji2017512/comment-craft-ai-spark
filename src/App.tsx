@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import History from "./pages/History";
 import Settings from "./pages/Settings";
 import Docs from "./pages/Docs";
+import Changelog from "./pages/Changelog";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
                     <Route path="/history" element={<History />} />
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/docs" element={<Docs />} />
+                    <Route path="/changelog" element={<Changelog />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </main>

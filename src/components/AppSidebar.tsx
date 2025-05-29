@@ -25,8 +25,7 @@ import {
   Twitter,
   Mail,
   MessageCircle,
-  HelpCircle,
-  FileText
+  HelpCircle
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -60,12 +59,6 @@ const AppSidebar = () => {
       url: "/history", 
       icon: History,
       isActive: location.pathname === "/history"
-    },
-    { 
-      title: "Docs", 
-      url: "/docs", 
-      icon: FileText,
-      isActive: location.pathname === "/docs"
     },
     { 
       title: "Settings", 

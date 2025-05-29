@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Sparkles, Heart } from "lucide-react";
 
 const Footer = () => {
@@ -42,9 +43,9 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/docs" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Documentation
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

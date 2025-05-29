@@ -1,5 +1,5 @@
-
 import React from "react";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -79,7 +79,7 @@ const Docs = () => {
     { title: "API Reference", icon: Code, badge: "Developer" },
     { title: "Video Tutorials", icon: MessageSquare, badge: "Popular" },
     { title: "Community Forum", icon: Users, badge: "Support" },
-    { title: "Changelog", icon: FileText, badge: "Updates" }
+    { title: "Changelog", icon: FileText, badge: "Updates", link: "/changelog" }
   ];
 
   return (
@@ -107,11 +107,23 @@ const Docs = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {quickLinks.map((link, index) => (
               <div key={index} className="p-4 border rounded-lg hover:bg-accent cursor-pointer transition-colors">
-                <div className="flex items-center gap-3 mb-2">
-                  <link.icon className="w-5 h-5 text-primary" />
-                  <Badge variant="secondary">{link.badge}</Badge>
-                </div>
-                <h3 className="font-medium">{link.title}</h3>
+                {link.link ? (
+                  <Link to={link.link} className="block">
+                    <div className="flex items-center gap-3 mb-2">
+                      <link.icon className="w-5 h-5 text-primary" />
+                      <Badge variant="secondary">{link.badge}</Badge>
+                    </div>
+                    <h3 className="font-medium">{link.title}</h3>
+                  </Link>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-3 mb-2">
+                      <link.icon className="w-5 h-5 text-primary" />
+                      <Badge variant="secondary">{link.badge}</Badge>
+                    </div>
+                    <h3 className="font-medium">{link.title}</h3>
+                  </>
+                )}
               </div>
             ))}
           </div>

@@ -12,7 +12,7 @@ interface DashboardStats {
   mostUsedTone: string;
   avgResponseTime: number;
   engagementRate: number;
-  activeUsers: number;
+  uniqueComments: number;
   successRate: number;
 }
 
@@ -30,7 +30,7 @@ const Dashboard = () => {
     mostUsedTone: 'Friendly',
     avgResponseTime: 2.3,
     engagementRate: 87.5,
-    activeUsers: 1247,
+    uniqueComments: 0,
     successRate: 95.2
   });
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
@@ -54,6 +54,12 @@ const Dashboard = () => {
         .from('generated_comments')
         .select('*', { count: 'exact', head: true })
         .gte('created_at', weekAgo.toISOString());
+
+      // Fetch unique comments (distinct by original_post)
+      const { data: uniqueData } = await supabase
+        .from('generated_comments')
+        .select('original_post')
+        .distinct('original_post');
 
       // Fetch recent activity
       const { data: recentData } = await supabase
@@ -92,6 +98,7 @@ const Dashboard = () => {
         ...prev,
         totalComments: totalComments || 0,
         thisWeek: thisWeekCount || 0,
+        uniqueComments: uniqueData?.length || 0,
         mostUsedPlatform,
         mostUsedTone
       }));
@@ -163,9 +170,9 @@ const Dashboard = () => {
       color: "text-red-500"
     },
     {
-      title: "Active Users",
-      value: stats.activeUsers.toLocaleString(),
-      description: "This month",
+      title: "Unique Comments",
+      value: stats.uniqueComments.toLocaleString(),
+      description: "Distinct posts commented",
       icon: Users,
       color: "text-indigo-500"
     },
