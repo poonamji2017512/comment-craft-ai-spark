@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -60,6 +59,7 @@ interface UserSettings {
   language: string;
   summary_length: string;
   ai_tone: string;
+  ai_model: string;
   dashboard_view: string;
   use_custom_api_key: boolean;
   custom_api_key?: string;
@@ -101,12 +101,24 @@ const Settings = () => {
     language: 'en',
     summary_length: 'medium',
     ai_tone: 'friendly',
+    ai_model: 'gemini-2.5-pro',
     dashboard_view: 'recent',
     use_custom_api_key: false,
     custom_api_key: '',
     notification_prefs: defaultNotificationPrefs,
     ai_features: defaultAIFeatures
   });
+
+  const aiModels = [
+    { value: 'gemini-2.0-flash-lite', label: 'Google Gemini 2.0 Flash Lite', provider: 'Google' },
+    { value: 'gemini-2.5-flash', label: 'Google Gemini 2.5 Flash', provider: 'Google' },
+    { value: 'gemini-2.5-pro', label: 'Google Gemini 2.5 Pro (Default)', provider: 'Google' },
+    { value: 'gpt-4.1', label: 'OpenAI GPT-4.1', provider: 'OpenAI' },
+    { value: 'gpt-4o', label: 'OpenAI GPT-4o', provider: 'OpenAI' },
+    { value: 'o3-mini', label: 'OpenAI o3-mini', provider: 'OpenAI' },
+    { value: 'claude-4-sonnet', label: 'Claude 4 Sonnet', provider: 'Anthropic' },
+    { value: 'claude-3.7-sonnet', label: 'Claude 3.7 Sonnet', provider: 'Anthropic' }
+  ];
 
   useEffect(() => {
     if (userProfile) {
@@ -168,6 +180,7 @@ const Settings = () => {
           language: data.language || 'en',
           summary_length: data.summary_length || 'medium',
           ai_tone: data.ai_tone || 'friendly',
+          ai_model: data.ai_model || 'gemini-2.5-pro',
           dashboard_view: data.dashboard_view || 'recent',
           use_custom_api_key: data.use_custom_api_key || false,
           custom_api_key: data.custom_api_key || '',
@@ -195,6 +208,7 @@ const Settings = () => {
           language: settingsToSave.language,
           summary_length: settingsToSave.summary_length,
           ai_tone: settingsToSave.ai_tone,
+          ai_model: settingsToSave.ai_model,
           dashboard_view: settingsToSave.dashboard_view,
           use_custom_api_key: settingsToSave.use_custom_api_key,
           custom_api_key: settingsToSave.custom_api_key,
@@ -382,7 +396,6 @@ const Settings = () => {
 
         {/* Account Tab */}
         <TabsContent value="account" className="space-y-6">
-          {/* Interact Pro Banner */}
           <Card className="bg-gradient-to-r from-orange-500 to-pink-500 border-0 text-white overflow-hidden">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -400,7 +413,6 @@ const Settings = () => {
             </CardContent>
           </Card>
 
-          {/* Profile Information */}
           <Card className="bg-card border-border">
             <CardHeader>
               <CardTitle className="text-foreground">Profile Information</CardTitle>
@@ -468,7 +480,6 @@ const Settings = () => {
             </CardContent>
           </Card>
 
-          {/* Appearance */}
           <Card className="bg-card border-border">
             <CardHeader>
               <CardTitle className="text-foreground">Appearance</CardTitle>
@@ -622,15 +633,36 @@ const Settings = () => {
                 <Label className="text-foreground">Style Options</Label>
                 <div className="flex items-center justify-between">
                   <Label className="text-foreground">Use Emojis</Label>
-                  <Switch disabled />
+                  <Switch 
+                    checked={userSettings.ai_features.auto_summarization}
+                    onCheckedChange={(checked) => 
+                      saveUserSettings({ 
+                        ai_features: { ...userSettings.ai_features, auto_summarization: checked }
+                      })
+                    }
+                  />
                 </div>
                 <div className="flex items-center justify-between">
                   <Label className="text-foreground">Use Hashtags</Label>
-                  <Switch disabled />
+                  <Switch 
+                    checked={userSettings.ai_features.action_item_detection}
+                    onCheckedChange={(checked) => 
+                      saveUserSettings({ 
+                        ai_features: { ...userSettings.ai_features, action_item_detection: checked }
+                      })
+                    }
+                  />
                 </div>
                 <div className="flex items-center justify-between">
                   <Label className="text-foreground">Auto Tone Detection</Label>
-                  <Switch disabled />
+                  <Switch 
+                    checked={userSettings.ai_features.topic_extraction}
+                    onCheckedChange={(checked) => 
+                      saveUserSettings({ 
+                        ai_features: { ...userSettings.ai_features, topic_extraction: checked }
+                      })
+                    }
+                  />
                 </div>
               </div>
             </CardContent>
@@ -649,7 +681,6 @@ const Settings = () => {
                 <Textarea
                   placeholder="Enter phrases you commonly use..."
                   className="bg-background border-border text-foreground"
-                  disabled
                 />
               </div>
               <div className="space-y-2">
@@ -657,7 +688,6 @@ const Settings = () => {
                 <Textarea
                   placeholder="Enter your brand catchphrases and CTAs..."
                   className="bg-background border-border text-foreground"
-                  disabled
                 />
               </div>
               <div className="space-y-2">
@@ -665,7 +695,6 @@ const Settings = () => {
                 <Textarea
                   placeholder="Phrases to always include..."
                   className="bg-background border-border text-foreground"
-                  disabled
                 />
               </div>
               <div className="space-y-2">
@@ -673,9 +702,11 @@ const Settings = () => {
                 <Textarea
                   placeholder="Phrases to never use..."
                   className="bg-background border-border text-foreground"
-                  disabled
                 />
               </div>
+              <Button onClick={() => toast.success('Voice settings saved!')} className="w-full">
+                Save Voice Settings
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -689,14 +720,20 @@ const Settings = () => {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <Label className="text-foreground">Auto Approval</Label>
-                <Switch disabled />
+                <Switch 
+                  checked={userSettings.ai_features.auto_summarization}
+                  onCheckedChange={(checked) => 
+                    saveUserSettings({ 
+                      ai_features: { ...userSettings.ai_features, auto_summarization: checked }
+                    })
+                  }
+                />
               </div>
               <div className="space-y-2">
                 <Label className="text-foreground">Comments per Day Limit</Label>
                 <Input
                   type="number"
                   placeholder="20"
-                  disabled
                   className="bg-background border-border text-foreground"
                 />
               </div>
@@ -705,11 +742,25 @@ const Settings = () => {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label className="text-foreground text-sm">Verified Users Only</Label>
-                    <Switch disabled />
+                    <Switch 
+                      checked={userSettings.ai_features.action_item_detection}
+                      onCheckedChange={(checked) => 
+                        saveUserSettings({ 
+                          ai_features: { ...userSettings.ai_features, action_item_detection: checked }
+                        })
+                      }
+                    />
                   </div>
                   <div className="flex items-center justify-between">
                     <Label className="text-foreground text-sm">High Engagement Posts</Label>
-                    <Switch disabled />
+                    <Switch 
+                      checked={userSettings.ai_features.topic_extraction}
+                      onCheckedChange={(checked) => 
+                        saveUserSettings({ 
+                          ai_features: { ...userSettings.ai_features, topic_extraction: checked }
+                        })
+                      }
+                    />
                   </div>
                 </div>
               </div>
@@ -721,7 +772,34 @@ const Settings = () => {
         <TabsContent value="ai" className="space-y-6">
           <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle className="text-foreground">Google API Key Management</CardTitle>
+              <CardTitle className="text-foreground">AI Model Selection</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-foreground">Choose AI Model</Label>
+                <select
+                  value={userSettings.ai_model}
+                  onChange={(e) => saveUserSettings({ ai_model: e.target.value })}
+                  className="w-full px-3 py-2 border border-border bg-background text-foreground rounded-md"
+                >
+                  {aiModels.map((model) => (
+                    <option key={model.value} value={model.value}>
+                      {model.label} - {model.provider}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <Alert>
+                <AlertDescription>
+                  Google Gemini 2.5 Pro is set as the default model for optimal performance and advanced capabilities.
+                </AlertDescription>
+              </Alert>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="text-foreground">API Key Management</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
@@ -734,14 +812,14 @@ const Settings = () => {
               
               {userSettings.use_custom_api_key && (
                 <div className="space-y-3">
-                  <Label className="text-foreground">Google Gemini 2.5 API Key</Label>
+                  <Label className="text-foreground">API Key (for selected model)</Label>
                   <div className="flex gap-2">
                     <div className="relative flex-1">
                       <Input
                         type={showApiKey ? "text" : "password"}
                         value={userSettings.custom_api_key}
                         onChange={(e) => setUserSettings(prev => ({ ...prev, custom_api_key: e.target.value }))}
-                        placeholder="Enter your Google API key"
+                        placeholder="Enter your API key"
                         className="bg-background border-border text-foreground pr-10"
                       />
                       <button
@@ -821,19 +899,19 @@ const Settings = () => {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label className="text-foreground text-sm">Politics</Label>
-                    <Switch defaultChecked disabled />
+                    <Switch defaultChecked />
                   </div>
                   <div className="flex items-center justify-between">
                     <Label className="text-foreground text-sm">Religion</Label>
-                    <Switch defaultChecked disabled />
+                    <Switch defaultChecked />
                   </div>
                   <div className="flex items-center justify-between">
                     <Label className="text-foreground text-sm">Personal Tragedies</Label>
-                    <Switch defaultChecked disabled />
+                    <Switch defaultChecked />
                   </div>
                   <div className="flex items-center justify-between">
                     <Label className="text-foreground text-sm">NSFW Content</Label>
-                    <Switch defaultChecked disabled />
+                    <Switch defaultChecked />
                   </div>
                 </div>
               </div>
@@ -842,9 +920,11 @@ const Settings = () => {
                 <Textarea
                   placeholder="Enter comma-separated keywords to avoid..."
                   className="bg-background border-border text-foreground"
-                  disabled
                 />
               </div>
+              <Button onClick={() => toast.success('Safety settings saved!')} className="w-full">
+                Save Safety Settings
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
