@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles, Heart } from "lucide-react";
+import { Sparkles, Heart, HelpCircle, FileText } from "lucide-react";
+import HelpModal from './HelpModal';
 
 const Footer = () => {
   return (
@@ -43,7 +44,8 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <Link to="/docs" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/docs" className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
+                  <FileText className="w-4 h-4" />
                   Documentation
                 </Link>
               </li>
@@ -55,9 +57,12 @@ const Footer = () => {
             <h4 className="font-semibold text-foreground mb-4">Support</h4>
             <ul className="space-y-3">
               <li>
-                <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  Help Center
-                </a>
+                <HelpModal>
+                  <button className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
+                    <HelpCircle className="w-4 h-4" />
+                    Help Center
+                  </button>
+                </HelpModal>
               </li>
               <li>
                 <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
