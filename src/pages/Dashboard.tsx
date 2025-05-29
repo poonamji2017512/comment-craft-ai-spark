@@ -55,32 +55,25 @@ const Dashboard = () => {
         .select('*', { count: 'exact', head: true })
         .gte('created_at', weekAgo.toISOString());
 
-      // Fetch unique comments (distinct by original_post)
-      const { data: uniqueData } = await supabase
+      // Fetch all comments to calculate unique posts
+      const { data: allCommentsData } = await supabase
         .from('generated_comments')
-        .select('original_post')
-        .distinct('original_post');
+        .select('original_post, platform, tone');
 
-      // Fetch recent activity
-      const { data: recentData } = await supabase
-        .from('generated_comments')
-        .select('platform, tone, created_at')
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      // Calculate most used platform and tone
-      const { data: allComments } = await supabase
-        .from('generated_comments')
-        .select('platform, tone');
-
+      let uniqueComments = 0;
       let mostUsedPlatform = 'Twitter';
       let mostUsedTone = 'Friendly';
 
-      if (allComments && allComments.length > 0) {
+      if (allCommentsData && allCommentsData.length > 0) {
+        // Calculate unique posts (original_post field)
+        const uniquePosts = new Set(allCommentsData.map(comment => comment.original_post));
+        uniqueComments = uniquePosts.size;
+
+        // Calculate most used platform and tone
         const platformCounts: Record<string, number> = {};
         const toneCounts: Record<string, number> = {};
 
-        allComments.forEach(comment => {
+        allCommentsData.forEach(comment => {
           platformCounts[comment.platform] = (platformCounts[comment.platform] || 0) + 1;
           toneCounts[comment.tone] = (toneCounts[comment.tone] || 0) + 1;
         });
@@ -94,11 +87,18 @@ const Dashboard = () => {
         );
       }
 
+      // Fetch recent activity
+      const { data: recentData } = await supabase
+        .from('generated_comments')
+        .select('platform, tone, created_at')
+        .order('created_at', { ascending: false })
+        .limit(5);
+
       setStats(prev => ({
         ...prev,
         totalComments: totalComments || 0,
         thisWeek: thisWeekCount || 0,
-        uniqueComments: uniqueData?.length || 0,
+        uniqueComments,
         mostUsedPlatform,
         mostUsedTone
       }));
