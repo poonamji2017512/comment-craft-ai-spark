@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, MessageSquare, Clock, TrendingUp } from "lucide-react";
+import { Sparkles, MessageSquare, Clock, TrendingUp, Users, Target, Zap, Globe, Calendar, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface DashboardStats {
@@ -10,6 +10,10 @@ interface DashboardStats {
   thisWeek: number;
   mostUsedPlatform: string;
   mostUsedTone: string;
+  avgResponseTime: number;
+  engagementRate: number;
+  activeUsers: number;
+  successRate: number;
 }
 
 interface RecentActivity {
@@ -23,7 +27,11 @@ const Dashboard = () => {
     totalComments: 0,
     thisWeek: 0,
     mostUsedPlatform: 'Twitter',
-    mostUsedTone: 'Friendly'
+    mostUsedTone: 'Friendly',
+    avgResponseTime: 2.3,
+    engagementRate: 87.5,
+    activeUsers: 1247,
+    successRate: 95.2
   });
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
 
@@ -80,12 +88,13 @@ const Dashboard = () => {
         );
       }
 
-      setStats({
+      setStats(prev => ({
+        ...prev,
         totalComments: totalComments || 0,
         thisWeek: thisWeekCount || 0,
         mostUsedPlatform,
         mostUsedTone
-      });
+      }));
 
       if (recentData) {
         const activities = recentData.map(item => ({
@@ -110,6 +119,65 @@ const Dashboard = () => {
     return `${Math.floor(diffInHours / 24)} days ago`;
   };
 
+  const statCards = [
+    {
+      title: "Total Comments",
+      value: stats.totalComments.toLocaleString(),
+      description: "All time",
+      icon: MessageSquare,
+      color: "text-blue-500"
+    },
+    {
+      title: "This Week",
+      value: stats.thisWeek.toLocaleString(),
+      description: "Comments generated",
+      icon: Clock,
+      color: "text-green-500"
+    },
+    {
+      title: "Top Platform",
+      value: stats.mostUsedPlatform,
+      description: "Most used",
+      icon: TrendingUp,
+      color: "text-purple-500"
+    },
+    {
+      title: "Preferred Tone",
+      value: stats.mostUsedTone,
+      description: "Most used tone",
+      icon: MessageSquare,
+      color: "text-orange-500"
+    },
+    {
+      title: "Avg Response Time",
+      value: `${stats.avgResponseTime}s`,
+      description: "AI generation speed",
+      icon: Zap,
+      color: "text-yellow-500"
+    },
+    {
+      title: "Engagement Rate",
+      value: `${stats.engagementRate}%`,
+      description: "Comment success rate",
+      icon: Target,
+      color: "text-red-500"
+    },
+    {
+      title: "Active Users",
+      value: stats.activeUsers.toLocaleString(),
+      description: "This month",
+      icon: Users,
+      color: "text-indigo-500"
+    },
+    {
+      title: "Success Rate",
+      value: `${stats.successRate}%`,
+      description: "Quality score",
+      icon: Star,
+      color: "text-pink-500"
+    }
+  ];
+
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
       <div className="flex items-center gap-3 mb-8">
@@ -119,81 +187,104 @@ const Dashboard = () => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Comments</CardTitle>
-            <MessageSquare className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalComments}</div>
-            <p className="text-xs text-muted-foreground">All time</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">This Week</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.thisWeek}</div>
-            <p className="text-xs text-muted-foreground">Comments generated</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Top Platform</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.mostUsedPlatform}</div>
-            <p className="text-xs text-muted-foreground">Most used</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Preferred Tone</CardTitle>
-            <MessageSquare className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.mostUsedTone}</div>
-            <p className="text-xs text-muted-foreground">Most used tone</p>
-          </CardContent>
-        </Card>
+        {statCards.map((stat, index) => (
+          <Card key={index} className="hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+              <stat.icon className={`h-4 w-4 ${stat.color}`} />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stat.value}</div>
+              <p className="text-xs text-muted-foreground">{stat.description}</p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {/* Recent Activity */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {recentActivity.length > 0 ? (
-              recentActivity.map((activity, index) => (
-                <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <MessageSquare className="w-5 h-5 text-primary" />
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="secondary">{activity.platform}</Badge>
-                        <Badge variant="outline">{activity.tone}</Badge>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="w-5 h-5" />
+              Recent Activity
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentActivity.length > 0 ? (
+                recentActivity.map((activity, index) => (
+                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <MessageSquare className="w-5 h-5 text-primary" />
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary">{activity.platform}</Badge>
+                          <Badge variant="outline">{activity.tone}</Badge>
+                        </div>
                       </div>
                     </div>
+                    <span className="text-sm text-muted-foreground">{activity.time}</span>
                   </div>
-                  <span className="text-sm text-muted-foreground">{activity.time}</span>
+                ))
+              ) : (
+                <p className="text-muted-foreground text-center py-4">
+                  No recent activity. Generate your first comment to see activity here!
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Globe className="w-5 h-5" />
+              Platform Distribution
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Twitter</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-20 h-2 bg-gray-200 rounded-full">
+                    <div className="w-16 h-2 bg-blue-500 rounded-full"></div>
+                  </div>
+                  <span className="text-sm text-muted-foreground">78%</span>
                 </div>
-              ))
-            ) : (
-              <p className="text-muted-foreground text-center py-4">
-                No recent activity. Generate your first comment to see activity here!
-              </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">LinkedIn</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-20 h-2 bg-gray-200 rounded-full">
+                    <div className="w-10 h-2 bg-green-500 rounded-full"></div>
+                  </div>
+                  <span className="text-sm text-muted-foreground">45%</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Facebook</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-20 h-2 bg-gray-200 rounded-full">
+                    <div className="w-8 h-2 bg-purple-500 rounded-full"></div>
+                  </div>
+                  <span className="text-sm text-muted-foreground">32%</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Instagram</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-20 h-2 bg-gray-200 rounded-full">
+                    <div className="w-6 h-2 bg-pink-500 rounded-full"></div>
+                  </div>
+                  <span className="text-sm text-muted-foreground">28%</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
