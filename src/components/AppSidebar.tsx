@@ -25,7 +25,8 @@ import {
   Twitter,
   Mail,
   MessageCircle,
-  HelpCircle
+  FileText,
+  Clock
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -72,7 +73,8 @@ const AppSidebar = () => {
     { title: "GitHub", url: "https://github.com", icon: Github },
     { title: "Twitter", url: "https://twitter.com", icon: Twitter },
     { title: "Discord", url: "https://discord.com", icon: MessageCircle },
-    { title: "Help", url: "https://help.example.com", icon: HelpCircle },
+    { title: "Docs", url: "/docs", icon: FileText },
+    { title: "Changelog", url: "/changelog", icon: Clock },
     { title: "Contact", onClick: () => setShowContactModal(true), icon: Mail },
   ];
 
@@ -181,9 +183,9 @@ const AppSidebar = () => {
                     <link.icon className={`${isCollapsed ? 'h-5 w-5' : 'h-4 w-4'}`} />
                   </button>
                 ) : (
-                  <a href={link.url} target="_blank" rel="noopener noreferrer">
+                  <Link to={link.url}>
                     <link.icon className={`${isCollapsed ? 'h-5 w-5' : 'h-4 w-4'}`} />
-                  </a>
+                  </Link>
                 )}
               </Button>
             ))}

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, MessageSquare, Clock, TrendingUp, Users, Target, Zap, Globe, Calendar, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import HourlyActivityChart from "@/components/HourlyActivityChart";
 
 interface DashboardStats {
   totalComments: number;
@@ -208,7 +209,7 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Recent Activity */}
+      {/* Recent Activity and Platform Distribution */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
@@ -292,6 +293,9 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* 24-Hour Activity Chart */}
+      <HourlyActivityChart />
     </div>
   );
 };
