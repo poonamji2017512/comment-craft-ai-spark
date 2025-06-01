@@ -6,6 +6,8 @@ import { Clock, TrendingUp, Activity, Eye, EyeOff, ChevronDown, Users } from "lu
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/contexts/AuthContext";
+import { toZonedTime, format } from 'date-fns-tz';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,8 +40,10 @@ interface DashboardStats {
 }
 
 const HourlyActivityChart = () => {
+  const { user } = useAuth();
   const [hourlyData, setHourlyData] = useState<HourlyData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [userTimezone, setUserTimezone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone);
   const [stats, setStats] = useState<DashboardStats>({
     uniqueComments: 0,
     totalComments: 0,
@@ -56,17 +60,39 @@ const HourlyActivityChart = () => {
   });
 
   useEffect(() => {
+    loadUserTimezone();
     fetchHourlyData();
-  }, []);
+  }, [user]);
+
+  useEffect(() => {
+    if (userTimezone) {
+      fetchHourlyData();
+    }
+  }, [userTimezone]);
+
+  const loadUserTimezone = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('user_settings')
+        .select('timezone')
+        .eq('user_id', user.id)
+        .single();
+
+      if (data && data.timezone) {
+        setUserTimezone(data.timezone);
+      }
+    } catch (error) {
+      console.error('Error loading timezone:', error);
+    }
+  };
 
   const fetchHourlyData = async () => {
     try {
       setIsLoading(true);
       
-      // Get current user session
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
+      if (!user) {
         console.log('No user session found');
         setIsLoading(false);
         return;
@@ -79,10 +105,10 @@ const HourlyActivityChart = () => {
       const { data: commentsData } = await supabase
         .from('generated_comments')
         .select('created_at, platform, original_post')
-        .eq('user_id', session.user.id)
+        .eq('user_id', user.id)
         .gte('created_at', twentyFourHoursAgo.toISOString());
 
-      // Initialize data for all 24 hours
+      // Initialize data for all 24 hours in user's timezone
       const hourlyActivity: { [key: string]: HourlyData } = {};
       
       for (let i = 0; i < 24; i++) {
@@ -112,11 +138,13 @@ const HourlyActivityChart = () => {
       // Calculate unique comments (distinct original posts)
       const uniquePosts = new Set();
 
-      // Process the data
+      // Process the data with timezone conversion
       if (commentsData) {
         commentsData.forEach(comment => {
-          const commentDate = new Date(comment.created_at);
-          const hour = commentDate.getHours().toString().padStart(2, '0') + ':00';
+          // Convert UTC time to user's timezone
+          const commentDateUTC = new Date(comment.created_at);
+          const commentDateLocal = toZonedTime(commentDateUTC, userTimezone);
+          const hour = commentDateLocal.getHours().toString().padStart(2, '0') + ':00';
           
           // Track unique posts
           uniquePosts.add(comment.original_post);
@@ -270,6 +298,10 @@ const HourlyActivityChart = () => {
               <TrendingUp className="w-4 h-4" />
             </Button>
           </div>
+        </div>
+        
+        <div className="text-sm text-muted-foreground">
+          Timezone: {userTimezone.replace('_', ' ')}
         </div>
         
         {/* Summary Stats */}

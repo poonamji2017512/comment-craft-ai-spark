@@ -37,7 +37,8 @@ import {
   Puzzle,
   Twitter,
   Linkedin,
-  Globe
+  Globe,
+  Clock
 } from "lucide-react";
 
 interface NotificationPrefs {
@@ -61,6 +62,7 @@ interface UserSettings {
   ai_tone: string;
   ai_model: string;
   dashboard_view: string;
+  timezone: string;
   use_custom_api_key: boolean;
   custom_api_key?: string;
   notification_prefs: NotificationPrefs;
@@ -103,6 +105,7 @@ const Settings = () => {
     ai_tone: 'friendly',
     ai_model: 'gemini-2.5-pro',
     dashboard_view: 'recent',
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     use_custom_api_key: false,
     custom_api_key: '',
     notification_prefs: defaultNotificationPrefs,
@@ -119,6 +122,12 @@ const Settings = () => {
     { value: 'claude-4-sonnet', label: 'Claude 4 Sonnet', provider: 'Anthropic' },
     { value: 'claude-3.7-sonnet', label: 'Claude 3.7 Sonnet', provider: 'Anthropic' }
   ];
+
+  // Get available timezones
+  const timezones = Intl.supportedValuesOf('timeZone').map(tz => ({
+    value: tz,
+    label: tz.replace(/_/g, ' ')
+  }));
 
   useEffect(() => {
     if (userProfile) {
@@ -182,6 +191,7 @@ const Settings = () => {
           ai_tone: data.ai_tone || 'friendly',
           ai_model: (data as any).ai_model || 'gemini-2.5-pro',
           dashboard_view: data.dashboard_view || 'recent',
+          timezone: (data as any).timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
           use_custom_api_key: data.use_custom_api_key || false,
           custom_api_key: data.custom_api_key || '',
           notification_prefs: notificationPrefs,
@@ -210,6 +220,7 @@ const Settings = () => {
           ai_tone: settingsToSave.ai_tone,
           ai_model: settingsToSave.ai_model,
           dashboard_view: settingsToSave.dashboard_view,
+          timezone: settingsToSave.timezone,
           use_custom_api_key: settingsToSave.use_custom_api_key,
           custom_api_key: settingsToSave.custom_api_key,
           notification_prefs: settingsToSave.notification_prefs as any,
@@ -237,17 +248,41 @@ const Settings = () => {
     
     setIsLoading(true);
     try {
-      const { error } = await supabase
-        .from('user_profiles')
-        .update({
-          full_name: profileData.full_name
-        })
-        .eq('id', user.id);
+      // Update both profile and settings
+      const promises = [
+        supabase
+          .from('user_profiles')
+          .update({
+            full_name: profileData.full_name
+          })
+          .eq('id', user.id),
+        
+        supabase
+          .from('user_settings')
+          .upsert({
+            user_id: user.id,
+            theme: userSettings.theme,
+            language: userSettings.language,
+            summary_length: userSettings.summary_length,
+            ai_tone: userSettings.ai_tone,
+            ai_model: userSettings.ai_model,
+            dashboard_view: userSettings.dashboard_view,
+            timezone: userSettings.timezone,
+            use_custom_api_key: userSettings.use_custom_api_key,
+            custom_api_key: userSettings.custom_api_key,
+            notification_prefs: userSettings.notification_prefs as any,
+            ai_features: userSettings.ai_features as any
+          })
+      ];
 
-      if (error) {
-        console.error('Error updating profile:', error);
-        toast.error('Failed to update profile');
-        return;
+      const results = await Promise.all(promises);
+      
+      for (const result of results) {
+        if (result.error) {
+          console.error('Error updating:', result.error);
+          toast.error('Failed to update profile');
+          return;
+        }
       }
 
       toast.success('Profile updated successfully!');
@@ -446,6 +481,23 @@ const Settings = () => {
                   placeholder="Describe yourself (used for AI context)"
                   className="bg-background border-border text-foreground"
                 />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-foreground">Timezone</Label>
+                <select
+                  value={userSettings.timezone}
+                  onChange={(e) => saveUserSettings({ timezone: e.target.value })}
+                  className="w-full px-3 py-2 border border-border bg-background text-foreground rounded-md"
+                >
+                  {timezones.map((tz) => (
+                    <option key={tz.value} value={tz.value}>
+                      {tz.label}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-sm text-muted-foreground">
+                  Used for displaying activity timelines and notifications in your local time
+                </p>
               </div>
               <div className="space-y-2">
                 <Label className="text-foreground">Preferred Tone</Label>
