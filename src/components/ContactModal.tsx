@@ -1,25 +1,22 @@
-
 import React, { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Mail, MessageSquare, Phone, MapPin, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
 interface ContactModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
-const ContactModal = ({ open, onOpenChange }: ContactModalProps) => {
-  const { toast } = useToast();
+const ContactModal = ({
+  open,
+  onOpenChange
+}: ContactModalProps) => {
+  const {
+    toast
+  } = useToast();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -27,30 +24,34 @@ const ContactModal = ({ open, onOpenChange }: ContactModalProps) => {
     message: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     // Simulate form submission
     setTimeout(() => {
       toast({
         title: "Message sent!",
-        description: "We'll get back to you within 24 hours.",
+        description: "We'll get back to you within 24 hours."
       });
-      setFormData({ name: "", email: "", subject: "", message: "" });
+      setFormData({
+        name: "",
+        email: "",
+        subject: "",
+        message: ""
+      });
       setIsSubmitting(false);
       onOpenChange(false);
     }, 1000);
   };
-
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+  return <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto mx-0">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center">
             Contact Us
@@ -72,27 +73,13 @@ const ContactModal = ({ open, onOpenChange }: ContactModalProps) => {
                   <label htmlFor="name" className="block text-sm font-medium mb-2">
                     Full Name
                   </label>
-                  <Input
-                    id="name"
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange("name", e.target.value)}
-                    placeholder="John Doe"
-                    required
-                  />
+                  <Input id="name" type="text" value={formData.name} onChange={e => handleInputChange("name", e.target.value)} placeholder="John Doe" required />
                 </div>
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium mb-2">
                     Email Address
                   </label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                    placeholder="john@example.com"
-                    required
-                  />
+                  <Input id="email" type="email" value={formData.email} onChange={e => handleInputChange("email", e.target.value)} placeholder="john@example.com" required />
                 </div>
               </div>
               
@@ -100,43 +87,21 @@ const ContactModal = ({ open, onOpenChange }: ContactModalProps) => {
                 <label htmlFor="subject" className="block text-sm font-medium mb-2">
                   Subject
                 </label>
-                <Input
-                  id="subject"
-                  type="text"
-                  value={formData.subject}
-                  onChange={(e) => handleInputChange("subject", e.target.value)}
-                  placeholder="How can we help you?"
-                  required
-                />
+                <Input id="subject" type="text" value={formData.subject} onChange={e => handleInputChange("subject", e.target.value)} placeholder="How can we help you?" required />
               </div>
               
               <div>
                 <label htmlFor="message" className="block text-sm font-medium mb-2">
                   Message
                 </label>
-                <Textarea
-                  id="message"
-                  value={formData.message}
-                  onChange={(e) => handleInputChange("message", e.target.value)}
-                  placeholder="Tell us more about your inquiry..."
-                  rows={4}
-                  required
-                />
+                <Textarea id="message" value={formData.message} onChange={e => handleInputChange("message", e.target.value)} placeholder="Tell us more about your inquiry..." rows={4} required />
               </div>
               
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  "Sending..."
-                ) : (
-                  <>
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? "Sending..." : <>
                     <Send className="w-4 h-4 mr-2" />
                     Send Message
-                  </>
-                )}
+                  </>}
               </Button>
             </form>
           </div>
@@ -168,26 +133,9 @@ const ContactModal = ({ open, onOpenChange }: ContactModalProps) => {
                 </div>
               </div>
               
-              <div className="flex items-start gap-3 p-4 border rounded-lg">
-                <Phone className="w-5 h-5 text-primary mt-0.5" />
-                <div>
-                  <h4 className="font-medium">Phone Support</h4>
-                  <p className="text-sm text-muted-foreground">+1 (555) 123-4567</p>
-                  <Badge variant="secondary" className="mt-1">Business Hours</Badge>
-                </div>
-              </div>
               
-              <div className="flex items-start gap-3 p-4 border rounded-lg">
-                <MapPin className="w-5 h-5 text-primary mt-0.5" />
-                <div>
-                  <h4 className="font-medium">Office Location</h4>
-                  <p className="text-sm text-muted-foreground">
-                    123 Tech Street<br />
-                    San Francisco, CA 94105<br />
-                    United States
-                  </p>
-                </div>
-              </div>
+              
+              
             </div>
             
             <div className="pt-4 border-t">
@@ -214,8 +162,6 @@ const ContactModal = ({ open, onOpenChange }: ContactModalProps) => {
           </div>
         </div>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
-
 export default ContactModal;
