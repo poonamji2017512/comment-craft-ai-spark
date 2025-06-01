@@ -2,10 +2,18 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, AreaChart, Area } from 'recharts';
-import { Clock, TrendingUp, Activity, Eye, EyeOff } from "lucide-react";
+import { Clock, TrendingUp, Activity, Eye, EyeOff, ChevronDown, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
 
 interface HourlyData {
   hour: string;
@@ -14,7 +22,6 @@ interface HourlyData {
   LinkedIn: number;
   Facebook: number;
   Instagram: number;
-  TikTok: number;
   Reddit: number;
   YouTube: number;
   total: number;
@@ -24,18 +31,26 @@ interface PlatformVisibility {
   [key: string]: boolean;
 }
 
+interface DashboardStats {
+  uniqueComments: number;
+  totalComments: number;
+  peakHour: string;
+}
+
 const HourlyActivityChart = () => {
   const [hourlyData, setHourlyData] = useState<HourlyData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [totalComments, setTotalComments] = useState(0);
-  const [peakHour, setPeakHour] = useState<string>('');
+  const [stats, setStats] = useState<DashboardStats>({
+    uniqueComments: 0,
+    totalComments: 0,
+    peakHour: ''
+  });
   const [chartType, setChartType] = useState<'line' | 'area'>('area');
   const [platformVisibility, setPlatformVisibility] = useState<PlatformVisibility>({
     Twitter: true,
     LinkedIn: true,
     Facebook: true,
     Instagram: true,
-    TikTok: true,
     Reddit: true,
     YouTube: true,
   });
@@ -48,13 +63,23 @@ const HourlyActivityChart = () => {
     try {
       setIsLoading(true);
       
-      // Get comments from the last 24 hours
+      // Get current user session
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        console.log('No user session found');
+        setIsLoading(false);
+        return;
+      }
+
+      // Get comments from the last 24 hours for the current user
       const twentyFourHoursAgo = new Date();
       twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
 
       const { data: commentsData } = await supabase
         .from('generated_comments')
-        .select('created_at, platform')
+        .select('created_at, platform, original_post')
+        .eq('user_id', session.user.id)
         .gte('created_at', twentyFourHoursAgo.toISOString());
 
       // Initialize data for all 24 hours
@@ -74,7 +99,6 @@ const HourlyActivityChart = () => {
           LinkedIn: 0,
           Facebook: 0,
           Instagram: 0,
-          TikTok: 0,
           Reddit: 0,
           YouTube: 0,
           total: 0
@@ -84,12 +108,18 @@ const HourlyActivityChart = () => {
       let totalCount = 0;
       let maxHourActivity = 0;
       let busyHour = '';
+      
+      // Calculate unique comments (distinct original posts)
+      const uniquePosts = new Set();
 
       // Process the data
       if (commentsData) {
         commentsData.forEach(comment => {
           const commentDate = new Date(comment.created_at);
           const hour = commentDate.getHours().toString().padStart(2, '0') + ':00';
+          
+          // Track unique posts
+          uniquePosts.add(comment.original_post);
           
           if (hourlyActivity[hour]) {
             // Map platform names to match our data structure
@@ -100,7 +130,6 @@ const HourlyActivityChart = () => {
             else if (platformKey === 'instagram') platformKey = 'Instagram';
             else if (platformKey === 'reddit') platformKey = 'Reddit';
             else if (platformKey === 'youtube') platformKey = 'YouTube';
-            else if (platformKey === 'tiktok') platformKey = 'TikTok';
             
             if (platformKey in hourlyActivity[hour]) {
               (hourlyActivity[hour] as any)[platformKey]++;
@@ -125,8 +154,11 @@ const HourlyActivityChart = () => {
       });
 
       setHourlyData(sortedData);
-      setTotalComments(totalCount);
-      setPeakHour(busyHour || 'N/A');
+      setStats({
+        uniqueComments: uniquePosts.size,
+        totalComments: totalCount,
+        peakHour: busyHour || 'N/A'
+      });
     } catch (error) {
       console.error('Error fetching hourly data:', error);
     } finally {
@@ -139,9 +171,17 @@ const HourlyActivityChart = () => {
     LinkedIn: '#0077B5',
     Facebook: '#1877F2',
     Instagram: '#E4405F',
-    TikTok: '#000000',
     Reddit: '#FF4500',
     YouTube: '#FF0000'
+  };
+
+  const platformIcons = {
+    Twitter: '𝕏',
+    LinkedIn: '💼',
+    Facebook: '📘',
+    Instagram: '📷',
+    Reddit: '🔴',
+    YouTube: '📺'
   };
 
   const togglePlatformVisibility = (platform: string) => {
@@ -163,6 +203,10 @@ const HourlyActivityChart = () => {
     .filter(([_, visible]) => visible)
     .map(([platform, _]) => platform);
 
+  const getVisiblePlatformsCount = () => {
+    return Object.values(platformVisibility).filter(Boolean).length;
+  };
+
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       const totalValue = payload.reduce((sum: number, entry: any) => 
@@ -177,9 +221,12 @@ const HourlyActivityChart = () => {
             .filter((entry: any) => platformVisibility[entry.dataKey] && entry.value > 0)
             .sort((a: any, b: any) => b.value - a.value)
             .map((entry: any, index: number) => (
-              <p key={index} className="text-sm" style={{ color: entry.color }}>
-                {`${entry.dataKey}: ${entry.value}`}
-              </p>
+              <div key={index} className="flex items-center gap-2 text-sm">
+                <span>{platformIcons[entry.dataKey as keyof typeof platformIcons]}</span>
+                <span style={{ color: entry.color }}>
+                  {`${entry.dataKey}: ${entry.value}`}
+                </span>
+              </div>
             ))}
         </div>
       );
@@ -226,13 +273,20 @@ const HourlyActivityChart = () => {
         </div>
         
         {/* Summary Stats */}
-        <div className="grid grid-cols-2 gap-4 mt-4">
+        <div className="grid grid-cols-3 gap-4 mt-4">
           <div className="bg-muted/30 rounded-lg p-3">
-            <div className="text-2xl font-bold text-primary">{totalComments}</div>
+            <div className="text-2xl font-bold text-primary">{stats.totalComments}</div>
             <div className="text-sm text-muted-foreground">Total Comments (24h)</div>
           </div>
           <div className="bg-muted/30 rounded-lg p-3">
-            <div className="text-2xl font-bold text-primary">{peakHour}</div>
+            <div className="text-2xl font-bold text-primary flex items-center gap-1">
+              <Users className="w-5 h-5" />
+              {stats.uniqueComments}
+            </div>
+            <div className="text-sm text-muted-foreground">Unique Comments</div>
+          </div>
+          <div className="bg-muted/30 rounded-lg p-3">
+            <div className="text-2xl font-bold text-primary">{stats.peakHour}</div>
             <div className="text-sm text-muted-foreground">Peak Activity Hour</div>
           </div>
         </div>
@@ -240,7 +294,7 @@ const HourlyActivityChart = () => {
         {/* Platform Controls */}
         <div className="mt-4">
           <div className="flex items-center justify-between mb-3">
-            <div className="text-sm font-medium text-foreground">Platforms</div>
+            <div className="text-sm font-medium text-foreground">Platform Visibility</div>
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
@@ -262,29 +316,79 @@ const HourlyActivityChart = () => {
               </Button>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {Object.entries(platformColors).map(([platform, color]) => (
-              <Button
-                key={platform}
-                variant={platformVisibility[platform] ? "default" : "outline"}
-                size="sm"
-                onClick={() => togglePlatformVisibility(platform)}
-                className="h-8 px-3 text-xs font-medium"
-                style={{
-                  backgroundColor: platformVisibility[platform] ? color : 'transparent',
-                  borderColor: color,
-                  color: platformVisibility[platform] ? 'white' : color
-                }}
+
+          {/* Platform Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="outline" 
+                className="w-full justify-between bg-background border-border"
               >
-                {platform}
-                {platformVisibility[platform] && (
-                  <Badge variant="secondary" className="ml-2 bg-white/20 text-white">
-                    {hourlyData.reduce((sum, hour) => sum + (hour as any)[platform], 0)}
-                  </Badge>
-                )}
+                <span className="flex items-center gap-2">
+                  {Object.entries(platformVisibility)
+                    .filter(([_, visible]) => visible)
+                    .slice(0, 3)
+                    .map(([platform, _]) => (
+                      <span key={platform} className="flex items-center gap-1">
+                        {platformIcons[platform as keyof typeof platformIcons]}
+                        <span className="text-xs">{platform}</span>
+                      </span>
+                    ))}
+                  {getVisiblePlatformsCount() > 3 && (
+                    <Badge variant="secondary" className="bg-muted text-muted-foreground text-xs">
+                      +{getVisiblePlatformsCount() - 3} more
+                    </Badge>
+                  )}
+                  {getVisiblePlatformsCount() === 0 && (
+                    <span className="text-muted-foreground">No platforms selected</span>
+                  )}
+                </span>
+                <ChevronDown className="h-4 w-4" />
               </Button>
-            ))}
-          </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56 bg-background border-border">
+              <DropdownMenuLabel>Select Platforms</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {Object.entries(platformColors).map(([platform, color]) => {
+                const totalComments = hourlyData.reduce((sum, hour) => sum + (hour as any)[platform], 0);
+                return (
+                  <DropdownMenuCheckboxItem
+                    key={platform}
+                    checked={platformVisibility[platform]}
+                    onCheckedChange={() => togglePlatformVisibility(platform)}
+                    className="flex items-center gap-2"
+                  >
+                    <span style={{ color }}>{platformIcons[platform as keyof typeof platformIcons]}</span>
+                    <span className="flex-1">{platform}</span>
+                    <Badge variant="outline" className="text-xs">
+                      {totalComments}
+                    </Badge>
+                  </DropdownMenuCheckboxItem>
+                );
+              })}
+              <DropdownMenuSeparator />
+              <div className="px-2 py-1">
+                <div className="flex gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => toggleAllPlatforms(true)}
+                    className="h-6 px-2 text-xs flex-1"
+                  >
+                    Show All
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => toggleAllPlatforms(false)}
+                    className="h-6 px-2 text-xs flex-1"
+                  >
+                    Hide All
+                  </Button>
+                </div>
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </CardHeader>
       

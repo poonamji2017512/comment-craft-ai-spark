@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,6 +27,41 @@ const CommentGenerator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [lastGenerationTime, setLastGenerationTime] = useState<number>(0);
   const [validationError, setValidationError] = useState<string>('');
+
+  // Load settings from sessionStorage on component mount
+  useEffect(() => {
+    const savedLength = sessionStorage.getItem('comment-length-setting');
+    const savedPlatform = sessionStorage.getItem('comment-platform-setting');
+    const savedTone = sessionStorage.getItem('comment-tone-setting');
+    
+    if (savedLength) {
+      const parsedLength = parseInt(savedLength);
+      if (!isNaN(parsedLength) && parsedLength >= 50 && parsedLength <= 10000) {
+        setLength([parsedLength]);
+      }
+    }
+    
+    if (savedPlatform) {
+      setPlatform(savedPlatform);
+    }
+    
+    if (savedTone) {
+      setTone(savedTone);
+    }
+  }, []);
+
+  // Save settings to sessionStorage when they change
+  useEffect(() => {
+    sessionStorage.setItem('comment-length-setting', length[0].toString());
+  }, [length]);
+
+  useEffect(() => {
+    sessionStorage.setItem('comment-platform-setting', platform);
+  }, [platform]);
+
+  useEffect(() => {
+    sessionStorage.setItem('comment-tone-setting', tone);
+  }, [tone]);
 
   const platforms = [
     { value: 'twitter', label: 'Twitter/X' },
