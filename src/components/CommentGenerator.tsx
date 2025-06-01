@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -6,9 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
-import { Sparkles, RefreshCw, Copy } from "lucide-react";
+import { Sparkles, RefreshCw, Copy, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { commentGenerationSchema, sanitizeText, sanitizeErrorMessage } from "@/lib/validation";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface CommentSuggestion {
   id: number;
@@ -25,6 +26,7 @@ const CommentGenerator = () => {
   const [generatedComments, setGeneratedComments] = useState<CommentSuggestion[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [lastGenerationTime, setLastGenerationTime] = useState<number>(0);
+  const [validationError, setValidationError] = useState<string>('');
 
   const platforms = [
     { value: 'twitter', label: 'Twitter/X' },
@@ -41,12 +43,33 @@ const CommentGenerator = () => {
     { value: 'casual', label: 'Casual' },
     { value: 'enthusiastic', label: 'Enthusiastic' },
     { value: 'thoughtful', label: 'Thoughtful' },
-    { value: 'humorous', label: 'Humorous' }
+    { value: 'humorous', label: 'Humorous' },
+    { value: 'gen-z', label: 'Gen-Z' }
   ];
 
+  const validateInput = () => {
+    try {
+      setValidationError('');
+      
+      const result = commentGenerationSchema.parse({
+        originalPost: sanitizeText(originalPost),
+        platform,
+        tone,
+        maxLength: length[0]
+      });
+      
+      return result;
+    } catch (error: any) {
+      const errorMessage = error.errors?.[0]?.message || 'Invalid input';
+      setValidationError(errorMessage);
+      return null;
+    }
+  };
+
   const generateComments = async () => {
-    if (!originalPost.trim()) {
-      toast.error('Please enter the original post content');
+    const validatedInput = validateInput();
+    if (!validatedInput) {
+      toast.error(validationError);
       return;
     }
 
@@ -62,12 +85,7 @@ const CommentGenerator = () => {
       }
 
       const { data, error } = await supabase.functions.invoke('generate-ai-comment', {
-        body: {
-          originalPost,
-          platform,
-          tone,
-          maxLength: length[0]
-        }
+        body: validatedInput
       });
 
       if (error) {
@@ -77,8 +95,13 @@ const CommentGenerator = () => {
       }
 
       if (data?.comments) {
-        // Clear previous comments and set new ones
-        setGeneratedComments(data.comments);
+        // Sanitize generated comments before displaying
+        const sanitizedComments = data.comments.map((comment: any) => ({
+          ...comment,
+          text: sanitizeText(comment.text)
+        }));
+        
+        setGeneratedComments(sanitizedComments);
         setLastGenerationTime(Date.now());
         toast.success('Comments generated successfully!');
       } else {
@@ -86,7 +109,7 @@ const CommentGenerator = () => {
       }
     } catch (error) {
       console.error('Error:', error);
-      toast.error('An unexpected error occurred. Please try again.');
+      toast.error(sanitizeErrorMessage(error));
     } finally {
       setIsGenerating(false);
     }
@@ -144,14 +167,28 @@ const CommentGenerator = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {validationError && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>{validationError}</AlertDescription>
+            </Alert>
+          )}
+          
           <div>
             <label className="text-sm font-medium mb-2 block text-foreground">Original Post Content</label>
             <Textarea
               placeholder="Paste the original post content here..."
               value={originalPost}
-              onChange={(e) => setOriginalPost(e.target.value)}
+              onChange={(e) => {
+                setOriginalPost(e.target.value);
+                setValidationError('');
+              }}
               className="min-h-[120px] bg-background border-border text-foreground"
+              maxLength={10000}
             />
+            <div className="text-xs text-muted-foreground mt-1">
+              {originalPost.length}/10,000 characters
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -204,7 +241,7 @@ const CommentGenerator = () => {
 
           <Button 
             onClick={generateComments} 
-            disabled={isGenerating || !originalPost.trim()}
+            disabled={isGenerating || !originalPost.trim() || !!validationError}
             className="w-full"
             size="lg"
           >

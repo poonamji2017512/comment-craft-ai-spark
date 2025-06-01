@@ -15,27 +15,79 @@ interface RequestBody {
   maxLength?: number;
 }
 
+// Input validation and sanitization
+const validateInput = (body: RequestBody): { isValid: boolean; error?: string; sanitized?: RequestBody } => {
+  if (!body.originalPost || typeof body.originalPost !== 'string') {
+    return { isValid: false, error: 'Original post is required and must be text' };
+  }
+  
+  if (body.originalPost.length > 10000) {
+    return { isValid: false, error: 'Original post is too long' };
+  }
+  
+  const allowedPlatforms = ['twitter', 'linkedin', 'facebook', 'instagram', 'reddit', 'youtube'];
+  if (!allowedPlatforms.includes(body.platform)) {
+    return { isValid: false, error: 'Invalid platform specified' };
+  }
+  
+  const allowedTones = ['friendly', 'professional', 'casual', 'enthusiastic', 'thoughtful', 'humorous', 'gen-z'];
+  if (!allowedTones.includes(body.tone)) {
+    return { isValid: false, error: 'Invalid tone specified' };
+  }
+  
+  // Sanitize input - remove potential HTML/script tags
+  const sanitizedPost = body.originalPost
+    .replace(/<[^>]*>/g, '') // Remove HTML tags
+    .replace(/javascript:/gi, '') // Remove javascript: protocol
+    .replace(/on\w+\s*=/gi, '') // Remove event handlers
+    .trim();
+  
+  return {
+    isValid: true,
+    sanitized: {
+      ...body,
+      originalPost: sanitizedPost,
+      maxLength: Math.min(Math.max(body.maxLength || 280, 50), 10000)
+    }
+  };
+};
+
+// Sanitize error messages to prevent information leakage
+const sanitizeErrorMessage = (error: unknown): string => {
+  if (typeof error === 'string') {
+    return error.replace(/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g, '[IP]'); // Remove IP addresses
+  }
+  if (error instanceof Error) {
+    return error.message.replace(/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g, '[IP]');
+  }
+  return 'An unexpected error occurred';
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { originalPost, platform, tone, maxLength = 280 }: RequestBody = await req.json();
-
-    if (!originalPost || !platform || !tone) {
+    const requestBody: RequestBody = await req.json();
+    
+    // Validate and sanitize input
+    const validation = validateInput(requestBody);
+    if (!validation.isValid) {
       return new Response(
-        JSON.stringify({ error: 'Missing required fields: originalPost, platform, tone' }),
+        JSON.stringify({ error: validation.error }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+    
+    const { originalPost, platform, tone, maxLength } = validation.sanitized!;
 
     // Get the API key from environment
     const geminiApiKey = Deno.env.get('GOOGLE_GEMINI_API_KEY');
     if (!geminiApiKey) {
       return new Response(
-        JSON.stringify({ error: 'Gemini API key not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'AI service temporarily unavailable' }),
+        { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -56,7 +108,8 @@ serve(async (req) => {
       casual: "Use relaxed, everyday language. Be conversational and natural, like talking to a friend.",
       enthusiastic: "Show genuine excitement and energy. Use positive language and express interest in the topic.",
       thoughtful: "Provide deep, reflective insights. Ask meaningful questions and show genuine consideration of the topic.",
-      humorous: "Add light humor where appropriate, but ensure it's tasteful and relevant. Don't force jokes."
+      humorous: "Add light humor where appropriate, but ensure it's tasteful and relevant. Don't force jokes.",
+      'gen-z': "Use modern slang and expressions. Be authentic, relatable, and use current internet language. Keep it real and engaging with Gen-Z vibes."
     };
 
     const prompt = `You are an expert social media comment writer. Your task is to generate 3 high-quality, human-like comments in response to the following post.
@@ -106,11 +159,10 @@ Generate exactly 3 different comments, separated by "---". Do not include any ot
     });
 
     if (!geminiResponse.ok) {
-      const errorText = await geminiResponse.text();
-      console.error('Gemini API error:', errorText);
+      console.error('Gemini API error - status:', geminiResponse.status);
       return new Response(
-        JSON.stringify({ error: 'Failed to generate comments' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'AI service temporarily unavailable' }),
+        { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -119,15 +171,22 @@ Generate exactly 3 different comments, separated by "---". Do not include any ot
 
     if (!generatedText) {
       return new Response(
-        JSON.stringify({ error: 'No content generated' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Unable to generate comments at this time' }),
+        { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Split the generated text into individual comments
+    // Split and sanitize generated comments
     const comments = generatedText
       .split('---')
-      .map((comment: string) => comment.trim())
+      .map((comment: string) => {
+        const sanitized = comment
+          .trim()
+          .replace(/<[^>]*>/g, '') // Remove any HTML tags
+          .replace(/javascript:/gi, '') // Remove javascript: protocol
+          .replace(/on\w+\s*=/gi, ''); // Remove event handlers
+        return sanitized;
+      })
       .filter((comment: string) => comment.length > 0)
       .slice(0, 3); // Ensure we only take 3 comments
 
@@ -166,7 +225,7 @@ Generate exactly 3 different comments, separated by "---". Do not include any ot
         .insert(commentsToStore);
 
       if (dbError) {
-        console.error('Database error:', dbError);
+        console.error('Database storage error');
         // Don't fail the request if database storage fails
       }
     }
@@ -184,9 +243,9 @@ Generate exactly 3 different comments, separated by "---". Do not include any ot
     );
 
   } catch (error) {
-    console.error('Error in generate-ai-comment function:', error);
+    console.error('Error in generate-ai-comment function');
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: sanitizeErrorMessage(error) }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
