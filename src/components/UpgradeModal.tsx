@@ -26,90 +26,100 @@ const UpgradeModal = ({ open, onOpenChange }: UpgradeModalProps) => {
         </DialogHeader>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-          {/* Free Plan */}
+          {/* PRO Plan */}
           <div className="border border-border rounded-lg p-6 space-y-4">
             <div>
-              <h3 className="text-lg font-semibold text-foreground">Free</h3>
+              <h3 className="text-lg font-semibold text-foreground">PRO</h3>
               <div className="mt-2">
-                <span className="text-3xl font-bold text-foreground">$0.00</span>
-                <span className="text-muted-foreground ml-1">Forever</span>
+                <span className="text-3xl font-bold text-foreground">$20.00</span>
+                <span className="text-muted-foreground ml-1">/ month</span>
               </div>
             </div>
             
-            <p className="text-sm text-muted-foreground">
-              Start for free, no credit card needed.
-            </p>
-            
-            <ul className="space-y-2 text-sm">
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-green-500" />
-                <span>Unlimited basic searches</span>
+            <ul className="space-y-3 text-sm">
+              <li className="flex items-start gap-2">
+                <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <div>
+                  <div className="font-medium">AI Model Access</div>
+                  <div className="text-muted-foreground text-xs">All Google, Claude, and OpenAI models (limited access)</div>
+                  <div className="text-muted-foreground text-xs">Unlimited access to standard models</div>
+                </div>
               </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-green-500" />
-                <span>3 Pro searches per day</span>
+              <li className="flex items-start gap-2">
+                <span className="text-sm mt-0.5">📱</span>
+                <div>
+                  <div className="font-medium">Social Media Platforms</div>
+                  <div className="text-muted-foreground text-xs">LinkedIn, X (Twitter), Reddit, Threads</div>
+                  <div className="text-muted-foreground text-xs">Bluesky, Facebook, YouTube replies</div>
+                </div>
               </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-green-500" />
-                <span>Upload 3 files per day</span>
+              <li className="flex items-start gap-2">
+                <span className="text-sm mt-0.5">🧰</span>
+                <div>
+                  <div className="font-medium">Features</div>
+                  <div className="text-muted-foreground text-xs">Meme Creator</div>
+                  <div className="text-muted-foreground text-xs">Unlimited Tone Selection</div>
+                </div>
               </li>
             </ul>
             
-            <Button variant="outline" className="w-full" disabled>
-              Continue with free
+            <Button className="w-full bg-white text-black hover:bg-gray-100">
+              Continue with Pro
             </Button>
           </div>
 
-          {/* Pro Plan */}
+          {/* ULTRA Plan */}
           <div className="border border-border rounded-lg p-6 space-y-4 relative">
             <div className="absolute -top-3 right-4">
               <Badge className="bg-blue-600 text-white">Popular</Badge>
             </div>
             
             <div>
-              <h3 className="text-lg font-semibold text-foreground">Pro</h3>
+              <h3 className="text-lg font-semibold text-foreground">ULTRA</h3>
               <div className="mt-2">
-                <span className="text-3xl font-bold text-foreground">$20.00</span>
+                <span className="text-3xl font-bold text-foreground">$40.00</span>
                 <span className="text-muted-foreground ml-1">/ month</span>
               </div>
-              <p className="text-sm text-muted-foreground mt-1">
-                $8.67 when billed annually
-              </p>
             </div>
             
-            <p className="text-sm text-muted-foreground">
-              Unlimited access to AI Comment Agent and enjoy new perks as they are added.
-            </p>
-            
-            <ul className="space-y-2 text-sm">
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-green-500" />
-                <span>Everything in Free</span>
+            <ul className="space-y-3 text-sm">
+              <li className="flex items-start gap-2">
+                <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <div>
+                  <div className="font-medium">AI Model Access</div>
+                  <div className="text-muted-foreground text-xs">All Google, Claude, and OpenAI models (full access)</div>
+                  <div className="text-muted-foreground text-xs">Unlimited access to standard models</div>
+                </div>
               </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-green-500" />
-                <span>Access to Deep Search</span>
+              <li className="flex items-start gap-2">
+                <span className="text-sm mt-0.5">📱</span>
+                <div>
+                  <div className="font-medium">Social Media Platforms</div>
+                  <div className="text-muted-foreground text-xs">LinkedIn, X (Twitter), Reddit, Threads</div>
+                  <div className="text-muted-foreground text-xs">Bluesky, Facebook, YouTube replies</div>
+                </div>
               </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-green-500" />
-                <span>10x as many questions in answers</span>
+              <li className="flex items-start gap-2">
+                <span className="text-sm mt-0.5">🧰</span>
+                <div>
+                  <div className="font-medium">Features</div>
+                  <div className="text-muted-foreground text-xs">Meme Creator</div>
+                  <div className="text-muted-foreground text-xs">Content Creator with workflows (e.g., Build in Public)</div>
+                  <div className="text-muted-foreground text-xs">Team Features</div>
+                  <div className="text-muted-foreground text-xs">Unlimited Tone Selection</div>
+                </div>
               </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-green-500" />
-                <span>Powered by the latest top AI models</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-green-500" />
-                <span>Upload unlimited documents and images</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Crown className="h-4 w-4 text-orange-500" />
-                <span>And much more</span>
+              <li className="flex items-start gap-2">
+                <span className="text-sm mt-0.5">⚡</span>
+                <div>
+                  <div className="font-medium">Support</div>
+                  <div className="text-muted-foreground text-xs">Priority Support</div>
+                </div>
               </li>
             </ul>
             
             <Button className="w-full bg-white text-black hover:bg-gray-100">
-              Continue with Pro
+              Continue with Ultra
             </Button>
           </div>
         </div>
