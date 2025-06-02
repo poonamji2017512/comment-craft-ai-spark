@@ -11,13 +11,42 @@ import {
   Zap, 
   Bug,
   Sparkles,
-  ArrowLeft
+  ArrowLeft,
+  Clock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 const Changelog = () => {
   const releases = [
+    {
+      version: "2.2.0",
+      date: "2024-12-16",
+      type: "feature",
+      title: "Settings Improvements & Timezone Support",
+      changes: [
+        {
+          type: "feature",
+          title: "Timezone Configuration",
+          description: "Added user timezone settings for accurate 24-Hour Activity Timeline display based on user's local time"
+        },
+        {
+          type: "improvement",
+          title: "Enhanced AI Model Selection",
+          description: "Reorganized AI models into clear categories (Google Gemini, OpenAI, Anthropic Claude) with improved descriptions and selection UI"
+        },
+        {
+          type: "bugfix",
+          title: "Settings Save Fix",
+          description: "Resolved issues with settings not saving properly and improved error handling with detailed feedback"
+        },
+        {
+          type: "improvement",
+          title: "Better User Experience",
+          description: "Enhanced loading states, error messages, and validation feedback throughout the settings interface"
+        }
+      ]
+    },
     {
       version: "2.1.0",
       date: "2024-12-15",
