@@ -13,34 +13,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { 
-  User, 
-  Settings as SettingsIcon, 
-  Bell, 
-  Database, 
-  Key, 
-  Trash2, 
-  Download,
-  Eye,
-  EyeOff,
-  Check,
-  X,
-  Palette,
-  MessageSquare,
-  Shield,
-  CreditCard,
-  Users,
-  Workflow,
-  Crown,
-  Mail,
-  ExternalLink,
-  Puzzle,
-  Twitter,
-  Linkedin,
-  Globe,
-  Clock
-} from "lucide-react";
-
+import { User, Settings as SettingsIcon, Bell, Database, Key, Trash2, Download, Eye, EyeOff, Check, X, Palette, MessageSquare, Shield, CreditCard, Users, Workflow, Crown, Mail, ExternalLink, Puzzle, Twitter, Linkedin, Globe, Clock } from "lucide-react";
 interface NotificationPrefs {
   email_notifications: boolean;
   meeting_processed: boolean;
@@ -48,13 +21,11 @@ interface NotificationPrefs {
   task_due: boolean;
   frequency: string;
 }
-
 interface AIFeatures {
   auto_summarization: boolean;
   action_item_detection: boolean;
   topic_extraction: boolean;
 }
-
 interface UserSettings {
   theme: string;
   language: string;
@@ -68,22 +39,25 @@ interface UserSettings {
   notification_prefs: NotificationPrefs;
   ai_features: AIFeatures;
 }
-
 const Settings = () => {
-  const { isDark, setTheme } = useTheme();
-  const { user, userProfile } = useAuth();
+  const {
+    isDark,
+    setTheme
+  } = useTheme();
+  const {
+    user,
+    userProfile
+  } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
   const [apiKeyValid, setApiKeyValid] = useState<boolean | null>(null);
   const [activeTab, setActiveTab] = useState("account");
-  
   const [profileData, setProfileData] = useState({
     full_name: userProfile?.full_name || '',
     email: user?.email || '',
     introduction: '',
-    preferred_tone: 'Bold Founder',
+    preferred_tone: 'Bold Founder'
   });
-
   const defaultNotificationPrefs: NotificationPrefs = {
     email_notifications: false,
     meeting_processed: true,
@@ -91,13 +65,11 @@ const Settings = () => {
     task_due: true,
     frequency: 'real-time'
   };
-
   const defaultAIFeatures: AIFeatures = {
     auto_summarization: true,
     action_item_detection: true,
     topic_extraction: true
   };
-
   const [userSettings, setUserSettings] = useState<UserSettings>({
     theme: isDark ? 'dark' : 'light',
     language: 'en',
@@ -111,47 +83,92 @@ const Settings = () => {
     notification_prefs: defaultNotificationPrefs,
     ai_features: defaultAIFeatures
   });
-
-  const aiModels = [
-    { value: 'gemini-2.0-flash-lite', label: 'Google Gemini 2.0 Flash Lite', provider: 'Google' },
-    { value: 'gemini-2.5-flash', label: 'Google Gemini 2.5 Flash', provider: 'Google' },
-    { value: 'gemini-2.5-pro', label: 'Google Gemini 2.5 Pro (Default)', provider: 'Google' },
-    { value: 'gpt-4.1', label: 'OpenAI GPT-4.1', provider: 'OpenAI' },
-    { value: 'gpt-4o', label: 'OpenAI GPT-4o', provider: 'OpenAI' },
-    { value: 'o3-mini', label: 'OpenAI o3-mini', provider: 'OpenAI' },
-    { value: 'claude-4-sonnet', label: 'Claude 4 Sonnet', provider: 'Anthropic' },
-    { value: 'claude-3.7-sonnet', label: 'Claude 3.7 Sonnet', provider: 'Anthropic' }
-  ];
+  const aiModels = [{
+    value: 'gemini-2.0-flash-lite',
+    label: 'Google Gemini 2.0 Flash Lite',
+    provider: 'Google'
+  }, {
+    value: 'gemini-2.5-flash',
+    label: 'Google Gemini 2.5 Flash',
+    provider: 'Google'
+  }, {
+    value: 'gemini-2.5-pro',
+    label: 'Google Gemini 2.5 Pro (Default)',
+    provider: 'Google'
+  }, {
+    value: 'gpt-4.1',
+    label: 'OpenAI GPT-4.1',
+    provider: 'OpenAI'
+  }, {
+    value: 'gpt-4o',
+    label: 'OpenAI GPT-4o',
+    provider: 'OpenAI'
+  }, {
+    value: 'o3-mini',
+    label: 'OpenAI o3-mini',
+    provider: 'OpenAI'
+  }, {
+    value: 'claude-4-sonnet',
+    label: 'Claude 4 Sonnet',
+    provider: 'Anthropic'
+  }, {
+    value: 'claude-3.7-sonnet',
+    label: 'Claude 3.7 Sonnet',
+    provider: 'Anthropic'
+  }];
 
   // Get available timezones - using a predefined list since Intl.supportedValuesOf might not be available
-  const timezones = [
-    { value: 'America/New_York', label: 'America/New York (EST/EDT)' },
-    { value: 'America/Chicago', label: 'America/Chicago (CST/CDT)' },
-    { value: 'America/Denver', label: 'America/Denver (MST/MDT)' },
-    { value: 'America/Los_Angeles', label: 'America/Los Angeles (PST/PDT)' },
-    { value: 'Europe/London', label: 'Europe/London (GMT/BST)' },
-    { value: 'Europe/Paris', label: 'Europe/Paris (CET/CEST)' },
-    { value: 'Europe/Berlin', label: 'Europe/Berlin (CET/CEST)' },
-    { value: 'Asia/Tokyo', label: 'Asia/Tokyo (JST)' },
-    { value: 'Asia/Shanghai', label: 'Asia/Shanghai (CST)' },
-    { value: 'Asia/Kolkata', label: 'Asia/Kolkata (IST)' },
-    { value: 'Australia/Sydney', label: 'Australia/Sydney (AEST/AEDT)' },
-    { value: 'Pacific/Auckland', label: 'Pacific/Auckland (NZST/NZDT)' },
-    { value: 'UTC', label: 'UTC (Coordinated Universal Time)' }
-  ].sort((a, b) => a.label.localeCompare(b.label));
-
+  const timezones = [{
+    value: 'America/New_York',
+    label: 'America/New York (EST/EDT)'
+  }, {
+    value: 'America/Chicago',
+    label: 'America/Chicago (CST/CDT)'
+  }, {
+    value: 'America/Denver',
+    label: 'America/Denver (MST/MDT)'
+  }, {
+    value: 'America/Los_Angeles',
+    label: 'America/Los Angeles (PST/PDT)'
+  }, {
+    value: 'Europe/London',
+    label: 'Europe/London (GMT/BST)'
+  }, {
+    value: 'Europe/Paris',
+    label: 'Europe/Paris (CET/CEST)'
+  }, {
+    value: 'Europe/Berlin',
+    label: 'Europe/Berlin (CET/CEST)'
+  }, {
+    value: 'Asia/Tokyo',
+    label: 'Asia/Tokyo (JST)'
+  }, {
+    value: 'Asia/Shanghai',
+    label: 'Asia/Shanghai (CST)'
+  }, {
+    value: 'Asia/Kolkata',
+    label: 'Asia/Kolkata (IST)'
+  }, {
+    value: 'Australia/Sydney',
+    label: 'Australia/Sydney (AEST/AEDT)'
+  }, {
+    value: 'Pacific/Auckland',
+    label: 'Pacific/Auckland (NZST/NZDT)'
+  }, {
+    value: 'UTC',
+    label: 'UTC (Coordinated Universal Time)'
+  }].sort((a, b) => a.label.localeCompare(b.label));
   useEffect(() => {
     if (userProfile) {
       setProfileData({
         full_name: userProfile.full_name || '',
         email: userProfile.email || user?.email || '',
         introduction: '',
-        preferred_tone: 'Bold Founder',
+        preferred_tone: 'Bold Founder'
       });
     }
     loadUserSettings();
   }, [userProfile, user]);
-
   const validateNotificationPrefs = (data: any): NotificationPrefs => {
     if (data && typeof data === 'object' && !Array.isArray(data)) {
       return {
@@ -164,7 +181,6 @@ const Settings = () => {
     }
     return defaultNotificationPrefs;
   };
-
   const validateAIFeatures = (data: any): AIFeatures => {
     if (data && typeof data === 'object' && !Array.isArray(data)) {
       return {
@@ -175,26 +191,20 @@ const Settings = () => {
     }
     return defaultAIFeatures;
   };
-
   const loadUserSettings = async () => {
     if (!user) return;
-
     try {
-      const { data, error } = await supabase
-        .from('user_settings')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-
+      const {
+        data,
+        error
+      } = await supabase.from('user_settings').select('*').eq('user_id', user.id).single();
       if (error && error.code !== 'PGRST116') {
         console.error('Error loading settings:', error);
         return;
       }
-
       if (data) {
         const notificationPrefs = validateNotificationPrefs(data.notification_prefs);
         const aiFeatures = validateAIFeatures(data.ai_features);
-
         setUserSettings({
           theme: data.theme || 'dark',
           language: data.language || 'en',
@@ -213,37 +223,35 @@ const Settings = () => {
       console.error('Error:', error);
     }
   };
-
   const saveUserSettings = async (updatedSettings: Partial<UserSettings>) => {
     if (!user) return;
-
     setIsLoading(true);
     try {
-      const settingsToSave = { ...userSettings, ...updatedSettings };
-      
-      const { error } = await supabase
-        .from('user_settings')
-        .upsert({
-          user_id: user.id,
-          theme: settingsToSave.theme,
-          language: settingsToSave.language,
-          summary_length: settingsToSave.summary_length,
-          ai_tone: settingsToSave.ai_tone,
-          ai_model: settingsToSave.ai_model,
-          dashboard_view: settingsToSave.dashboard_view,
-          timezone: settingsToSave.timezone,
-          use_custom_api_key: settingsToSave.use_custom_api_key,
-          custom_api_key: settingsToSave.custom_api_key,
-          notification_prefs: settingsToSave.notification_prefs as any,
-          ai_features: settingsToSave.ai_features as any
-        });
-
+      const settingsToSave = {
+        ...userSettings,
+        ...updatedSettings
+      };
+      const {
+        error
+      } = await supabase.from('user_settings').upsert({
+        user_id: user.id,
+        theme: settingsToSave.theme,
+        language: settingsToSave.language,
+        summary_length: settingsToSave.summary_length,
+        ai_tone: settingsToSave.ai_tone,
+        ai_model: settingsToSave.ai_model,
+        dashboard_view: settingsToSave.dashboard_view,
+        timezone: settingsToSave.timezone,
+        use_custom_api_key: settingsToSave.use_custom_api_key,
+        custom_api_key: settingsToSave.custom_api_key,
+        notification_prefs: settingsToSave.notification_prefs as any,
+        ai_features: settingsToSave.ai_features as any
+      });
       if (error) {
         console.error('Error saving settings:', error);
         toast.error('Failed to save settings');
         return;
       }
-
       setUserSettings(settingsToSave);
       toast.success('Settings saved successfully!');
     } catch (error) {
@@ -253,41 +261,28 @@ const Settings = () => {
       setIsLoading(false);
     }
   };
-
   const handleProfileUpdate = async () => {
     if (!user) return;
-    
     setIsLoading(true);
     try {
       // Update both profile and settings
-      const promises = [
-        supabase
-          .from('user_profiles')
-          .update({
-            full_name: profileData.full_name
-          })
-          .eq('id', user.id),
-        
-        supabase
-          .from('user_settings')
-          .upsert({
-            user_id: user.id,
-            theme: userSettings.theme,
-            language: userSettings.language,
-            summary_length: userSettings.summary_length,
-            ai_tone: userSettings.ai_tone,
-            ai_model: userSettings.ai_model,
-            dashboard_view: userSettings.dashboard_view,
-            timezone: userSettings.timezone,
-            use_custom_api_key: userSettings.use_custom_api_key,
-            custom_api_key: userSettings.custom_api_key,
-            notification_prefs: userSettings.notification_prefs as any,
-            ai_features: userSettings.ai_features as any
-          })
-      ];
-
+      const promises = [supabase.from('user_profiles').update({
+        full_name: profileData.full_name
+      }).eq('id', user.id), supabase.from('user_settings').upsert({
+        user_id: user.id,
+        theme: userSettings.theme,
+        language: userSettings.language,
+        summary_length: userSettings.summary_length,
+        ai_tone: userSettings.ai_tone,
+        ai_model: userSettings.ai_model,
+        dashboard_view: userSettings.dashboard_view,
+        timezone: userSettings.timezone,
+        use_custom_api_key: userSettings.use_custom_api_key,
+        custom_api_key: userSettings.custom_api_key,
+        notification_prefs: userSettings.notification_prefs as any,
+        ai_features: userSettings.ai_features as any
+      })];
       const results = await Promise.all(promises);
-      
       for (const result of results) {
         if (result.error) {
           console.error('Error updating:', result.error);
@@ -295,7 +290,6 @@ const Settings = () => {
           return;
         }
       }
-
       toast.success('Profile updated successfully!');
     } catch (error) {
       console.error('Error:', error);
@@ -304,10 +298,8 @@ const Settings = () => {
       setIsLoading(false);
     }
   };
-
   const validateApiKey = async () => {
     if (!userSettings.custom_api_key) return;
-    
     setIsLoading(true);
     try {
       const response = await fetch('https://generativelanguage.googleapis.com/v1/models?key=' + userSettings.custom_api_key);
@@ -325,29 +317,26 @@ const Settings = () => {
       setIsLoading(false);
     }
   };
-
   const handleExportData = async () => {
     if (!user) return;
-
     try {
-      const { data, error } = await supabase
-        .from('generated_comments')
-        .select('*')
-        .eq('user_id', user.id);
-
+      const {
+        data,
+        error
+      } = await supabase.from('generated_comments').select('*').eq('user_id', user.id);
       if (error) {
         toast.error('Failed to export data');
         return;
       }
-
       const exportData = {
         user_profile: userProfile,
         generated_comments: data,
         user_settings: userSettings,
         exported_at: new Date().toISOString()
       };
-
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+        type: 'application/json'
+      });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -356,48 +345,38 @@ const Settings = () => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      
       toast.success('Data exported successfully');
     } catch (error) {
       console.error('Error:', error);
       toast.error('An error occurred while exporting data');
     }
   };
-
   const handleClearData = async () => {
     if (!user || !confirm('Are you sure you want to clear all your data? This action cannot be undone.')) return;
-    
     try {
-      const { error } = await supabase
-        .from('generated_comments')
-        .delete()
-        .eq('user_id', user.id);
-
+      const {
+        error
+      } = await supabase.from('generated_comments').delete().eq('user_id', user.id);
       if (error) {
         console.error('Error clearing data:', error);
         toast.error('Failed to clear data');
         return;
       }
-
       toast.success('All data cleared successfully');
     } catch (error) {
       console.error('Error:', error);
       toast.error('An error occurred while clearing data');
     }
   };
-
-  return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
+  return <div className="container mx-auto px-4 py-8 max-w-7xl">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Settings</h1>
           <p className="text-muted-foreground mt-1">Customize your AI comment experience</p>
         </div>
-        {userProfile && (
-          <Badge variant="secondary" className="bg-muted text-muted-foreground">
+        {userProfile && <Badge variant="secondary" className="bg-muted text-muted-foreground">
             Daily Comments: {userProfile.daily_prompt_count || 0}/20
-          </Badge>
-        )}
+          </Badge>}
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -466,45 +445,30 @@ const Settings = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="full-name" className="text-foreground">Display Name</Label>
-                <Input
-                  id="full-name"
-                  value={profileData.full_name}
-                  onChange={(e) => setProfileData(prev => ({ ...prev, full_name: e.target.value }))}
-                  placeholder="Enter your display name"
-                  className="bg-background border-border text-foreground"
-                />
+                <Input id="full-name" value={profileData.full_name} onChange={e => setProfileData(prev => ({
+                ...prev,
+                full_name: e.target.value
+              }))} placeholder="Enter your display name" className="bg-background border-border text-foreground" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-foreground">Email</Label>
-                <Input
-                  id="email"
-                  value={profileData.email}
-                  disabled
-                  className="bg-muted border-border text-muted-foreground"
-                />
+                <Input id="email" value={profileData.email} disabled className="bg-muted border-border text-muted-foreground" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="introduction" className="text-foreground">Introduction</Label>
-                <Textarea
-                  id="introduction"
-                  value={profileData.introduction}
-                  onChange={(e) => setProfileData(prev => ({ ...prev, introduction: e.target.value }))}
-                  placeholder="Describe yourself (used for AI context)"
-                  className="bg-background border-border text-foreground"
-                />
+                <Textarea id="introduction" value={profileData.introduction} onChange={e => setProfileData(prev => ({
+                ...prev,
+                introduction: e.target.value
+              }))} placeholder="Describe yourself (used for AI context)" className="bg-background border-border text-foreground" />
               </div>
               <div className="space-y-2">
                 <Label className="text-foreground">Timezone</Label>
-                <select
-                  value={userSettings.timezone}
-                  onChange={(e) => saveUserSettings({ timezone: e.target.value })}
-                  className="w-full px-3 py-2 border border-border bg-background text-foreground rounded-md"
-                >
-                  {timezones.map((tz) => (
-                    <option key={tz.value} value={tz.value}>
+                <select value={userSettings.timezone} onChange={e => saveUserSettings({
+                timezone: e.target.value
+              })} className="w-full px-3 py-2 border border-border bg-background text-foreground rounded-md">
+                  {timezones.map(tz => <option key={tz.value} value={tz.value}>
                       {tz.label}
-                    </option>
-                  ))}
+                    </option>)}
                 </select>
                 <p className="text-sm text-muted-foreground">
                   Used for displaying activity timelines and notifications in your local time
@@ -512,11 +476,10 @@ const Settings = () => {
               </div>
               <div className="space-y-2">
                 <Label className="text-foreground">Preferred Tone</Label>
-                <select
-                  value={profileData.preferred_tone}
-                  onChange={(e) => setProfileData(prev => ({ ...prev, preferred_tone: e.target.value }))}
-                  className="w-full px-3 py-2 border border-border bg-background text-foreground rounded-md"
-                >
+                <select value={profileData.preferred_tone} onChange={e => setProfileData(prev => ({
+                ...prev,
+                preferred_tone: e.target.value
+              }))} className="w-full px-3 py-2 border border-border bg-background text-foreground rounded-md">
                   <option value="Bold Founder">Bold Founder</option>
                   <option value="Curious Maker">Curious Maker</option>
                   <option value="Corporate Executive">Corporate Executive</option>
@@ -524,18 +487,10 @@ const Settings = () => {
                 </select>
               </div>
               <div className="flex gap-3">
-                <Button 
-                  onClick={handleProfileUpdate} 
-                  disabled={isLoading}
-                  className="flex-1"
-                >
+                <Button onClick={handleProfileUpdate} disabled={isLoading} className="flex-1">
                   {isLoading ? 'Updating...' : 'Update Profile'}
                 </Button>
-                <Button 
-                  variant="outline"
-                  onClick={() => window.open('mailto:support@interactai.com', '_blank')}
-                  className="flex items-center gap-2"
-                >
+                <Button variant="outline" onClick={() => window.open('mailto:support@interactai.com', '_blank')} className="flex items-center gap-2">
                   <Mail className="h-4 w-4" />
                   Support
                 </Button>
@@ -550,22 +505,18 @@ const Settings = () => {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <Label htmlFor="dark-mode" className="text-foreground">Dark Mode</Label>
-                <Switch
-                  id="dark-mode"
-                  checked={isDark}
-                  onCheckedChange={(checked) => {
-                    setTheme(checked ? 'dark' : 'light');
-                    saveUserSettings({ theme: checked ? 'dark' : 'light' });
-                  }}
-                />
+                <Switch id="dark-mode" checked={isDark} onCheckedChange={checked => {
+                setTheme(checked ? 'dark' : 'light');
+                saveUserSettings({
+                  theme: checked ? 'dark' : 'light'
+                });
+              }} />
               </div>
               <div className="space-y-2">
                 <Label className="text-foreground">Language</Label>
-                <select
-                  value={userSettings.language}
-                  onChange={(e) => saveUserSettings({ language: e.target.value })}
-                  className="w-full px-3 py-2 border border-border bg-background text-foreground rounded-md"
-                >
+                <select value={userSettings.language} onChange={e => saveUserSettings({
+                language: e.target.value
+              })} className="w-full px-3 py-2 border border-border bg-background text-foreground rounded-md">
                   <option value="en">English</option>
                   <option value="es">Spanish</option>
                   <option value="fr">French</option>
@@ -665,11 +616,9 @@ const Settings = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label className="text-foreground">Comment Length</Label>
-                <select
-                  value={userSettings.summary_length}
-                  onChange={(e) => saveUserSettings({ summary_length: e.target.value })}
-                  className="w-full px-3 py-2 border border-border bg-background text-foreground rounded-md"
-                >
+                <select value={userSettings.summary_length} onChange={e => saveUserSettings({
+                summary_length: e.target.value
+              })} className="w-full px-3 py-2 border border-border bg-background text-foreground rounded-md">
                   <option value="short">Short</option>
                   <option value="medium">Medium</option>
                   <option value="detailed">Long</option>
@@ -678,11 +627,9 @@ const Settings = () => {
               
               <div className="space-y-2">
                 <Label className="text-foreground">AI Response Tone</Label>
-                <select
-                  value={userSettings.ai_tone}
-                  onChange={(e) => saveUserSettings({ ai_tone: e.target.value })}
-                  className="w-full px-3 py-2 border border-border bg-background text-foreground rounded-md"
-                >
+                <select value={userSettings.ai_tone} onChange={e => saveUserSettings({
+                ai_tone: e.target.value
+              })} className="w-full px-3 py-2 border border-border bg-background text-foreground rounded-md">
                   <option value="formal">Formal</option>
                   <option value="casual">Casual</option>
                   <option value="friendly">Friendly</option>
@@ -696,36 +643,30 @@ const Settings = () => {
                 <Label className="text-foreground">Style Options</Label>
                 <div className="flex items-center justify-between">
                   <Label className="text-foreground">Use Emojis</Label>
-                  <Switch 
-                    checked={userSettings.ai_features.auto_summarization}
-                    onCheckedChange={(checked) => 
-                      saveUserSettings({ 
-                        ai_features: { ...userSettings.ai_features, auto_summarization: checked }
-                      })
-                    }
-                  />
+                  <Switch checked={userSettings.ai_features.auto_summarization} onCheckedChange={checked => saveUserSettings({
+                  ai_features: {
+                    ...userSettings.ai_features,
+                    auto_summarization: checked
+                  }
+                })} />
                 </div>
                 <div className="flex items-center justify-between">
                   <Label className="text-foreground">Use Hashtags</Label>
-                  <Switch 
-                    checked={userSettings.ai_features.action_item_detection}
-                    onCheckedChange={(checked) => 
-                      saveUserSettings({ 
-                        ai_features: { ...userSettings.ai_features, action_item_detection: checked }
-                      })
-                    }
-                  />
+                  <Switch checked={userSettings.ai_features.action_item_detection} onCheckedChange={checked => saveUserSettings({
+                  ai_features: {
+                    ...userSettings.ai_features,
+                    action_item_detection: checked
+                  }
+                })} />
                 </div>
                 <div className="flex items-center justify-between">
                   <Label className="text-foreground">Auto Tone Detection</Label>
-                  <Switch 
-                    checked={userSettings.ai_features.topic_extraction}
-                    onCheckedChange={(checked) => 
-                      saveUserSettings({ 
-                        ai_features: { ...userSettings.ai_features, topic_extraction: checked }
-                      })
-                    }
-                  />
+                  <Switch checked={userSettings.ai_features.topic_extraction} onCheckedChange={checked => saveUserSettings({
+                  ai_features: {
+                    ...userSettings.ai_features,
+                    topic_extraction: checked
+                  }
+                })} />
                 </div>
               </div>
             </CardContent>
@@ -741,31 +682,19 @@ const Settings = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label className="text-foreground">Frequently Used Phrases</Label>
-                <Textarea
-                  placeholder="Enter phrases you commonly use..."
-                  className="bg-background border-border text-foreground"
-                />
+                <Textarea placeholder="Enter phrases you commonly use..." className="bg-background border-border text-foreground" />
               </div>
               <div className="space-y-2">
                 <Label className="text-foreground">Brand CTAs and Catchphrases</Label>
-                <Textarea
-                  placeholder="Enter your brand catchphrases and CTAs..."
-                  className="bg-background border-border text-foreground"
-                />
+                <Textarea placeholder="Enter your brand catchphrases and CTAs..." className="bg-background border-border text-foreground" />
               </div>
               <div className="space-y-2">
                 <Label className="text-foreground">Always Say</Label>
-                <Textarea
-                  placeholder="Phrases to always include..."
-                  className="bg-background border-border text-foreground"
-                />
+                <Textarea placeholder="Phrases to always include..." className="bg-background border-border text-foreground" />
               </div>
               <div className="space-y-2">
                 <Label className="text-foreground">Never Say</Label>
-                <Textarea
-                  placeholder="Phrases to never use..."
-                  className="bg-background border-border text-foreground"
-                />
+                <Textarea placeholder="Phrases to never use..." className="bg-background border-border text-foreground" />
               </div>
               <Button onClick={() => toast.success('Voice settings saved!')} className="w-full">
                 Save Voice Settings
@@ -783,47 +712,37 @@ const Settings = () => {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <Label className="text-foreground">Auto Approval</Label>
-                <Switch 
-                  checked={userSettings.ai_features.auto_summarization}
-                  onCheckedChange={(checked) => 
-                    saveUserSettings({ 
-                      ai_features: { ...userSettings.ai_features, auto_summarization: checked }
-                    })
-                  }
-                />
+                <Switch checked={userSettings.ai_features.auto_summarization} onCheckedChange={checked => saveUserSettings({
+                ai_features: {
+                  ...userSettings.ai_features,
+                  auto_summarization: checked
+                }
+              })} />
               </div>
               <div className="space-y-2">
                 <Label className="text-foreground">Comments per Day Limit</Label>
-                <Input
-                  type="number"
-                  placeholder="20"
-                  className="bg-background border-border text-foreground"
-                />
+                <Input type="number" placeholder="20" className="bg-background border-border text-foreground" />
               </div>
               <div className="space-y-2">
                 <Label className="text-foreground">Priority Targeting</Label>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label className="text-foreground text-sm">Verified Users Only</Label>
-                    <Switch 
-                      checked={userSettings.ai_features.action_item_detection}
-                      onCheckedChange={(checked) => 
-                        saveUserSettings({ 
-                          ai_features: { ...userSettings.ai_features, action_item_detection: checked }
-                        })
-                      }
-                    />
+                    <Switch checked={userSettings.ai_features.action_item_detection} onCheckedChange={checked => saveUserSettings({
+                    ai_features: {
+                      ...userSettings.ai_features,
+                      action_item_detection: checked
+                    }
+                  })} />
                   </div>
                   <div className="flex items-center justify-between">
                     <Label className="text-foreground text-sm">High Engagement Posts</Label>
-                    <Switch 
-                      checked={userSettings.ai_features.topic_extraction}
-                      onCheckedChange={(checked) => 
-                        saveUserSettings({ 
-                          ai_features: { ...userSettings.ai_features, topic_extraction: checked }
-                        })
-                      }
-                    />
+                    <Switch checked={userSettings.ai_features.topic_extraction} onCheckedChange={checked => saveUserSettings({
+                    ai_features: {
+                      ...userSettings.ai_features,
+                      topic_extraction: checked
+                    }
+                  })} />
                   </div>
                 </div>
               </div>
@@ -840,16 +759,12 @@ const Settings = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label className="text-foreground">Choose AI Model</Label>
-                <select
-                  value={userSettings.ai_model}
-                  onChange={(e) => saveUserSettings({ ai_model: e.target.value })}
-                  className="w-full px-3 py-2 border border-border bg-background text-foreground rounded-md"
-                >
-                  {aiModels.map((model) => (
-                    <option key={model.value} value={model.value}>
+                <select value={userSettings.ai_model} onChange={e => saveUserSettings({
+                ai_model: e.target.value
+              })} className="w-full px-3 py-2 border border-border bg-background text-foreground rounded-md">
+                  {aiModels.map(model => <option key={model.value} value={model.value}>
                       {model.label} - {model.provider}
-                    </option>
-                  ))}
+                    </option>)}
                 </select>
               </div>
               <Alert>
@@ -867,87 +782,45 @@ const Settings = () => {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <Label className="text-foreground">Use Custom API Key</Label>
-                <Switch
-                  checked={userSettings.use_custom_api_key}
-                  onCheckedChange={(checked) => saveUserSettings({ use_custom_api_key: checked })}
-                />
+                <Switch checked={userSettings.use_custom_api_key} onCheckedChange={checked => saveUserSettings({
+                use_custom_api_key: checked
+              })} />
               </div>
               
-              {userSettings.use_custom_api_key && (
-                <div className="space-y-3">
+              {userSettings.use_custom_api_key && <div className="space-y-3">
                   <Label className="text-foreground">API Key (for selected model)</Label>
                   <div className="flex gap-2">
                     <div className="relative flex-1">
-                      <Input
-                        type={showApiKey ? "text" : "password"}
-                        value={userSettings.custom_api_key}
-                        onChange={(e) => setUserSettings(prev => ({ ...prev, custom_api_key: e.target.value }))}
-                        placeholder="Enter your API key"
-                        className="bg-background border-border text-foreground pr-10"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowApiKey(!showApiKey)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                      >
+                      <Input type={showApiKey ? "text" : "password"} value={userSettings.custom_api_key} onChange={e => setUserSettings(prev => ({
+                    ...prev,
+                    custom_api_key: e.target.value
+                  }))} placeholder="Enter your API key" className="bg-background border-border text-foreground pr-10" />
+                      <button type="button" onClick={() => setShowApiKey(!showApiKey)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground">
                         {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
-                    <Button 
-                      variant="outline" 
-                      onClick={validateApiKey}
-                      disabled={!userSettings.custom_api_key || isLoading}
-                    >
+                    <Button variant="outline" onClick={validateApiKey} disabled={!userSettings.custom_api_key || isLoading}>
                       Validate
                     </Button>
                   </div>
                   
-                  {apiKeyValid !== null && (
-                    <Alert className={apiKeyValid ? "border-green-500" : "border-red-500"}>
+                  {apiKeyValid !== null && <Alert className={apiKeyValid ? "border-green-500" : "border-red-500"}>
                       {apiKeyValid ? <Check className="h-4 w-4 text-green-500" /> : <X className="h-4 w-4 text-red-500" />}
                       <AlertDescription className={apiKeyValid ? "text-green-700 dark:text-green-300" : "text-red-700 dark:text-red-300"}>
                         {apiKeyValid ? "API key is valid and working" : "API key is invalid or expired"}
                       </AlertDescription>
-                    </Alert>
-                  )}
+                    </Alert>}
                   
-                  <Button 
-                    onClick={() => saveUserSettings({ custom_api_key: userSettings.custom_api_key })}
-                    disabled={isLoading}
-                    className="w-full"
-                  >
+                  <Button onClick={() => saveUserSettings({
+                custom_api_key: userSettings.custom_api_key
+              })} disabled={isLoading} className="w-full">
                     Save API Key
                   </Button>
-                </div>
-              )}
+                </div>}
             </CardContent>
           </Card>
 
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="text-foreground">AI Features</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <Label className="text-foreground">AI Features</Label>
-                {Object.entries(userSettings.ai_features).map(([key, value]) => (
-                  <div key={key} className="flex items-center justify-between">
-                    <Label className="text-foreground capitalize">
-                      {key.replace(/_/g, ' ')}
-                    </Label>
-                    <Switch
-                      checked={value}
-                      onCheckedChange={(checked) => 
-                        saveUserSettings({ 
-                          ai_features: { ...userSettings.ai_features, [key]: checked }
-                        })
-                      }
-                    />
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          
         </TabsContent>
 
         {/* Safety Tab */}
@@ -980,10 +853,7 @@ const Settings = () => {
               </div>
               <div className="space-y-2">
                 <Label className="text-foreground">Banned Keywords</Label>
-                <Textarea
-                  placeholder="Enter comma-separated keywords to avoid..."
-                  className="bg-background border-border text-foreground"
-                />
+                <Textarea placeholder="Enter comma-separated keywords to avoid..." className="bg-background border-border text-foreground" />
               </div>
               <Button onClick={() => toast.success('Safety settings saved!')} className="w-full">
                 Save Safety Settings
@@ -1138,8 +1008,7 @@ const Settings = () => {
       </Tabs>
 
       {/* Account Information Footer */}
-      {userProfile && (
-        <Card className="mt-8 bg-card border-border">
+      {userProfile && <Card className="mt-8 bg-card border-border">
           <CardHeader>
             <CardTitle className="text-foreground">Account Information</CardTitle>
           </CardHeader>
@@ -1159,10 +1028,7 @@ const Settings = () => {
               <span className="text-foreground">{userProfile.daily_prompt_count || 0} / 20</span>
             </div>
           </CardContent>
-        </Card>
-      )}
-    </div>
-  );
+        </Card>}
+    </div>;
 };
-
 export default Settings;
