@@ -80,7 +80,12 @@ const HourlyActivityChart = () => {
         .eq('user_id', user.id)
         .single();
 
-      if (data && data.timezone) {
+      if (error) {
+        console.error('Error loading timezone:', error);
+        return;
+      }
+
+      if (data?.timezone) {
         setUserTimezone(data.timezone);
       }
     } catch (error) {

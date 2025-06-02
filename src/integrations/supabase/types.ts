@@ -203,6 +203,7 @@ export type Database = {
           notification_prefs: Json | null
           summary_length: string | null
           theme: string | null
+          timezone: string | null
           updated_at: string
           use_custom_api_key: boolean | null
           user_id: string
@@ -219,6 +220,7 @@ export type Database = {
           notification_prefs?: Json | null
           summary_length?: string | null
           theme?: string | null
+          timezone?: string | null
           updated_at?: string
           use_custom_api_key?: boolean | null
           user_id: string
@@ -235,6 +237,7 @@ export type Database = {
           notification_prefs?: Json | null
           summary_length?: string | null
           theme?: string | null
+          timezone?: string | null
           updated_at?: string
           use_custom_api_key?: boolean | null
           user_id?: string

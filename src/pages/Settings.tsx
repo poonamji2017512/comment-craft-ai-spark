@@ -123,11 +123,22 @@ const Settings = () => {
     { value: 'claude-3.7-sonnet', label: 'Claude 3.7 Sonnet', provider: 'Anthropic' }
   ];
 
-  // Get available timezones
-  const timezones = Intl.supportedValuesOf('timeZone').map(tz => ({
-    value: tz,
-    label: tz.replace(/_/g, ' ')
-  }));
+  // Get available timezones - using a predefined list since Intl.supportedValuesOf might not be available
+  const timezones = [
+    { value: 'America/New_York', label: 'America/New York (EST/EDT)' },
+    { value: 'America/Chicago', label: 'America/Chicago (CST/CDT)' },
+    { value: 'America/Denver', label: 'America/Denver (MST/MDT)' },
+    { value: 'America/Los_Angeles', label: 'America/Los Angeles (PST/PDT)' },
+    { value: 'Europe/London', label: 'Europe/London (GMT/BST)' },
+    { value: 'Europe/Paris', label: 'Europe/Paris (CET/CEST)' },
+    { value: 'Europe/Berlin', label: 'Europe/Berlin (CET/CEST)' },
+    { value: 'Asia/Tokyo', label: 'Asia/Tokyo (JST)' },
+    { value: 'Asia/Shanghai', label: 'Asia/Shanghai (CST)' },
+    { value: 'Asia/Kolkata', label: 'Asia/Kolkata (IST)' },
+    { value: 'Australia/Sydney', label: 'Australia/Sydney (AEST/AEDT)' },
+    { value: 'Pacific/Auckland', label: 'Pacific/Auckland (NZST/NZDT)' },
+    { value: 'UTC', label: 'UTC (Coordinated Universal Time)' }
+  ].sort((a, b) => a.label.localeCompare(b.label));
 
   useEffect(() => {
     if (userProfile) {
@@ -189,9 +200,9 @@ const Settings = () => {
           language: data.language || 'en',
           summary_length: data.summary_length || 'medium',
           ai_tone: data.ai_tone || 'friendly',
-          ai_model: (data as any).ai_model || 'gemini-2.5-pro',
+          ai_model: data.ai_model || 'gemini-2.5-pro',
           dashboard_view: data.dashboard_view || 'recent',
-          timezone: (data as any).timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+          timezone: data.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
           use_custom_api_key: data.use_custom_api_key || false,
           custom_api_key: data.custom_api_key || '',
           notification_prefs: notificationPrefs,
