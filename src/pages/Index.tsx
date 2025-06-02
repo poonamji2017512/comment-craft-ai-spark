@@ -3,11 +3,10 @@ import React from "react";
 import CommentGenerator from "@/components/CommentGenerator";
 import AutoAuthModal from "@/components/AutoAuthModal";
 import FloatingAuthModal from "@/components/FloatingAuthModal";
-import FooterNavigation from "@/components/FooterNavigation";
 
 const Index = () => {
   return (
-    <div className="min-h-full bg-background flex flex-col pb-16">
+    <div className="min-h-full bg-background flex flex-col">
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
@@ -25,7 +24,6 @@ const Index = () => {
 
       <AutoAuthModal />
       <FloatingAuthModal />
-      <FooterNavigation />
     </div>
   );
 };

@@ -1,185 +1,314 @@
 
 import React from "react";
-import { ArrowLeft, Calendar, Plus, Zap, Bug, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { 
+  Calendar, 
+  GitCommit, 
+  Plus, 
+  Settings, 
+  Zap, 
+  Bug,
+  Sparkles,
+  ArrowLeft,
+  Clock
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 const Changelog = () => {
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case "feature":
-        return <Plus className="w-4 h-4 text-green-600" />;
-      case "improvement":
-        return <Zap className="w-4 h-4 text-blue-600" />;
-      case "bugfix":
-        return <Bug className="w-4 h-4 text-red-600" />;
-      case "major":
-        return <Sparkles className="w-4 h-4 text-purple-600" />;
-      default:
-        return <Calendar className="w-4 h-4" />;
-    }
-  };
-
-  const changelogEntries = [
+  const releases = [
     {
       version: "2.3.0",
-      date: "December 2, 2024",
+      date: "2024-12-17",
+      type: "feature",
       title: "Enhanced Settings & UI Improvements",
       changes: [
         {
           type: "feature",
-          title: "Footer Navigation Bar",
-          description: "Added persistent footer navigation with quick access to Pro, Ultra, Enterprise, Store, and Careers pages"
-        },
-        {
-          type: "improvement", 
           title: "Improved AI Model Selection",
-          description: "Reorganized AI models into a 3-column grid layout with clearer categorization"
+          description: "Reorganized AI models into a 3-column grid layout with clearer categorization by provider (Google Gemini, OpenAI, Anthropic Claude)"
         },
         {
           type: "bugfix",
-          title: "Settings Save Fix", 
-          description: "Fixed duplicate key constraint error when saving user settings"
+          title: "Settings Save Fix",
+          description: "Fixed duplicate key constraint error when saving user settings by properly handling insert vs update operations"
         },
         {
           type: "improvement",
           title: "Enhanced User Experience",
-          description: "Improved settings save error handling with better feedback"
+          description: "Improved settings save error handling with better feedback and validation for timezone settings"
+        },
+        {
+          type: "improvement",
+          title: "Changelog UI Updates",
+          description: "Moved 'Back to Docs' button to the right side and updated layout for better navigation"
+        },
+        {
+          type: "feature",
+          title: "Timezone Database Support",
+          description: "Added timezone column to user_settings table with proper default values and validation"
         }
       ]
     },
     {
       version: "2.2.0",
-      date: "November 28, 2024", 
-      title: "Pricing Plan Updates & Notifications",
+      date: "2024-12-16",
+      type: "feature",
+      title: "Settings Improvements & Timezone Support",
       changes: [
         {
           type: "feature",
-          title: "New Pricing Plans",
-          description: "Updated pricing modal with new PRO ($20/month) and ULTRA ($40/month) plans"
-        },
-        {
-          type: "feature",
-          title: "Changelog Notifications",
-          description: "Added popup notifications for signed-in users when new updates are available"
+          title: "Timezone Configuration",
+          description: "Added user timezone settings for accurate 24-Hour Activity Timeline display based on user's local time"
         },
         {
           type: "improvement",
-          title: "Plan Feature Clarity",
-          description: "Enhanced plan descriptions with detailed feature breakdowns and icons"
+          title: "Enhanced AI Model Selection",
+          description: "Reorganized AI models into clear categories (Google Gemini, OpenAI, Anthropic Claude) with improved descriptions and selection UI"
+        },
+        {
+          type: "bugfix",
+          title: "Settings Save Fix",
+          description: "Resolved issues with settings not saving properly and improved error handling with detailed feedback"
+        },
+        {
+          type: "improvement",
+          title: "Better User Experience",
+          description: "Enhanced loading states, error messages, and validation feedback throughout the settings interface"
         }
       ]
     },
     {
       version: "2.1.0",
-      date: "November 20, 2024",
-      title: "Authentication & Security Enhancements",
+      date: "2024-12-15",
+      type: "feature",
+      title: "Enhanced AI Models & Settings",
       changes: [
         {
           type: "feature",
-          title: "Auto-Authentication Modal",
-          description: "Added automatic authentication prompts for better user onboarding"
+          title: "New AI Models Added",
+          description: "Added support for Google Gemini 2.0 Flash, 2.5 Flash, OpenAI GPT-4.1, GPT-4o, o3-mini, and Claude 4 Sonnet models"
+        },
+        {
+          type: "feature", 
+          title: "Advanced Settings Panel",
+          description: "Complete settings overhaul with AI model selection, custom API keys, and personalization options"
         },
         {
           type: "improvement",
-          title: "Security Improvements",
-          description: "Enhanced input validation and sanitization across all forms"
+          title: "Default Model Update",
+          description: "Set Google Gemini 2.5 Pro as the default AI model for optimal performance"
+        }
+      ]
+    },
+    {
+      version: "2.0.5",
+      date: "2024-12-10", 
+      type: "improvement",
+      title: "Dashboard Analytics Enhancement",
+      changes: [
+        {
+          type: "feature",
+          title: "Unique Comments Tracking",
+          description: "Replaced active users metric with unique comments for better A/B testing insights"
         },
         {
-          type: "bugfix",
-          title: "Theme Persistence",
-          description: "Fixed theme settings not persisting across browser sessions"
+          type: "improvement",
+          title: "Real-time Statistics", 
+          description: "Improved dashboard data fetching with live updates from Supabase"
         }
       ]
     },
     {
       version: "2.0.0",
-      date: "November 15, 2024",
-      title: "Major UI Overhaul",
+      date: "2024-12-01",
+      type: "major",
+      title: "Complete Platform Redesign",
       changes: [
         {
-          type: "major",
-          title: "Dark Theme Implementation",
-          description: "Complete redesign with dark theme matching modern design standards"
+          type: "feature",
+          title: "New Sidebar Navigation",
+          description: "Implemented collapsible sidebar with improved navigation and user experience"
         },
         {
           type: "feature",
-          title: "Sidebar Navigation",
-          description: "Added collapsible sidebar with improved navigation structure"
+          title: "Documentation Portal",
+          description: "Added comprehensive documentation with guides, API references, and tutorials"
         },
         {
           type: "feature",
-          title: "Comment Generator V2",
-          description: "Redesigned comment generation interface with enhanced AI model selection"
+          title: "User Authentication",
+          description: "Integrated Supabase authentication with user profiles and settings"
         },
         {
           type: "improvement",
-          title: "Responsive Design",
-          description: "Improved mobile and tablet experience across all pages"
+          title: "UI/UX Overhaul",
+          description: "Complete redesign using Shadcn UI components with dark/light theme support"
+        }
+      ]
+    },
+    {
+      version: "1.5.2",
+      date: "2024-11-25",
+      type: "bugfix",
+      title: "Performance & Bug Fixes",
+      changes: [
+        {
+          type: "bugfix",
+          title: "Comment Generation Speed",
+          description: "Fixed slow response times for AI comment generation"
+        },
+        {
+          type: "bugfix",
+          title: "Platform Integration",
+          description: "Resolved issues with Twitter and LinkedIn comment formatting"
+        },
+        {
+          type: "improvement",
+          title: "Error Handling",
+          description: "Enhanced error messages and user feedback throughout the application"
+        }
+      ]
+    },
+    {
+      version: "1.5.0",
+      date: "2024-11-20",
+      type: "feature",
+      title: "Multi-Platform Support",
+      changes: [
+        {
+          type: "feature",
+          title: "Platform Expansion",
+          description: "Added support for Facebook, Instagram, and Reddit comment generation"
+        },
+        {
+          type: "feature",
+          title: "Tone Customization",
+          description: "Introduced multiple tone options: Professional, Casual, Enthusiastic, Supportive, Humorous, and Critical"
+        },
+        {
+          type: "improvement",
+          title: "Comment History",
+          description: "Added comprehensive history tracking with search and filter capabilities"
         }
       ]
     }
   ];
 
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case "feature":
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
+      case "improvement":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300";
+      case "bugfix":
+        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
+      case "major":
+        return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300";
+      default:
+        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300";
+    }
+  };
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case "feature":
+        return <Plus className="w-4 h-4" />;
+      case "improvement":
+        return <Zap className="w-4 h-4" />;
+      case "bugfix":
+        return <Bug className="w-4 h-4" />;
+      case "major":
+        return <Sparkles className="w-4 h-4" />;
+      default:
+        return <GitCommit className="w-4 h-4" />;
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-6 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Button asChild variant="ghost" size="sm">
-              <Link to="/docs" className="flex items-center gap-2">
-                <ArrowLeft className="w-4 h-4" />
-                Back to Docs
-              </Link>
-            </Button>
+    <div className="container mx-auto px-4 py-8 space-y-8">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-3">
+          <Calendar className="w-8 h-8 text-primary" />
+          <div>
+            <h1 className="text-3xl font-bold">Changelog</h1>
+            <p className="text-muted-foreground">Stay updated with the latest features and improvements</p>
           </div>
         </div>
+        <Button variant="outline" size="sm" asChild>
+          <Link to="/docs">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Docs
+          </Link>
+        </Button>
+      </div>
 
-        <div className="max-w-4xl">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">Changelog</h1>
-            <p className="text-muted-foreground">
-              Stay up to date with the latest features, improvements, and bug fixes.
-            </p>
-          </div>
-
-          {/* Changelog Entries */}
-          <div className="space-y-8">
-            {changelogEntries.map((entry, index) => (
-              <div key={index} className="border border-border rounded-lg p-6">
-                <div className="flex items-center gap-3 mb-4">
+      {/* Releases */}
+      <div className="space-y-8">
+        {releases.map((release, index) => (
+          <Card key={index}>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
                   <Badge variant="outline" className="text-sm">
-                    v{entry.version}
+                    v{release.version}
                   </Badge>
-                  <span className="text-sm text-muted-foreground">{entry.date}</span>
+                  <Badge className={getTypeColor(release.type)}>
+                    {getTypeIcon(release.type)}
+                    <span className="ml-1 capitalize">{release.type}</span>
+                  </Badge>
                 </div>
-                
-                <h2 className="text-xl font-semibold text-foreground mb-4">
-                  {entry.title}
-                </h2>
-
-                <div className="space-y-3">
-                  {entry.changes.map((change, changeIndex) => (
-                    <div key={changeIndex} className="flex items-start gap-3">
-                      {getTypeIcon(change.type)}
-                      <div className="flex-1">
-                        <h3 className="font-medium text-foreground text-sm">
-                          {change.title}
-                        </h3>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {change.description}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Calendar className="w-4 h-4" />
+                  {release.date}
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
+              <CardTitle className="text-xl">{release.title}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {release.changes.map((change, changeIndex) => (
+                  <div key={changeIndex}>
+                    <div className="flex items-start gap-3">
+                      <div className={`p-1 rounded ${getTypeColor(change.type)}`}>
+                        {getTypeIcon(change.type)}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-sm mb-1">{change.title}</h4>
+                        <p className="text-sm text-muted-foreground">{change.description}</p>
+                      </div>
+                    </div>
+                    {changeIndex < release.changes.length - 1 && (
+                      <Separator className="my-3" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
+
+      {/* Footer */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="text-center space-y-4">
+            <GitCommit className="w-8 h-8 text-primary mx-auto" />
+            <div>
+              <h3 className="font-medium mb-2">Want to suggest a feature?</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                We're always looking to improve AI Comment Companion based on your feedback.
+              </p>
+              <Button variant="outline">
+                Submit Feature Request
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
