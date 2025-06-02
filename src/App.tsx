@@ -1,12 +1,14 @@
 
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
-import AppSidebar from "@/components/AppSidebar";
+import { ThemeProvider } from "@/contexts/ThemeContext";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
+import ChangelogNotificationModal from "@/components/ChangelogNotificationModal";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import History from "./pages/History";
@@ -23,11 +25,12 @@ const App = () => (
       <AuthProvider>
         <TooltipProvider>
           <Toaster />
+          <Sonner />
           <BrowserRouter>
             <SidebarProvider>
-              <div className="min-h-screen flex w-full">
+              <div className="min-h-screen flex w-full bg-background">
                 <AppSidebar />
-                <main className="flex-1">
+                <main className="flex-1 overflow-hidden">
                   <Routes>
                     <Route path="/" element={<Index />} />
                     <Route path="/dashboard" element={<Dashboard />} />
@@ -39,6 +42,7 @@ const App = () => (
                   </Routes>
                 </main>
               </div>
+              <ChangelogNotificationModal />
             </SidebarProvider>
           </BrowserRouter>
         </TooltipProvider>

@@ -20,6 +20,39 @@ import { Link } from "react-router-dom";
 const Changelog = () => {
   const releases = [
     {
+      version: "2.3.0",
+      date: "2024-12-17",
+      type: "feature",
+      title: "Enhanced Settings & UI Improvements",
+      changes: [
+        {
+          type: "feature",
+          title: "Improved AI Model Selection",
+          description: "Reorganized AI models into a 3-column grid layout with clearer categorization by provider (Google Gemini, OpenAI, Anthropic Claude)"
+        },
+        {
+          type: "bugfix",
+          title: "Settings Save Fix",
+          description: "Fixed duplicate key constraint error when saving user settings by properly handling insert vs update operations"
+        },
+        {
+          type: "improvement",
+          title: "Enhanced User Experience",
+          description: "Improved settings save error handling with better feedback and validation for timezone settings"
+        },
+        {
+          type: "improvement",
+          title: "Changelog UI Updates",
+          description: "Moved 'Back to Docs' button to the right side and updated layout for better navigation"
+        },
+        {
+          type: "feature",
+          title: "Timezone Database Support",
+          description: "Added timezone column to user_settings table with proper default values and validation"
+        }
+      ]
+    },
+    {
       version: "2.2.0",
       date: "2024-12-16",
       type: "feature",
@@ -197,13 +230,7 @@ const Changelog = () => {
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-8">
-        <Button variant="outline" size="sm" asChild>
-          <Link to="/docs">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Docs
-          </Link>
-        </Button>
+      <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
           <Calendar className="w-8 h-8 text-primary" />
           <div>
@@ -211,6 +238,12 @@ const Changelog = () => {
             <p className="text-muted-foreground">Stay updated with the latest features and improvements</p>
           </div>
         </div>
+        <Button variant="outline" size="sm" asChild>
+          <Link to="/docs">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Docs
+          </Link>
+        </Button>
       </div>
 
       {/* Releases */}

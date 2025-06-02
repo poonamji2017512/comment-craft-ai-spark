@@ -50,6 +50,7 @@ const Settings = () => {
   const [showApiKey, setShowApiKey] = useState(false);
   const [apiKeyValid, setApiKeyValid] = useState<boolean | null>(null);
   const [activeTab, setActiveTab] = useState("account");
+  const [hasExistingSettings, setHasExistingSettings] = useState(false);
   const [profileData, setProfileData] = useState({
     full_name: userProfile?.full_name || '',
     email: user?.email || '',
@@ -171,7 +172,7 @@ const Settings = () => {
         .from('user_settings')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
         console.error('Error loading settings:', error);
@@ -179,6 +180,7 @@ const Settings = () => {
       }
 
       if (data) {
+        setHasExistingSettings(true);
         const notificationPrefs = validateNotificationPrefs(data.notification_prefs);
         const aiFeatures = validateAIFeatures(data.ai_features);
 
@@ -195,6 +197,8 @@ const Settings = () => {
           notification_prefs: notificationPrefs,
           ai_features: aiFeatures
         });
+      } else {
+        setHasExistingSettings(false);
       }
     } catch (error) {
       console.error('Error:', error);
@@ -216,22 +220,39 @@ const Settings = () => {
 
       console.log('Saving settings:', settingsToSave);
 
-      const { error } = await supabase
-        .from('user_settings')
-        .upsert({
-          user_id: user.id,
-          theme: settingsToSave.theme,
-          language: settingsToSave.language,
-          summary_length: settingsToSave.summary_length,
-          ai_tone: settingsToSave.ai_tone,
-          ai_model: settingsToSave.ai_model,
-          dashboard_view: settingsToSave.dashboard_view,
-          timezone: settingsToSave.timezone,
-          use_custom_api_key: settingsToSave.use_custom_api_key,
-          custom_api_key: settingsToSave.custom_api_key,
-          notification_prefs: settingsToSave.notification_prefs as any,
-          ai_features: settingsToSave.ai_features as any
-        });
+      const settingsData = {
+        user_id: user.id,
+        theme: settingsToSave.theme,
+        language: settingsToSave.language,
+        summary_length: settingsToSave.summary_length,
+        ai_tone: settingsToSave.ai_tone,
+        ai_model: settingsToSave.ai_model,
+        dashboard_view: settingsToSave.dashboard_view,
+        timezone: settingsToSave.timezone,
+        use_custom_api_key: settingsToSave.use_custom_api_key,
+        custom_api_key: settingsToSave.custom_api_key,
+        notification_prefs: settingsToSave.notification_prefs as any,
+        ai_features: settingsToSave.ai_features as any
+      };
+
+      let error;
+      if (hasExistingSettings) {
+        // Update existing settings
+        const result = await supabase
+          .from('user_settings')
+          .update(settingsData)
+          .eq('user_id', user.id);
+        error = result.error;
+      } else {
+        // Insert new settings
+        const result = await supabase
+          .from('user_settings')
+          .insert(settingsData);
+        error = result.error;
+        if (!error) {
+          setHasExistingSettings(true);
+        }
+      }
 
       if (error) {
         console.error('Error saving settings:', error);
@@ -548,7 +569,7 @@ const Settings = () => {
           </Card>
         </TabsContent>
 
-        {/* AI & API Tab */}
+        {/* AI & API Tab with 3-column grid layout */}
         <TabsContent value="ai" className="space-y-6">
           <Card className="bg-card border-border">
             <CardHeader>
@@ -558,7 +579,7 @@ const Settings = () => {
               {Object.entries(aiModelCategories).map(([categoryKey, category]) => (
                 <div key={categoryKey} className="space-y-3">
                   <h3 className="text-lg font-semibold text-foreground">{category.name}</h3>
-                  <div className="grid gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {category.models.map((model) => (
                       <div
                         key={model.value}
@@ -569,13 +590,13 @@ const Settings = () => {
                         }`}
                         onClick={() => saveUserSettings({ ai_model: model.value })}
                       >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h4 className="font-medium text-foreground">{model.label}</h4>
-                            <p className="text-sm text-muted-foreground">{model.description}</p>
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h4 className="font-medium text-foreground text-sm">{model.label}</h4>
+                            <p className="text-xs text-muted-foreground mt-1">{model.description}</p>
                           </div>
                           {userSettings.ai_model === model.value && (
-                            <Check className="h-5 w-5 text-primary" />
+                            <Check className="h-4 w-4 text-primary flex-shrink-0 ml-2" />
                           )}
                         </div>
                       </div>
