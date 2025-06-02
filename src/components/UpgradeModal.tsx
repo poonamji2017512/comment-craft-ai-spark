@@ -1,23 +1,17 @@
-
 import React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, Crown } from "lucide-react";
-
 interface UpgradeModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
-const UpgradeModal = ({ open, onOpenChange }: UpgradeModalProps) => {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+const UpgradeModal = ({
+  open,
+  onOpenChange
+}: UpgradeModalProps) => {
+  return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center">
@@ -29,7 +23,7 @@ const UpgradeModal = ({ open, onOpenChange }: UpgradeModalProps) => {
           {/* PRO Plan */}
           <div className="border border-border rounded-lg p-6 space-y-4">
             <div>
-              <h3 className="text-lg font-semibold text-foreground">PRO</h3>
+              <h3 className="text-lg font-semibold text-foreground my-[21px]">PRO</h3>
               <div className="mt-2">
                 <span className="text-3xl font-bold text-foreground">$20.00</span>
                 <span className="text-muted-foreground ml-1">/ month</span>
@@ -133,8 +127,6 @@ const UpgradeModal = ({ open, onOpenChange }: UpgradeModalProps) => {
           </p>
         </div>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
-
 export default UpgradeModal;
