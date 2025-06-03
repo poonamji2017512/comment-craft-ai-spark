@@ -62,7 +62,7 @@ const UpgradeModal = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* PRO Plan */}
           <div className="border border-border rounded-lg p-6 space-y-4">
-            <div>
+            <div className="my-0 py-[14px]">
               <h3 className="text-lg font-semibold text-foreground">PRO</h3>
               <div className="mt-2">
                 <span className="text-3xl font-bold text-foreground">{proPrice.display}</span>
