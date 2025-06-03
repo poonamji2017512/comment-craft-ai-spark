@@ -57,9 +57,9 @@ const ToneStyleSettings = () => {
       </div>
 
       {Object.entries(toneCategories).map(([category, tones]) => (
-        <div key={category} className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Badge className={getCategoryBadgeColor(category)}>
+        <div key={category} className="space-y-4">
+          <div className="flex items-center gap-3">
+            <Badge className={`${getCategoryBadgeColor(category)} px-3 py-1`}>
               {getCategoryTitle(category)}
             </Badge>
             <span className="text-sm text-muted-foreground">
@@ -67,32 +67,32 @@ const ToneStyleSettings = () => {
             </span>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-4">
             {tones.map((tone) => (
               <Card
                 key={tone.id}
                 className={`cursor-pointer transition-all hover:shadow-md ${
                   selectedTone === tone.id
-                    ? "ring-2 ring-primary border-primary"
+                    ? "ring-2 ring-primary border-primary bg-primary/5"
                     : "hover:border-primary/50"
                 }`}
                 onClick={() => setSelectedTone(tone.id)}
               >
                 <CardContent className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h4 className="font-medium text-sm mb-1">{tone.name}</h4>
-                      <p className="text-xs text-muted-foreground">
-                        {tone.description}
-                      </p>
-                    </div>
-                    {selectedTone === tone.id && (
-                      <div className="ml-2 flex-shrink-0">
-                        <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center">
-                          <Check className="w-3 h-3 text-primary-foreground" />
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex items-start justify-between">
+                      <h4 className="font-medium text-sm">{tone.name}</h4>
+                      {selectedTone === tone.id && (
+                        <div className="flex-shrink-0">
+                          <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center">
+                            <Check className="w-3 h-3 text-primary-foreground" />
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      {tone.description}
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -101,7 +101,7 @@ const ToneStyleSettings = () => {
         </div>
       ))}
 
-      <div className="pt-4 border-t">
+      <div className="pt-6 border-t">
         <Button className="w-full">
           Save Tone & Style Settings
         </Button>
