@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +18,34 @@ import { Link } from "react-router-dom";
 
 const Changelog = () => {
   const releases = [
+    {
+      version: "2.4.0",
+      date: "2024-12-18",
+      type: "feature",
+      title: "Footer Navigation & Enhanced UI",
+      changes: [
+        {
+          type: "feature",
+          title: "Footer Navigation Bar",
+          description: "Added persistent footer navigation with Pro, Ultra, Enterprise, Store, and Careers links at the bottom of the main content area"
+        },
+        {
+          type: "improvement",
+          title: "Pricing Plans Update",
+          description: "Updated pricing modal with new PRO ($20/month) and ULTRA ($40/month) plans, replacing the old Free/Pro structure"
+        },
+        {
+          type: "improvement",
+          title: "Enhanced Tone & Style Settings",
+          description: "Reorganized tone selection into categorized 3-column grid layout with Short, Medium, and Long form categories"
+        },
+        {
+          type: "improvement",
+          title: "Changelog Notification Redesign",
+          description: "Redesigned changelog notification modal to be smaller, positioned in bottom-left corner, and appear only once per update"
+        }
+      ]
+    },
     {
       version: "2.3.0",
       date: "2024-12-17",

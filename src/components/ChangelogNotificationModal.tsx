@@ -10,40 +10,39 @@ import { Link } from "react-router-dom";
 const ChangelogNotificationModal = () => {
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-  const [hasSeenLatest, setHasSeenLatest] = useState(false);
 
   // Latest version info
-  const latestVersion = "2.3.0";
+  const latestVersion = "2.4.0";
   const latestChanges = [
     {
       type: "feature",
-      title: "Improved AI Model Selection",
-      description: "Reorganized AI models into a 3-column grid layout with clearer categorization"
+      title: "Footer Navigation",
+      description: "Added persistent footer with Pro, Ultra, Enterprise, Store, and Careers links"
     },
     {
-      type: "bugfix", 
-      title: "Settings Save Fix",
-      description: "Fixed duplicate key constraint error when saving user settings"
+      type: "improvement", 
+      title: "Pricing Plans Update",
+      description: "Updated to new PRO ($20/month) and ULTRA ($40/month) plans with enhanced features"
     },
     {
       type: "improvement",
-      title: "Enhanced User Experience", 
-      description: "Improved settings save error handling with better feedback"
+      title: "Enhanced Tone Settings", 
+      description: "Reorganized tone selection into categorized 3-column grid layout"
     }
   ];
 
   const getTypeIcon = (type: string) => {
     switch (type) {
       case "feature":
-        return <Plus className="w-4 h-4 text-green-600" />;
+        return <Plus className="w-3 h-3 text-green-600" />;
       case "improvement":
-        return <Zap className="w-4 h-4 text-blue-600" />;
+        return <Zap className="w-3 h-3 text-blue-600" />;
       case "bugfix":
-        return <Bug className="w-4 h-4 text-red-600" />;
+        return <Bug className="w-3 h-3 text-red-600" />;
       case "major":
-        return <Sparkles className="w-4 h-4 text-purple-600" />;
+        return <Sparkles className="w-3 h-3 text-purple-600" />;
       default:
-        return <Calendar className="w-4 h-4" />;
+        return <Calendar className="w-3 h-3" />;
     }
   };
 
@@ -77,54 +76,52 @@ const ChangelogNotificationModal = () => {
   if (!user) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader className="text-center">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-6 h-6 text-primary" />
-              <DialogTitle className="text-xl">What's New</DialogTitle>
-            </div>
-            <Button variant="ghost" size="sm" onClick={handleClose}>
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
-        </DialogHeader>
-        
-        <div className="space-y-4">
-          <div className="text-center">
-            <Badge variant="outline" className="text-sm mb-2">
-              v{latestVersion}
-            </Badge>
-            <h3 className="font-semibold text-lg">Enhanced Settings & UI Improvements</h3>
-            <p className="text-sm text-muted-foreground">Check out the latest updates to your AI Comment Companion</p>
-          </div>
-
-          <div className="space-y-3">
-            {latestChanges.map((change, index) => (
-              <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
-                {getTypeIcon(change.type)}
-                <div className="flex-1">
-                  <h4 className="font-medium text-sm">{change.title}</h4>
-                  <p className="text-xs text-muted-foreground mt-1">{change.description}</p>
-                </div>
+    <>
+      {isOpen && (
+        <div className="fixed bottom-4 left-4 z-50 w-80 bg-card border border-border rounded-lg shadow-lg animate-slide-in-left">
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-primary" />
+                <h3 className="font-semibold text-sm">What's New</h3>
+                <Badge variant="outline" className="text-xs">
+                  v{latestVersion}
+                </Badge>
               </div>
-            ))}
-          </div>
+              <Button variant="ghost" size="sm" onClick={handleClose} className="h-6 w-6 p-0">
+                <X className="w-3 h-3" />
+              </Button>
+            </div>
+            
+            <div className="space-y-2 mb-4">
+              {latestChanges.slice(0, 2).map((change, index) => (
+                <div key={index} className="flex items-start gap-2">
+                  {getTypeIcon(change.type)}
+                  <div className="flex-1">
+                    <h4 className="font-medium text-xs">{change.title}</h4>
+                    <p className="text-xs text-muted-foreground">{change.description}</p>
+                  </div>
+                </div>
+              ))}
+              {latestChanges.length > 2 && (
+                <p className="text-xs text-muted-foreground">+{latestChanges.length - 2} more updates</p>
+              )}
+            </div>
 
-          <div className="flex gap-2">
-            <Button asChild className="flex-1">
-              <Link to="/changelog" onClick={handleViewFullChangelog}>
-                View Full Changelog
-              </Link>
-            </Button>
-            <Button variant="outline" onClick={handleClose}>
-              Got it
-            </Button>
+            <div className="flex gap-2">
+              <Button asChild size="sm" className="flex-1 text-xs">
+                <Link to="/changelog" onClick={handleViewFullChangelog}>
+                  View All
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleClose} className="text-xs">
+                Dismiss
+              </Button>
+            </div>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      )}
+    </>
   );
 };
 
