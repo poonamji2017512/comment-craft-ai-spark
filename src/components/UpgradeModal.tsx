@@ -74,7 +74,7 @@ const UpgradeModal = ({
               </p>
             </div>
             
-            <Button className="w-full bg-white text-black hover:bg-gray-100">
+            <Button className="w-full bg-white text-black hover:bg-gray-100 my-[6px]">
               Continue with Pro
             </Button>
             
