@@ -30,15 +30,16 @@ const BillingSettings = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-semibold mb-2">Billing & Plans</h3>
-        <p className="text-sm text-muted-foreground">
-          Manage your subscription and billing preferences
-        </p>
-      </div>
-
-      {/* Billing Period Toggle */}
-      <div className="flex justify-center">
+      {/* Header with billing toggle */}
+      <div className="flex justify-between items-start mb-6">
+        <div>
+          <h3 className="text-lg font-semibold mb-2">Billing & Plans</h3>
+          <p className="text-sm text-muted-foreground">
+            Manage your subscription and billing preferences
+          </p>
+        </div>
+        
+        {/* Billing Period Toggle */}
         <div className="flex bg-muted rounded-lg p-1">
           <Button
             variant={billingPeriod === "monthly" ? "default" : "ghost"}
@@ -80,99 +81,132 @@ const BillingSettings = () => {
       {/* Plan Options */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* PRO Plan */}
-        <Card className="border-border">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center justify-between">
-              <span>PRO</span>
-              <Badge variant="outline">Current</Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-2xl font-bold">{proPrice.display}</span>
-                <span className="text-muted-foreground text-sm">{proPrice.period}</span>
-              </div>
-              {proPrice.note && (
-                <p className="text-xs text-muted-foreground">{proPrice.note}</p>
-              )}
+        <div className="border border-border rounded-lg p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-foreground">PRO</h3>
+            <Badge variant="outline">Current</Badge>
+          </div>
+          
+          <div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-3xl font-bold text-foreground">{proPrice.display}</span>
+              <span className="text-muted-foreground ml-1">{proPrice.period}</span>
             </div>
-            
-            <p className="text-sm text-muted-foreground">
-              Ideal for individual creators
-            </p>
-
-            <ul className="space-y-2 text-sm">
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-green-500" />
-                <span>Standard AI Models</span>
+            {proPrice.note && (
+              <div className="text-sm text-muted-foreground">{proPrice.note}</div>
+            )}
+          </div>
+          
+          <p className="text-sm text-muted-foreground">
+            Ideal for individual creators and getting started with AI comments.
+          </p>
+          
+          <Button variant="outline" className="w-full" disabled>
+            Current Plan
+          </Button>
+          
+          <div className="border-t pt-4">
+            <ul className="space-y-3 text-sm">
+              <li className="flex items-start gap-2">
+                <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <span>Access to Standard AI Models</span>
               </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-green-500" />
-                <span>All Social Platforms</span>
+              <li className="flex items-start gap-2">
+                <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <span>Unlimited access to other standard models</span>
               </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-green-500" />
-                <span>Unlimited Tones</span>
+              <li className="flex items-start gap-2">
+                <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <span>LinkedIn, X (Twitter), Reddit, Threads</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <span>Bluesky, Facebook, YouTube replies</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <span>Meme Creator</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <span>Unlimited Tone Selection</span>
               </li>
             </ul>
-
-            <Button variant="outline" className="w-full" disabled>
-              Current Plan
-            </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* ULTRA Plan */}
-        <Card className="border-primary relative">
-          <div className="absolute -top-2 right-4">
+        <div className="border border-border rounded-lg p-6 space-y-4 relative">
+          <div className="absolute -top-3 right-4">
             <Badge className="bg-blue-600 text-white">Popular</Badge>
           </div>
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center justify-between">
-              <span>ULTRA</span>
-              <Crown className="h-5 w-5 text-yellow-500" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-2xl font-bold">{ultraPrice.display}</span>
-                <span className="text-muted-foreground text-sm">{ultraPrice.period}</span>
-              </div>
-              {ultraPrice.note && (
-                <p className="text-xs text-muted-foreground">{ultraPrice.note}</p>
-              )}
+          
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-foreground">ULTRA</h3>
+            <Crown className="h-5 w-5 text-yellow-500" />
+          </div>
+          
+          <div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-3xl font-bold text-foreground">{ultraPrice.display}</span>
+              <span className="text-muted-foreground ml-1">{ultraPrice.period}</span>
             </div>
-            
-            <p className="text-sm text-muted-foreground">
-              Best for power users and teams
-            </p>
-
-            <ul className="space-y-2 text-sm">
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-green-500" />
-                <span className="font-medium">Premium AI Models</span>
+            {ultraPrice.note && (
+              <div className="text-sm text-muted-foreground">{ultraPrice.note}</div>
+            )}
+          </div>
+          
+          <p className="text-sm text-muted-foreground">
+            Best for power users, teams, and businesses needing advanced AI and collaboration.
+          </p>
+          
+          <Button className="w-full">
+            Upgrade to Ultra
+          </Button>
+          
+          <div className="border-t pt-4">
+            <ul className="space-y-3 text-sm">
+              <li className="flex items-start gap-2">
+                <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <span className="font-semibold">Full & Priority Access to all Google, Claude, and OpenAI models</span>
               </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-green-500" />
-                <span className="font-medium">Team Features</span>
+              <li className="flex items-start gap-2">
+                <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <span>Unlimited access to other standard models</span>
               </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-green-500" />
-                <span className="font-medium">Priority Support</span>
+              <li className="flex items-start gap-2">
+                <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <span>LinkedIn, X (Twitter), Reddit, Threads</span>
               </li>
-              <li className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-green-500" />
-                <span>Content Workflows</span>
+              <li className="flex items-start gap-2">
+                <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <span>Bluesky, Facebook, YouTube replies</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <span>Meme Creator</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <span className="font-semibold">Content Creator with Workflows</span>
+                <span className="text-muted-foreground text-xs">(e.g., Build in Public)</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <span className="font-semibold">Team Features</span>
+                <span className="text-muted-foreground text-xs">(collaboration, shared access)</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <span>Unlimited Tone Selection</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-sm mt-0.5">⚡</span>
+                <span className="font-semibold">Priority Support</span>
               </li>
             </ul>
-
-            <Button className="w-full">
-              Upgrade to Ultra
-            </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       {/* Billing History Section */}

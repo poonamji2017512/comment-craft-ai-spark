@@ -19,6 +19,34 @@ import { Link } from "react-router-dom";
 const Changelog = () => {
   const releases = [
     {
+      version: "2.5.0",
+      date: "2025-01-03",
+      type: "feature",
+      title: "Enhanced Pricing & UI Improvements",
+      changes: [
+        {
+          type: "feature",
+          title: "Updated Pricing Structure",
+          description: "Implemented monthly/yearly billing toggle with 20% discount for yearly plans across upgrade modal and billing settings"
+        },
+        {
+          type: "improvement",
+          title: "Billing Settings Redesign",
+          description: "Redesigned billing settings page to match upgrade modal layout with pricing columns and enhanced feature lists"
+        },
+        {
+          type: "improvement",
+          title: "Tone & Style Categories",
+          description: "Organized tone selection into Short, Medium, and Long form categories with 3-column grid layout for better usability"
+        },
+        {
+          type: "improvement",
+          title: "Changelog Notification Enhancement",
+          description: "Improved changelog notification modal with smaller size, bottom-left positioning, and one-time display per update"
+        }
+      ]
+    },
+    {
       version: "2.4.0",
       date: "2024-12-18",
       type: "feature",
