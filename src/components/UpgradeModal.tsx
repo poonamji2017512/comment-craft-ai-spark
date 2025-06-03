@@ -1,21 +1,17 @@
-
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, Crown } from "lucide-react";
-
 interface UpgradeModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
 const UpgradeModal = ({
   open,
   onOpenChange
 }: UpgradeModalProps) => {
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">("monthly");
-
   const getPrice = (monthlyPrice: number) => {
     if (billingPeriod === "yearly") {
       const yearlyPrice = monthlyPrice * 12 * 0.8; // 20% discount
@@ -32,12 +28,9 @@ const UpgradeModal = ({
       note: null
     };
   };
-
   const proPrice = getPrice(20);
   const ultraPrice = getPrice(40);
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+  return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl">
         <DialogHeader>
           {/* New layout: Headline on left, billing toggle on right */}
@@ -52,21 +45,11 @@ const UpgradeModal = ({
             </div>
             
             {/* Billing Period Toggle moved to right */}
-            <div className="flex bg-muted rounded-lg p-1">
-              <Button
-                variant={billingPeriod === "monthly" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setBillingPeriod("monthly")}
-                className="rounded-md"
-              >
+            <div className="flex bg-muted rounded-lg p-1 my-[10px] mx-[22px]">
+              <Button variant={billingPeriod === "monthly" ? "default" : "ghost"} size="sm" onClick={() => setBillingPeriod("monthly")} className="rounded-md">
                 Monthly
               </Button>
-              <Button
-                variant={billingPeriod === "yearly" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setBillingPeriod("yearly")}
-                className="rounded-md"
-              >
+              <Button variant={billingPeriod === "yearly" ? "default" : "ghost"} size="sm" onClick={() => setBillingPeriod("yearly")} className="rounded-md">
                 Yearly
                 <Badge variant="secondary" className="ml-2 text-xs bg-green-100 text-green-800">
                   20% OFF
@@ -84,9 +67,7 @@ const UpgradeModal = ({
               <div className="mt-2">
                 <span className="text-3xl font-bold text-foreground">{proPrice.display}</span>
                 <span className="text-muted-foreground ml-1">{proPrice.period}</span>
-                {proPrice.note && (
-                  <div className="text-sm text-muted-foreground">{proPrice.note}</div>
-                )}
+                {proPrice.note && <div className="text-sm text-muted-foreground">{proPrice.note}</div>}
               </div>
               <p className="text-sm text-muted-foreground mt-2">
                 Ideal for individual creators and getting started with AI comments.
@@ -138,9 +119,7 @@ const UpgradeModal = ({
               <div className="mt-2">
                 <span className="text-3xl font-bold text-foreground">{ultraPrice.display}</span>
                 <span className="text-muted-foreground ml-1">{ultraPrice.period}</span>
-                {ultraPrice.note && (
-                  <div className="text-sm text-muted-foreground">{ultraPrice.note}</div>
-                )}
+                {ultraPrice.note && <div className="text-sm text-muted-foreground">{ultraPrice.note}</div>}
               </div>
               <p className="text-sm text-muted-foreground mt-2">
                 Best for power users, teams, and businesses needing advanced AI and collaboration.
@@ -205,8 +184,6 @@ const UpgradeModal = ({
           </p>
         </div>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
-
 export default UpgradeModal;
