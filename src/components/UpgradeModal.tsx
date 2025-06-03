@@ -40,35 +40,41 @@ const UpgradeModal = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-center">
-            Choose Your Plan
-          </DialogTitle>
-        </DialogHeader>
-        
-        {/* Billing Period Toggle */}
-        <div className="flex justify-center mt-4 mb-6">
-          <div className="flex bg-muted rounded-lg p-1">
-            <Button
-              variant={billingPeriod === "monthly" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setBillingPeriod("monthly")}
-              className="rounded-md"
-            >
-              Monthly
-            </Button>
-            <Button
-              variant={billingPeriod === "yearly" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setBillingPeriod("yearly")}
-              className="rounded-md"
-            >
-              Yearly
-              <Badge variant="secondary" className="ml-2 text-xs bg-green-100 text-green-800">
-                20% OFF
-              </Badge>
-            </Button>
+          {/* New layout: Headline on left, billing toggle on right */}
+          <div className="flex justify-between items-start mb-6">
+            <div className="text-left">
+              <DialogTitle className="text-2xl font-bold">
+                Choose Your Plan
+              </DialogTitle>
+              <p className="text-muted-foreground mt-2">
+                Select the perfect plan for your AI comment needs
+              </p>
+            </div>
+            
+            {/* Billing Period Toggle moved to right */}
+            <div className="flex bg-muted rounded-lg p-1">
+              <Button
+                variant={billingPeriod === "monthly" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setBillingPeriod("monthly")}
+                className="rounded-md"
+              >
+                Monthly
+              </Button>
+              <Button
+                variant={billingPeriod === "yearly" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setBillingPeriod("yearly")}
+                className="rounded-md"
+              >
+                Yearly
+                <Badge variant="secondary" className="ml-2 text-xs bg-green-100 text-green-800">
+                  20% OFF
+                </Badge>
+              </Button>
+            </div>
           </div>
-        </div>
+        </DialogHeader>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* PRO Plan */}
