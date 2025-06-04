@@ -1,13 +1,10 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, Crown, Download, CreditCard } from "lucide-react";
-
 const BillingSettings = () => {
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">("monthly");
-
   const getPrice = (monthlyPrice: number) => {
     if (billingPeriod === "yearly") {
       const yearlyPrice = monthlyPrice * 12 * 0.8; // 20% discount
@@ -24,12 +21,9 @@ const BillingSettings = () => {
       note: null
     };
   };
-
   const proPrice = getPrice(20);
   const ultraPrice = getPrice(40);
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       {/* Header with Billing Toggle */}
       <div className="flex justify-between items-start mb-6">
         <div className="text-left">
@@ -202,7 +196,7 @@ const BillingSettings = () => {
               </div>
               <div className="text-right">
                 <p className="font-medium">$20.00</p>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 mx-[70px] my-[-25px]">
                   <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">Paid</Badge>
                   <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
                     <Download className="h-3 w-3" />
@@ -299,8 +293,6 @@ const BillingSettings = () => {
           </Button>
         </p>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default BillingSettings;
