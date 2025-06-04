@@ -13,6 +13,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import BillingSettings from "@/components/BillingSettings";
 import { User, Settings as SettingsIcon, Bell, Database, Key, Trash2, Download, Eye, EyeOff, Check, X, Palette, MessageSquare, Shield, CreditCard, Users, Workflow, Crown, Mail, ExternalLink, Puzzle, Twitter, Linkedin, Globe, Clock } from "lucide-react";
 
 interface NotificationPrefs {
@@ -583,12 +584,11 @@ const Settings = () => {
                     {category.models.map((model) => (
                       <div
                         key={model.value}
-                        className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                        className={`border rounded-lg p-4 cursor-not-allowed transition-colors ${
                           userSettings.ai_model === model.value
                             ? 'border-primary bg-primary/5'
-                            : 'border-border hover:border-primary/50'
+                            : 'border-border'
                         }`}
-                        onClick={() => saveUserSettings({ ai_model: model.value })}
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
@@ -979,112 +979,9 @@ const Settings = () => {
           </Card>
         </TabsContent>
 
-        {/* Billing Tab */}
+        {/* Billing Tab - Now using BillingSettings component */}
         <TabsContent value="billing">
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="text-foreground">Billing & Plan</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Free Plan */}
-                <div className="border border-border rounded-lg p-6 space-y-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-foreground">Free</h3>
-                    <div className="mt-2">
-                      <span className="text-3xl font-bold text-foreground">$0.00</span>
-                      <span className="text-muted-foreground ml-1">Forever</span>
-                    </div>
-                  </div>
-                  
-                  <p className="text-sm text-muted-foreground">
-                    Start for free, no credit card needed.
-                  </p>
-                  
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-green-500" />
-                      <span>Unlimited basic searches</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-green-500" />
-                      <span>3 Pro searches per day</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-green-500" />
-                      <span>Upload 3 files per day</span>
-                    </li>
-                  </ul>
-                  
-                  <Button variant="outline" className="w-full" disabled>
-                    Continue with free
-                  </Button>
-                </div>
-
-                {/* Pro Plan */}
-                <div className="border border-border rounded-lg p-6 space-y-4 relative">
-                  <div className="absolute -top-3 right-4">
-                    <Badge className="bg-blue-600 text-white">Popular</Badge>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-lg font-semibold text-foreground">Pro</h3>
-                    <div className="mt-2">
-                      <span className="text-3xl font-bold text-foreground">$20.00</span>
-                      <span className="text-muted-foreground ml-1">/ month</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      $8.67 when billed annually
-                    </p>
-                  </div>
-                  
-                  <p className="text-sm text-muted-foreground">
-                    Unlimited access to AI Comment Agent and enjoy new perks as they are added.
-                  </p>
-                  
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-green-500" />
-                      <span>Everything in Free</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-green-500" />
-                      <span>Access to Deep Search</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-green-500" />
-                      <span>10x as many questions in answers</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-green-500" />
-                      <span>Powered by the latest top AI models</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-green-500" />
-                      <span>Upload unlimited documents and images</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Crown className="h-4 w-4 text-orange-500" />
-                      <span>And much more</span>
-                    </li>
-                  </ul>
-                  
-                  <Button className="w-full bg-white text-black hover:bg-gray-100">
-                    Continue with Pro
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="mt-8 text-center">
-                <p className="text-sm text-muted-foreground">
-                  AI Comment Agent for teams or business?{' '}
-                  <Button variant="link" className="p-0 h-auto text-blue-600">
-                    Learn more
-                  </Button>
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <BillingSettings />
         </TabsContent>
       </Tabs>
 
