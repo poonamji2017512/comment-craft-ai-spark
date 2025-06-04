@@ -212,7 +212,7 @@ const BillingSettings = () => {
               </div>
               <div className="text-right">
                 <p className="font-medium">$20.00</p>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 mx-[70px] my-[-25px]">
                   <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">Paid</Badge>
                   <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
                     <Download className="h-3 w-3" />
