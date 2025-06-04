@@ -3,15 +3,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, Crown } from "lucide-react";
+import { useSubscription } from "@/hooks/useSubscription";
+
 interface UpgradeModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-const UpgradeModal = ({
-  open,
-  onOpenChange
-}: UpgradeModalProps) => {
+
+const UpgradeModal = ({ open, onOpenChange }: UpgradeModalProps) => {
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">("monthly");
+  const { createSubscription, isCreatingSubscription } = useSubscription();
+
   const getPrice = (monthlyPrice: number) => {
     if (billingPeriod === "yearly") {
       const yearlyPrice = monthlyPrice * 12 * 0.8; // 20% discount
@@ -28,12 +30,19 @@ const UpgradeModal = ({
       note: null
     };
   };
+
   const proPrice = getPrice(20);
   const ultraPrice = getPrice(40);
-  return <Dialog open={open} onOpenChange={onOpenChange}>
+
+  const handleSelectPlan = (planType: 'PRO' | 'ULTRA') => {
+    createSubscription({ planType, billingCycle: billingPeriod });
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl">
         <DialogHeader>
-          {/* New layout: Headline on left, billing toggle on right */}
           <div className="flex justify-between items-start mb-6">
             <div className="text-left">
               <DialogTitle className="text-2xl font-bold">
@@ -44,12 +53,21 @@ const UpgradeModal = ({
               </p>
             </div>
             
-            {/* Billing Period Toggle moved to right */}
             <div className="flex bg-muted rounded-lg p-1 my-[10px] mx-[22px]">
-              <Button variant={billingPeriod === "monthly" ? "default" : "ghost"} size="sm" onClick={() => setBillingPeriod("monthly")} className="rounded-md">
+              <Button 
+                variant={billingPeriod === "monthly" ? "default" : "ghost"} 
+                size="sm" 
+                onClick={() => setBillingPeriod("monthly")} 
+                className="rounded-md"
+              >
                 Monthly
               </Button>
-              <Button variant={billingPeriod === "yearly" ? "default" : "ghost"} size="sm" onClick={() => setBillingPeriod("yearly")} className="rounded-md">
+              <Button 
+                variant={billingPeriod === "yearly" ? "default" : "ghost"} 
+                size="sm" 
+                onClick={() => setBillingPeriod("yearly")} 
+                className="rounded-md"
+              >
                 Yearly
                 <Badge variant="secondary" className="ml-2 text-xs bg-green-100 text-green-800">
                   20% OFF
@@ -74,11 +92,16 @@ const UpgradeModal = ({
               </p>
             </div>
             
-            <Button className="w-full bg-white text-black hover:bg-gray-100 my-[4px]">
-              Continue with Pro
+            <Button 
+              className="w-full bg-white text-black hover:bg-gray-100 my-[4px]"
+              onClick={() => handleSelectPlan('PRO')}
+              disabled={isCreatingSubscription}
+            >
+              {isCreatingSubscription ? 'Processing...' : 'Continue with Pro'}
             </Button>
             
             <div className="border-t pt-4">
+              
               <ul className="space-y-3 text-sm">
                 <li className="flex items-start gap-2">
                   <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
@@ -126,11 +149,16 @@ const UpgradeModal = ({
               </p>
             </div>
             
-            <Button className="w-full bg-white text-black hover:bg-gray-100">
-              Continue with Ultra
+            <Button 
+              className="w-full bg-white text-black hover:bg-gray-100"
+              onClick={() => handleSelectPlan('ULTRA')}
+              disabled={isCreatingSubscription}
+            >
+              {isCreatingSubscription ? 'Processing...' : 'Continue with Ultra'}
             </Button>
             
             <div className="border-t pt-4 my-[28px]">
+              
               <ul className="space-y-3 text-sm">
                 <li className="flex items-start gap-2">
                   <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
@@ -184,6 +212,8 @@ const UpgradeModal = ({
           </p>
         </div>
       </DialogContent>
-    </Dialog>;
+    </Dialog>
+  );
 };
+
 export default UpgradeModal;

@@ -1,0 +1,156 @@
+
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { DodoPayments } from "npm:@dodopayments/node@1.0.0";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+interface CreateSubscriptionRequest {
+  planType: 'PRO' | 'ULTRA';
+  billingCycle: 'monthly' | 'yearly';
+}
+
+const supabase = createClient(
+  Deno.env.get('SUPABASE_URL') ?? '',
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+);
+
+const dodo = new DodoPayments({
+  apiKey: Deno.env.get('DODO_PAYMENTS_SECRET_KEY') ?? '',
+});
+
+// Product ID mapping
+const PRODUCT_IDS = {
+  PRO: {
+    monthly: 'pdt_nYgdsmbwvDujGIBBlA9LE',
+    yearly: 'pdt_YQbqHvroDI6wJrRhBkEwj'
+  },
+  ULTRA: {
+    monthly: 'pdt_APpHuTy5eP3DqNcs0WYR7',
+    yearly: 'pdt_WAhDE7ydq4emw3hRu1dgp'
+  }
+};
+
+serve(async (req: Request) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    // Get user from auth header
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) {
+      throw new Error('No authorization header');
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !user) {
+      throw new Error('Unauthorized');
+    }
+
+    const { planType, billingCycle }: CreateSubscriptionRequest = await req.json();
+
+    console.log('Creating subscription for user:', user.id, 'Plan:', planType, 'Cycle:', billingCycle);
+
+    // Get or create customer in Dodo Payments
+    let dodoCustomerId: string;
+    
+    // Check if user already has a Dodo customer ID
+    const { data: existingSubscription } = await supabase
+      .from('subscriptions')
+      .select('dodo_customer_id')
+      .eq('user_id', user.id)
+      .single();
+
+    if (existingSubscription?.dodo_customer_id) {
+      dodoCustomerId = existingSubscription.dodo_customer_id;
+    } else {
+      // Create new customer in Dodo Payments
+      const customer = await dodo.customers.create({
+        email: user.email!,
+        name: user.user_metadata?.full_name || user.email!,
+      });
+      dodoCustomerId = customer.id;
+    }
+
+    // Get the product ID for the selected plan
+    const productId = PRODUCT_IDS[planType][billingCycle];
+
+    // Create subscription in Dodo Payments
+    const subscription = await dodo.subscriptions.create({
+      customer: dodoCustomerId,
+      items: [{
+        product: productId,
+        quantity: 1,
+      }],
+      payment_behavior: 'default_incomplete',
+      payment_settings: {
+        save_default_payment_method: 'on_subscription',
+      },
+      expand: ['latest_invoice.payment_intent'],
+    });
+
+    console.log('Dodo subscription created:', subscription.id);
+
+    // Store subscription in our database
+    const { error: dbError } = await supabase
+      .from('subscriptions')
+      .upsert({
+        user_id: user.id,
+        dodo_customer_id: dodoCustomerId,
+        dodo_subscription_id: subscription.id,
+        plan_type: planType,
+        billing_cycle: billingCycle,
+        status: subscription.status,
+        current_period_start: subscription.current_period_start ? new Date(subscription.current_period_start * 1000).toISOString() : null,
+        current_period_end: subscription.current_period_end ? new Date(subscription.current_period_end * 1000).toISOString() : null,
+        updated_at: new Date().toISOString(),
+      });
+
+    if (dbError) {
+      console.error('Database error:', dbError);
+      throw new Error('Failed to store subscription');
+    }
+
+    // Return checkout URL or payment intent client secret
+    let checkoutUrl = null;
+    let clientSecret = null;
+
+    if (subscription.latest_invoice?.payment_intent) {
+      clientSecret = subscription.latest_invoice.payment_intent.client_secret;
+    }
+
+    // If subscription requires payment, create a checkout session
+    if (subscription.status === 'incomplete') {
+      const checkoutSession = await dodo.checkout.sessions.create({
+        customer: dodoCustomerId,
+        subscription: subscription.id,
+        success_url: `${req.headers.get('origin')}/settings?tab=billing&success=true`,
+        cancel_url: `${req.headers.get('origin')}/settings?tab=billing&canceled=true`,
+      });
+      
+      checkoutUrl = checkoutSession.url;
+    }
+
+    return new Response(JSON.stringify({
+      subscriptionId: subscription.id,
+      status: subscription.status,
+      checkoutUrl,
+      clientSecret,
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
+  } catch (error: any) {
+    console.error('Error creating subscription:', error);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+});

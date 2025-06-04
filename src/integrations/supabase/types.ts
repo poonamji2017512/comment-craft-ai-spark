@@ -9,6 +9,53 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      billing_history: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          description: string | null
+          dodo_payment_id: string | null
+          id: string
+          payment_date: string
+          status: string
+          subscription_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          description?: string | null
+          dodo_payment_id?: string | null
+          id?: string
+          payment_date?: string
+          status: string
+          subscription_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          description?: string | null
+          dodo_payment_id?: string | null
+          id?: string
+          payment_date?: string
+          status?: string
+          subscription_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_history_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_logs: {
         Row: {
           event_type: string
@@ -150,6 +197,48 @@ export type Database = {
           id?: string
           platform?: Database["public"]["Enums"]["platform_type"]
           topic?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          billing_cycle: string
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          dodo_customer_id: string | null
+          dodo_subscription_id: string | null
+          id: string
+          plan_type: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          billing_cycle: string
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          dodo_customer_id?: string | null
+          dodo_subscription_id?: string | null
+          id?: string
+          plan_type: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          billing_cycle?: string
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          dodo_customer_id?: string | null
+          dodo_subscription_id?: string | null
+          id?: string
+          plan_type?: string
+          status?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
