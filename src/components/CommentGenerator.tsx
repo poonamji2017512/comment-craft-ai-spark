@@ -145,17 +145,19 @@ const CommentGenerator = () => {
       }
 
       // Determine which function to call based on selected model
-      let functionName = 'generate-ai-comment'; // default
+      let functionName = 'generate-ai-comment'; // default fallback
       
       if (userModel.startsWith('gemini-')) {
         const modelMap: Record<string, string> = {
           'gemini-2.0-flash-lite': 'generate-gemini-2-0-flash-lite',
           'gemini-2.5-flash': 'generate-gemini-2-5-flash',
           'gemini-2.5-pro': 'generate-gemini-2-5-pro',
-          'gemini-2.0-flash-exp': 'generate-ai-comment' // fallback to main function
+          'gemini-2.0-flash-exp': 'generate-gemini-2-0-flash-exp'
         };
         functionName = modelMap[userModel] || 'generate-ai-comment';
       }
+
+      console.log(`Using function: ${functionName} for model: ${userModel}`);
 
       const { data, error } = await supabase.functions.invoke(functionName, {
         body: validatedInput
@@ -163,7 +165,7 @@ const CommentGenerator = () => {
 
       if (error) {
         console.error('Error generating comments:', error);
-        toast.error('Failed to generate comments. Please try again.');
+        toast.error(`Failed to generate comments: ${error.message || 'Unknown error'}`);
         return;
       }
 
@@ -178,6 +180,7 @@ const CommentGenerator = () => {
         setLastGenerationTime(Date.now());
         toast.success('Comments generated successfully!');
       } else {
+        console.error('No comments in response:', data);
         toast.error('No comments were generated. Please try again.');
       }
     } catch (error) {

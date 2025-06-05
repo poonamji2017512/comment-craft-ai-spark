@@ -8,7 +8,7 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  console.log(`[${new Date().toISOString()}] generate-gemini-2-5-pro: Function invoked. Method: ${req.method}`);
+  console.log(`[${new Date().toISOString()}] generate-gemini-2-0-flash-exp: Function invoked. Method: ${req.method}`);
 
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -16,12 +16,12 @@ serve(async (req) => {
 
   try {
     const requestBody = await req.json();
-    console.log(`[${new Date().toISOString()}] generate-gemini-2-5-pro: Request body:`, JSON.stringify(requestBody, null, 2));
+    console.log(`[${new Date().toISOString()}] generate-gemini-2-0-flash-exp: Request body:`, JSON.stringify(requestBody, null, 2));
     
     const { originalPost, platform, tone, maxLength } = requestBody;
 
     if (!originalPost || !platform || !tone || !maxLength) {
-      console.error(`[${new Date().toISOString()}] generate-gemini-2-5-pro: Missing required fields`);
+      console.error(`[${new Date().toISOString()}] generate-gemini-2-0-flash-exp: Missing required fields`);
       return new Response(
         JSON.stringify({ error: 'Missing required fields: originalPost, platform, tone, maxLength' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -30,7 +30,7 @@ serve(async (req) => {
 
     const geminiApiKey = Deno.env.get('GOOGLE_GEMINI_API_KEY');
     if (!geminiApiKey) {
-      console.error(`[${new Date().toISOString()}] generate-gemini-2-5-pro: GOOGLE_GEMINI_API_KEY not found`);
+      console.error(`[${new Date().toISOString()}] generate-gemini-2-0-flash-exp: GOOGLE_GEMINI_API_KEY not found`);
       return new Response(
         JSON.stringify({ error: 'AI service temporarily unavailable - API key not configured' }),
         { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -39,8 +39,8 @@ serve(async (req) => {
 
     const prompt = `You are an expert social media comment writer. Generate 3 high-quality, human-like comments for this post: "${originalPost}". Platform: ${platform}, Tone: ${tone}, Max length: ${maxLength} characters. Make each comment unique and valuable. Separate with "---".`;
 
-    const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${geminiApiKey}`;
-    console.log(`[${new Date().toISOString()}] generate-gemini-2-5-pro: Calling Gemini API endpoint: ${geminiEndpoint.split('?')[0]}`);
+    const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${geminiApiKey}`;
+    console.log(`[${new Date().toISOString()}] generate-gemini-2-0-flash-exp: Calling Gemini API endpoint: ${geminiEndpoint.split('?')[0]}`);
 
     const geminiResponse = await fetch(geminiEndpoint, {
       method: 'POST',
@@ -56,13 +56,13 @@ serve(async (req) => {
       }),
     });
 
-    console.log(`[${new Date().toISOString()}] generate-gemini-2-5-pro: Gemini API response status: ${geminiResponse.status}`);
+    console.log(`[${new Date().toISOString()}] generate-gemini-2-0-flash-exp: Gemini API response status: ${geminiResponse.status}`);
 
     const geminiResponseText = await geminiResponse.text();
-    console.log(`[${new Date().toISOString()}] generate-gemini-2-5-pro: Gemini API response body: ${geminiResponseText}`);
+    console.log(`[${new Date().toISOString()}] generate-gemini-2-0-flash-exp: Gemini API response body: ${geminiResponseText}`);
 
     if (!geminiResponse.ok) {
-      console.error(`[${new Date().toISOString()}] generate-gemini-2-5-pro: Gemini API error. Status: ${geminiResponse.status}`);
+      console.error(`[${new Date().toISOString()}] generate-gemini-2-0-flash-exp: Gemini API error. Status: ${geminiResponse.status}`);
       return new Response(
         JSON.stringify({ 
           error: 'AI service temporarily unavailable',
@@ -77,7 +77,7 @@ serve(async (req) => {
     try {
       geminiData = JSON.parse(geminiResponseText);
     } catch (e) {
-      console.error(`[${new Date().toISOString()}] generate-gemini-2-5-pro: Failed to parse Gemini response as JSON: ${e.message}`);
+      console.error(`[${new Date().toISOString()}] generate-gemini-2-0-flash-exp: Failed to parse Gemini response as JSON: ${e.message}`);
       return new Response(
         JSON.stringify({ error: 'Invalid response from AI service' }),
         { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -87,7 +87,7 @@ serve(async (req) => {
     const generatedText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (!generatedText) {
-      console.error(`[${new Date().toISOString()}] generate-gemini-2-5-pro: No generated text in response`);
+      console.error(`[${new Date().toISOString()}] generate-gemini-2-0-flash-exp: No generated text in response`);
       return new Response(
         JSON.stringify({ error: 'Unable to generate comments at this time' }),
         { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -100,7 +100,7 @@ serve(async (req) => {
       .filter((comment: string) => comment.length > 0)
       .slice(0, 3);
 
-    console.log(`[${new Date().toISOString()}] generate-gemini-2-5-pro: Successfully generated ${comments.length} comments`);
+    console.log(`[${new Date().toISOString()}] generate-gemini-2-0-flash-exp: Successfully generated ${comments.length} comments`);
 
     return new Response(
       JSON.stringify({ 
@@ -115,7 +115,7 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error(`[${new Date().toISOString()}] generate-gemini-2-5-pro: ERROR CAUGHT: ${error.message}, Stack: ${error.stack}`);
+    console.error(`[${new Date().toISOString()}] generate-gemini-2-0-flash-exp: ERROR CAUGHT: ${error.message}, Stack: ${error.stack}`);
     return new Response(
       JSON.stringify({ 
         error: 'An unexpected error occurred',
