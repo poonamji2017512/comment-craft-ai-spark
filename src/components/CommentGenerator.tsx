@@ -27,7 +27,6 @@ const CommentGenerator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [lastGenerationTime, setLastGenerationTime] = useState<number>(0);
   const [validationError, setValidationError] = useState<string>('');
-  const [userModel, setUserModel] = useState('gemini-2.5-pro');
 
   // Load settings from sessionStorage on component mount
   useEffect(() => {
@@ -49,30 +48,6 @@ const CommentGenerator = () => {
     if (savedTone) {
       setTone(savedTone);
     }
-  }, []);
-
-  // Load user's selected AI model
-  useEffect(() => {
-    const loadUserModel = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { data: settings } = await supabase
-            .from('user_settings')
-            .select('ai_model')
-            .eq('user_id', user.id)
-            .maybeSingle();
-          
-          if (settings?.ai_model) {
-            setUserModel(settings.ai_model);
-          }
-        }
-      } catch (error) {
-        console.error('Error loading user model:', error);
-      }
-    };
-
-    loadUserModel();
   }, []);
 
   // Save settings to sessionStorage when they change
@@ -144,28 +119,13 @@ const CommentGenerator = () => {
         return;
       }
 
-      // Determine which function to call based on selected model
-      let functionName = 'generate-ai-comment'; // default fallback
-      
-      if (userModel.startsWith('gemini-')) {
-        const modelMap: Record<string, string> = {
-          'gemini-2.0-flash-lite': 'generate-gemini-2-0-flash-lite',
-          'gemini-2.5-flash': 'generate-gemini-2-5-flash',
-          'gemini-2.5-pro': 'generate-gemini-2-5-pro',
-          'gemini-2.0-flash-exp': 'generate-gemini-2-0-flash-exp'
-        };
-        functionName = modelMap[userModel] || 'generate-ai-comment';
-      }
-
-      console.log(`Using function: ${functionName} for model: ${userModel}`);
-
-      const { data, error } = await supabase.functions.invoke(functionName, {
+      const { data, error } = await supabase.functions.invoke('generate-ai-comment', {
         body: validatedInput
       });
 
       if (error) {
         console.error('Error generating comments:', error);
-        toast.error(`Failed to generate comments: ${error.message || 'Unknown error'}`);
+        toast.error('Failed to generate comments. Please try again.');
         return;
       }
 
@@ -180,7 +140,6 @@ const CommentGenerator = () => {
         setLastGenerationTime(Date.now());
         toast.success('Comments generated successfully!');
       } else {
-        console.error('No comments in response:', data);
         toast.error('No comments were generated. Please try again.');
       }
     } catch (error) {
@@ -237,9 +196,6 @@ const CommentGenerator = () => {
           <CardTitle className="flex items-center gap-2 text-foreground">
             <Sparkles className="w-5 h-5 text-primary" />
             Generate AI Comments
-            <Badge variant="outline" className="ml-auto text-xs">
-              {userModel}
-            </Badge>
           </CardTitle>
           <CardDescription className="text-muted-foreground">
             Enter the original post content and customize your comment preferences

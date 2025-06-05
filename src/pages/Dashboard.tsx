@@ -1,10 +1,10 @@
+
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, MessageSquare, Clock, TrendingUp, Users, Target, Zap, Globe, Calendar, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import HourlyActivityChart from "@/components/HourlyActivityChart";
-import ModelUsageChart from "@/components/ModelUsageChart";
 
 interface DashboardStats {
   totalComments: number;
@@ -209,7 +209,7 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Recent Activity and Model Usage */}
+      {/* Recent Activity and Platform Distribution */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
@@ -244,7 +244,54 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <ModelUsageChart />
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Globe className="w-5 h-5" />
+              Platform Distribution
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Twitter</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-20 h-2 bg-gray-200 rounded-full">
+                    <div className="w-16 h-2 bg-blue-500 rounded-full"></div>
+                  </div>
+                  <span className="text-sm text-muted-foreground">78%</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">LinkedIn</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-20 h-2 bg-gray-200 rounded-full">
+                    <div className="w-10 h-2 bg-green-500 rounded-full"></div>
+                  </div>
+                  <span className="text-sm text-muted-foreground">45%</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Facebook</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-20 h-2 bg-gray-200 rounded-full">
+                    <div className="w-8 h-2 bg-purple-500 rounded-full"></div>
+                  </div>
+                  <span className="text-sm text-muted-foreground">32%</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Instagram</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-20 h-2 bg-gray-200 rounded-full">
+                    <div className="w-6 h-2 bg-pink-500 rounded-full"></div>
+                  </div>
+                  <span className="text-sm text-muted-foreground">28%</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* 24-Hour Activity Chart */}
