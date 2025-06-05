@@ -1,7 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { DodoPayments } from "npm:@dodopayments/node@1.0.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -19,9 +18,30 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 );
 
-const dodo = new DodoPayments({
-  apiKey: Deno.env.get('DODO_PAYMENTS_SECRET_KEY') ?? '',
-});
+const DODO_API_BASE = 'https://api.dodopayments.com/v1';
+
+async function dodoRequest(endpoint: string, options: RequestInit = {}) {
+  const apiKey = Deno.env.get('DODO_PAYMENTS_SECRET_KEY');
+  if (!apiKey) {
+    throw new Error('DODO_PAYMENTS_SECRET_KEY not configured');
+  }
+
+  const response = await fetch(`${DODO_API_BASE}${endpoint}`, {
+    ...options,
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Dodo API error: ${response.status} ${error}`);
+  }
+
+  return response.json();
+}
 
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
@@ -62,8 +82,11 @@ serve(async (req: Request) => {
     switch (action) {
       case 'cancel':
         // Cancel subscription at period end
-        result = await dodo.subscriptions.update(subscription.dodo_subscription_id, {
-          cancel_at_period_end: true,
+        result = await dodoRequest(`/subscriptions/${subscription.dodo_subscription_id}`, {
+          method: 'PATCH',
+          body: JSON.stringify({
+            cancel_at_period_end: true,
+          }),
         });
 
         // Update in our database
@@ -84,7 +107,7 @@ serve(async (req: Request) => {
         }
 
         // Get current subscription from Dodo
-        const currentSub = await dodo.subscriptions.retrieve(subscription.dodo_subscription_id);
+        const currentSub = await dodoRequest(`/subscriptions/${subscription.dodo_subscription_id}`);
         
         // Update subscription with new plan
         const productIds = {
@@ -100,12 +123,15 @@ serve(async (req: Request) => {
 
         const newProductId = productIds[newPlanType][newBillingCycle];
 
-        result = await dodo.subscriptions.update(subscription.dodo_subscription_id, {
-          items: [{
-            id: currentSub.items.data[0].id,
-            product: newProductId,
-          }],
-          proration_behavior: 'create_prorations',
+        result = await dodoRequest(`/subscriptions/${subscription.dodo_subscription_id}`, {
+          method: 'PATCH',
+          body: JSON.stringify({
+            items: [{
+              id: currentSub.items.data[0].id,
+              product: newProductId,
+            }],
+            proration_behavior: 'create_prorations',
+          }),
         });
 
         // Update in our database

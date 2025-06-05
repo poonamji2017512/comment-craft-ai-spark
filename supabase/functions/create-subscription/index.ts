@@ -1,7 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { DodoPayments } from "npm:@dodopayments/node@1.0.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -18,10 +17,6 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 );
 
-const dodo = new DodoPayments({
-  apiKey: Deno.env.get('DODO_PAYMENTS_SECRET_KEY') ?? '',
-});
-
 // Product ID mapping
 const PRODUCT_IDS = {
   PRO: {
@@ -33,6 +28,31 @@ const PRODUCT_IDS = {
     yearly: 'pdt_WAhDE7ydq4emw3hRu1dgp'
   }
 };
+
+const DODO_API_BASE = 'https://api.dodopayments.com/v1';
+
+async function dodoRequest(endpoint: string, options: RequestInit = {}) {
+  const apiKey = Deno.env.get('DODO_PAYMENTS_SECRET_KEY');
+  if (!apiKey) {
+    throw new Error('DODO_PAYMENTS_SECRET_KEY not configured');
+  }
+
+  const response = await fetch(`${DODO_API_BASE}${endpoint}`, {
+    ...options,
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Dodo API error: ${response.status} ${error}`);
+  }
+
+  return response.json();
+}
 
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
@@ -71,9 +91,12 @@ serve(async (req: Request) => {
       dodoCustomerId = existingSubscription.dodo_customer_id;
     } else {
       // Create new customer in Dodo Payments
-      const customer = await dodo.customers.create({
-        email: user.email!,
-        name: user.user_metadata?.full_name || user.email!,
+      const customer = await dodoRequest('/customers', {
+        method: 'POST',
+        body: JSON.stringify({
+          email: user.email!,
+          name: user.user_metadata?.full_name || user.email!,
+        }),
       });
       dodoCustomerId = customer.id;
     }
@@ -82,17 +105,20 @@ serve(async (req: Request) => {
     const productId = PRODUCT_IDS[planType][billingCycle];
 
     // Create subscription in Dodo Payments
-    const subscription = await dodo.subscriptions.create({
-      customer: dodoCustomerId,
-      items: [{
-        product: productId,
-        quantity: 1,
-      }],
-      payment_behavior: 'default_incomplete',
-      payment_settings: {
-        save_default_payment_method: 'on_subscription',
-      },
-      expand: ['latest_invoice.payment_intent'],
+    const subscription = await dodoRequest('/subscriptions', {
+      method: 'POST',
+      body: JSON.stringify({
+        customer: dodoCustomerId,
+        items: [{
+          product: productId,
+          quantity: 1,
+        }],
+        payment_behavior: 'default_incomplete',
+        payment_settings: {
+          save_default_payment_method: 'on_subscription',
+        },
+        expand: ['latest_invoice.payment_intent'],
+      }),
     });
 
     console.log('Dodo subscription created:', subscription.id);
@@ -127,11 +153,14 @@ serve(async (req: Request) => {
 
     // If subscription requires payment, create a checkout session
     if (subscription.status === 'incomplete') {
-      const checkoutSession = await dodo.checkout.sessions.create({
-        customer: dodoCustomerId,
-        subscription: subscription.id,
-        success_url: `${req.headers.get('origin')}/settings?tab=billing&success=true`,
-        cancel_url: `${req.headers.get('origin')}/settings?tab=billing&canceled=true`,
+      const checkoutSession = await dodoRequest('/checkout/sessions', {
+        method: 'POST',
+        body: JSON.stringify({
+          customer: dodoCustomerId,
+          subscription: subscription.id,
+          success_url: `${req.headers.get('origin')}/settings?tab=billing&success=true`,
+          cancel_url: `${req.headers.get('origin')}/settings?tab=billing&canceled=true`,
+        }),
       });
       
       checkoutUrl = checkoutSession.url;
