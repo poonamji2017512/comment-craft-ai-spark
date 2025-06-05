@@ -37,6 +37,8 @@ async function dodoRequest(endpoint: string, options: RequestInit = {}) {
     throw new Error('DODO_PAYMENTS_SECRET_KEY not configured');
   }
 
+  console.log(`Making request to: ${DODO_API_BASE}${endpoint}`);
+
   const response = await fetch(`${DODO_API_BASE}${endpoint}`, {
     ...options,
     headers: {
@@ -48,6 +50,7 @@ async function dodoRequest(endpoint: string, options: RequestInit = {}) {
 
   if (!response.ok) {
     const error = await response.text();
+    console.error(`Dodo API error: ${response.status} ${error}`);
     throw new Error(`Dodo API error: ${response.status} ${error}`);
   }
 
@@ -70,6 +73,7 @@ serve(async (req: Request) => {
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     
     if (authError || !user) {
+      console.error('Auth error:', authError);
       throw new Error('Unauthorized');
     }
 
@@ -89,8 +93,10 @@ serve(async (req: Request) => {
 
     if (existingSubscription?.dodo_customer_id) {
       dodoCustomerId = existingSubscription.dodo_customer_id;
+      console.log('Using existing customer ID:', dodoCustomerId);
     } else {
       // Create new customer in Dodo Payments
+      console.log('Creating new customer for:', user.email);
       const customer = await dodoRequest('/customers', {
         method: 'POST',
         body: JSON.stringify({
@@ -99,10 +105,12 @@ serve(async (req: Request) => {
         }),
       });
       dodoCustomerId = customer.id;
+      console.log('Created new customer:', dodoCustomerId);
     }
 
     // Get the product ID for the selected plan
     const productId = PRODUCT_IDS[planType][billingCycle];
+    console.log('Using product ID:', productId);
 
     // Create subscription in Dodo Payments
     const subscription = await dodoRequest('/subscriptions', {
@@ -164,6 +172,7 @@ serve(async (req: Request) => {
       });
       
       checkoutUrl = checkoutSession.url;
+      console.log('Created checkout session:', checkoutUrl);
     }
 
     return new Response(JSON.stringify({
