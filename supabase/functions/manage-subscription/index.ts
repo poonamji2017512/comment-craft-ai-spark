@@ -18,7 +18,7 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 );
 
-const DODO_API_BASE = 'https://api.dodopayments.com/v1';
+const DODO_API_BASE = 'https://api.dodo.dev/v1';
 
 async function dodoRequest(endpoint: string, options: RequestInit = {}) {
   const apiKey = Deno.env.get('DODO_PAYMENTS_SECRET_KEY');
@@ -31,6 +31,7 @@ async function dodoRequest(endpoint: string, options: RequestInit = {}) {
     headers: {
       'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
+      'Accept': 'application/json',
       ...options.headers,
     },
   });
@@ -81,12 +82,9 @@ serve(async (req: Request) => {
 
     switch (action) {
       case 'cancel':
-        // Cancel subscription at period end
-        result = await dodoRequest(`/subscriptions/${subscription.dodo_subscription_id}`, {
-          method: 'PATCH',
-          body: JSON.stringify({
-            cancel_at_period_end: true,
-          }),
+        // Cancel subscription 
+        result = await dodoRequest(`/subscriptions/${subscription.dodo_subscription_id}/cancel`, {
+          method: 'POST',
         });
 
         // Update in our database
@@ -106,31 +104,24 @@ serve(async (req: Request) => {
           throw new Error('New plan type and billing cycle required for plan changes');
         }
 
-        // Get current subscription from Dodo
-        const currentSub = await dodoRequest(`/subscriptions/${subscription.dodo_subscription_id}`);
-        
         // Update subscription with new plan
         const productIds = {
           PRO: {
-            monthly: 'pdt_nYgdsmbwvDujGIBBlA9LE',
-            yearly: 'pdt_YQbqHvroDI6wJrRhBkEwj'
+            monthly: 'price_pro_monthly',
+            yearly: 'price_pro_yearly'
           },
           ULTRA: {
-            monthly: 'pdt_APpHuTy5eP3DqNcs0WYR7',
-            yearly: 'pdt_WAhDE7ydq4emw3hRu1dgp'
+            monthly: 'price_ultra_monthly',
+            yearly: 'price_ultra_yearly'
           }
         };
 
-        const newProductId = productIds[newPlanType][newBillingCycle];
+        const newPriceId = productIds[newPlanType][newBillingCycle];
 
         result = await dodoRequest(`/subscriptions/${subscription.dodo_subscription_id}`, {
           method: 'PATCH',
           body: JSON.stringify({
-            items: [{
-              id: currentSub.items.data[0].id,
-              product: newProductId,
-            }],
-            proration_behavior: 'create_prorations',
+            price_id: newPriceId,
           }),
         });
 

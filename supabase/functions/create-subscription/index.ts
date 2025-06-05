@@ -17,19 +17,20 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 );
 
-// Product ID mapping
+// Updated Product ID mapping - these should match your Dodo dashboard
 const PRODUCT_IDS = {
   PRO: {
-    monthly: 'pdt_nYgdsmbwvDujGIBBlA9LE',
-    yearly: 'pdt_YQbqHvroDI6wJrRhBkEwj'
+    monthly: 'price_pro_monthly',
+    yearly: 'price_pro_yearly'
   },
   ULTRA: {
-    monthly: 'pdt_APpHuTy5eP3DqNcs0WYR7',
-    yearly: 'pdt_WAhDE7ydq4emw3hRu1dgp'
+    monthly: 'price_ultra_monthly', 
+    yearly: 'price_ultra_yearly'
   }
 };
 
-const DODO_API_BASE = 'https://api.dodopayments.com/v1';
+// Correct Dodo Payments API base URL
+const DODO_API_BASE = 'https://api.dodo.dev/v1';
 
 async function dodoRequest(endpoint: string, options: RequestInit = {}) {
   const apiKey = Deno.env.get('DODO_PAYMENTS_SECRET_KEY');
@@ -38,23 +39,33 @@ async function dodoRequest(endpoint: string, options: RequestInit = {}) {
   }
 
   console.log(`Making request to: ${DODO_API_BASE}${endpoint}`);
+  console.log('Request options:', JSON.stringify({
+    method: options.method || 'GET',
+    headers: options.headers,
+    body: options.body
+  }, null, 2));
 
   const response = await fetch(`${DODO_API_BASE}${endpoint}`, {
     ...options,
     headers: {
       'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
+      'Accept': 'application/json',
       ...options.headers,
     },
   });
 
+  console.log(`Response status: ${response.status}`);
+  
   if (!response.ok) {
-    const error = await response.text();
-    console.error(`Dodo API error: ${response.status} ${error}`);
-    throw new Error(`Dodo API error: ${response.status} ${error}`);
+    const errorText = await response.text();
+    console.error(`Dodo API error: ${response.status} ${errorText}`);
+    throw new Error(`Dodo API error: ${response.status} ${errorText}`);
   }
 
-  return response.json();
+  const responseData = await response.json();
+  console.log('Response data:', JSON.stringify(responseData, null, 2));
+  return responseData;
 }
 
 serve(async (req: Request) => {
@@ -95,15 +106,21 @@ serve(async (req: Request) => {
       dodoCustomerId = existingSubscription.dodo_customer_id;
       console.log('Using existing customer ID:', dodoCustomerId);
     } else {
-      // Create new customer in Dodo Payments
+      // Create new customer in Dodo Payments with correct format
       console.log('Creating new customer for:', user.email);
+      
+      const customerData = {
+        email: user.email!,
+        name: user.user_metadata?.full_name || user.email!.split('@')[0],
+      };
+      
+      console.log('Customer data:', JSON.stringify(customerData, null, 2));
+      
       const customer = await dodoRequest('/customers', {
         method: 'POST',
-        body: JSON.stringify({
-          email: user.email!,
-          name: user.user_metadata?.full_name || user.email!,
-        }),
+        body: JSON.stringify(customerData),
       });
+      
       dodoCustomerId = customer.id;
       console.log('Created new customer:', dodoCustomerId);
     }
@@ -112,21 +129,20 @@ serve(async (req: Request) => {
     const productId = PRODUCT_IDS[planType][billingCycle];
     console.log('Using product ID:', productId);
 
-    // Create subscription in Dodo Payments
+    // Create subscription in Dodo Payments with correct format
+    const subscriptionData = {
+      customer_id: dodoCustomerId,
+      price_id: productId,
+      payment_behavior: 'default_incomplete',
+      success_url: `${req.headers.get('origin')}/settings?tab=billing&success=true`,
+      cancel_url: `${req.headers.get('origin')}/settings?tab=billing&canceled=true`,
+    };
+
+    console.log('Subscription data:', JSON.stringify(subscriptionData, null, 2));
+
     const subscription = await dodoRequest('/subscriptions', {
       method: 'POST',
-      body: JSON.stringify({
-        customer: dodoCustomerId,
-        items: [{
-          product: productId,
-          quantity: 1,
-        }],
-        payment_behavior: 'default_incomplete',
-        payment_settings: {
-          save_default_payment_method: 'on_subscription',
-        },
-        expand: ['latest_invoice.payment_intent'],
-      }),
+      body: JSON.stringify(subscriptionData),
     });
 
     console.log('Dodo subscription created:', subscription.id);
@@ -151,42 +167,26 @@ serve(async (req: Request) => {
       throw new Error('Failed to store subscription');
     }
 
-    // Return checkout URL or payment intent client secret
-    let checkoutUrl = null;
-    let clientSecret = null;
-
-    if (subscription.latest_invoice?.payment_intent) {
-      clientSecret = subscription.latest_invoice.payment_intent.client_secret;
-    }
-
-    // If subscription requires payment, create a checkout session
-    if (subscription.status === 'incomplete') {
-      const checkoutSession = await dodoRequest('/checkout/sessions', {
-        method: 'POST',
-        body: JSON.stringify({
-          customer: dodoCustomerId,
-          subscription: subscription.id,
-          success_url: `${req.headers.get('origin')}/settings?tab=billing&success=true`,
-          cancel_url: `${req.headers.get('origin')}/settings?tab=billing&canceled=true`,
-        }),
-      });
-      
-      checkoutUrl = checkoutSession.url;
-      console.log('Created checkout session:', checkoutUrl);
-    }
-
-    return new Response(JSON.stringify({
+    // Return checkout URL or subscription details
+    const result = {
       subscriptionId: subscription.id,
       status: subscription.status,
-      checkoutUrl,
-      clientSecret,
-    }), {
+      checkoutUrl: subscription.checkout_url || null,
+      clientSecret: subscription.client_secret || null,
+    };
+
+    console.log('Returning result:', JSON.stringify(result, null, 2));
+
+    return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error: any) {
     console.error('Error creating subscription:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ 
+      error: error.message,
+      details: error.stack 
+    }), {
       status: 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
