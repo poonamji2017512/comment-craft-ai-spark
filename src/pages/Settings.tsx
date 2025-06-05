@@ -92,7 +92,8 @@ const Settings = () => {
     google: {
       name: "Google Gemini",
       models: [
-        { value: 'gemini-2.0-flash-lite', label: 'Gemini 2.0 Flash Lite', description: 'Fast and efficient' },
+        { value: 'gemini-2.0-flash-lite', label: 'Gemini 2.0 Flash Lite', description: 'Fastest and most efficient' },
+        { value: 'gemini-2.0-flash-exp', label: 'Gemini 2.0 Flash Experimental', description: 'Latest experimental features' },
         { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash', description: 'Balanced performance' },
         { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro (Recommended)', description: 'Best overall performance' }
       ]
@@ -100,6 +101,7 @@ const Settings = () => {
     openai: {
       name: "OpenAI",
       models: [
+        { value: 'gpt-4o-mini', label: 'GPT-4o Mini', description: 'Fast and efficient' },
         { value: 'gpt-4.1', label: 'GPT-4.1', description: 'Advanced reasoning' },
         { value: 'gpt-4o', label: 'GPT-4o', description: 'Multimodal capabilities' },
         { value: 'o3-mini', label: 'o3-mini', description: 'Compact and efficient' }
@@ -108,6 +110,7 @@ const Settings = () => {
     anthropic: {
       name: "Anthropic Claude",
       models: [
+        { value: 'claude-4-opus', label: 'Claude 4 Opus', description: 'Most powerful Claude model' },
         { value: 'claude-4-sonnet', label: 'Claude 4 Sonnet', description: 'Latest Claude model' },
         { value: 'claude-3.7-sonnet', label: 'Claude 3.7 Sonnet', description: 'Reliable performance' }
       ]
@@ -302,6 +305,10 @@ const Settings = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleModelSelection = async (modelValue: string) => {
+    await saveUserSettings({ ai_model: modelValue });
   };
 
   const validateApiKey = async () => {
@@ -584,11 +591,12 @@ const Settings = () => {
                     {category.models.map((model) => (
                       <div
                         key={model.value}
-                        className={`border rounded-lg p-4 cursor-not-allowed transition-colors ${
+                        className={`border rounded-lg p-4 cursor-pointer transition-colors ${
                           userSettings.ai_model === model.value
                             ? 'border-primary bg-primary/5'
-                            : 'border-border'
+                            : 'border-border hover:border-primary/50'
                         }`}
+                        onClick={() => handleModelSelection(model.value)}
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
