@@ -16,6 +16,7 @@ import Settings from "./pages/Settings";
 import Docs from "./pages/Docs";
 import Changelog from "./pages/Changelog";
 import NotFound from "./pages/NotFound";
+import Landing from "./pages/Landing";
 
 const queryClient = new QueryClient();
 
@@ -27,23 +28,31 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <SidebarProvider>
-              <div className="min-h-screen flex w-full bg-background">
-                <AppSidebar />
-                <main className="flex-1 overflow-hidden">
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/history" element={<History />} />
-                    <Route path="/settings" element={<Settings />} />
-                    <Route path="/docs" element={<Docs />} />
-                    <Route path="/changelog" element={<Changelog />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </main>
-              </div>
-              <ChangelogNotificationModal />
-            </SidebarProvider>
+            <Routes>
+              {/* Landing page route - no sidebar */}
+              <Route path="/landing" element={<Landing />} />
+              
+              {/* SaaS app routes - with sidebar */}
+              <Route path="/*" element={
+                <SidebarProvider>
+                  <div className="min-h-screen flex w-full bg-background">
+                    <AppSidebar />
+                    <main className="flex-1 overflow-hidden">
+                      <Routes>
+                        <Route path="/" element={<Index />} />
+                        <Route path="/dashboard" element={<Dashboard />} />
+                        <Route path="/history" element={<History />} />
+                        <Route path="/settings" element={<Settings />} />
+                        <Route path="/docs" element={<Docs />} />
+                        <Route path="/changelog" element={<Changelog />} />
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </main>
+                  </div>
+                  <ChangelogNotificationModal />
+                </SidebarProvider>
+              } />
+            </Routes>
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>
