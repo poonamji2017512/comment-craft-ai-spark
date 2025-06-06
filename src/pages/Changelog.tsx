@@ -19,6 +19,39 @@ import { Link } from "react-router-dom";
 const Changelog = () => {
   const releases = [
     {
+      version: "2.5.0",
+      date: "2024-12-19",
+      type: "feature",
+      title: "Payment Integration & Landing Page",
+      changes: [
+        {
+          type: "feature",
+          title: "Dodo Payments Integration",
+          description: "Fixed payment gateway integration with proper API configuration, subscription creation flow, and checkout form processing"
+        },
+        {
+          type: "feature",
+          title: "Dedicated Landing Page",
+          description: "Created a new landing page with dedicated sticky navigation bar, separate from the main app interface"
+        },
+        {
+          type: "improvement",
+          title: "Enhanced Contact Modal",
+          description: "Redesigned contact modal with improved layout, better visual hierarchy, and enhanced user experience"
+        },
+        {
+          type: "bugfix",
+          title: "API Endpoint Configuration",
+          description: "Fixed Dodo Payments API endpoint configuration and request payload structure for proper checkout functionality"
+        },
+        {
+          type: "improvement",
+          title: "Authentication Flow",
+          description: "Improved authentication handling in landing page navbar with proper logout functionality"
+        }
+      ]
+    },
+    {
       version: "2.4.0",
       date: "2024-12-18",
       type: "feature",
