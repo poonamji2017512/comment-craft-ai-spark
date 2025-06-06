@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,12 +5,12 @@ import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 
 const LandingPageNavbar = () => {
-  const { user, signOut } = useAuth();
+  const { user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleAuthAction = () => {
     if (user) {
-      signOut();
+      logout();
     } else {
       // You can add login modal trigger here
       console.log('Trigger login modal');
