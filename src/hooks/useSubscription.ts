@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -127,17 +126,11 @@ export const useSubscription = () => {
       return data;
     },
     onSuccess: (data) => {
-      if (data.checkoutUrl) {
-        // For embedded checkout, open in overlay
-        if (data.embedded) {
-          // Trigger embedded checkout here
-          console.log('Opening embedded checkout:', data.checkoutUrl);
-          // You would integrate with Dodo's embedded checkout SDK here
-          window.open(data.checkoutUrl, '_blank');
-        } else {
-          // Redirect to Dodo Payments checkout
-          window.location.href = data.checkoutUrl;
-        }
+      if (data.checkoutUrl || data.paymentLink) {
+        // Redirect to Dodo Payments checkout
+        const checkoutUrl = data.checkoutUrl || data.paymentLink;
+        console.log('Redirecting to checkout:', checkoutUrl);
+        window.location.href = checkoutUrl;
       } else {
         toast({
           title: "Subscription Created",
@@ -147,6 +140,7 @@ export const useSubscription = () => {
       }
     },
     onError: (error: any) => {
+      console.error('Subscription creation error:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to create subscription",

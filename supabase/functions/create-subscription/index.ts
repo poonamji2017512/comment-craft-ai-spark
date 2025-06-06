@@ -17,7 +17,7 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 );
 
-// Updated Product ID mapping
+// Product ID mapping based on your configuration
 const PRODUCT_IDS = {
   PRO: {
     monthly: 'pdt_nYgdsmbwvDujGIBBlA9LE',
@@ -29,7 +29,7 @@ const PRODUCT_IDS = {
   }
 };
 
-const DODO_API_BASE = 'https://api.dodo.dev/v1';
+const DODO_API_BASE = 'https://live.dodopayments.com';
 
 async function dodoRequest(endpoint: string, options: RequestInit = {}) {
   const timestamp = new Date().toISOString();
@@ -37,7 +37,6 @@ async function dodoRequest(endpoint: string, options: RequestInit = {}) {
   
   console.log(`[${timestamp}] create-subscription: Starting dodoRequest to endpoint: ${endpoint}`);
   
-  // Bug Fix #3: Throw error immediately if dodoApiKey is missing
   if (!apiKey) {
     console.error(`[${timestamp}] create-subscription: CRITICAL - DODO_PAYMENTS_SECRET_KEY not configured`);
     throw new Error('DODO_PAYMENTS_SECRET_KEY not configured');
@@ -151,7 +150,7 @@ serve(async (req: Request) => {
 
     const { planType, billingCycle }: CreateSubscriptionRequest = requestBody;
 
-    // Bug Fix #2: Validate planType strictly
+    // Validate planType and billingCycle
     if (!planType || !['PRO', 'ULTRA'].includes(planType)) {
       console.error(`[${timestamp}] create-subscription: Invalid planType: ${planType}`);
       return new Response(JSON.stringify({ 
@@ -188,7 +187,6 @@ serve(async (req: Request) => {
       dodoCustomerId = existingSubscription.dodo_customer_id;
       console.log(`[${timestamp}] create-subscription: Using existing customer ID: ${dodoCustomerId}`);
     } else {
-      // Bug Fix #7: Fix customer object structure
       console.log(`[${timestamp}] create-subscription: Creating new customer for: ${user.email}`);
       
       const customerData = {
@@ -204,7 +202,7 @@ serve(async (req: Request) => {
           body: JSON.stringify(customerData),
         });
         
-        dodoCustomerId = customer.id;
+        dodoCustomerId = customer.customer_id;
         console.log(`[${timestamp}] create-subscription: Created new customer: ${dodoCustomerId}`);
       } catch (customerError) {
         console.error(`[${timestamp}] create-subscription: Error creating customer:`, customerError.message);
@@ -222,22 +220,17 @@ serve(async (req: Request) => {
     const productId = PRODUCT_IDS[planType][billingCycle];
     console.log(`[${timestamp}] create-subscription: Using product ID: ${productId}`);
 
-    // Bug Fix #4: Improve returnUrl fallback
     const origin = req.headers.get('origin') || 'https://your-app.com';
     const successUrl = `${origin}/settings?tab=billing&subscription_process=success`;
     const cancelUrl = `${origin}/settings?tab=billing&subscription_process=canceled`;
 
-    // Bug Fix #1: Move Dodo API call before DB insert to avoid orphaned records
-    // Bug Fix #5: Support embedded checkout
-    // Bug Fix #8: Add optional trial_period_days logic
+    // Create subscription with Dodo Payments API - including REQUIRED quantity field
     const subscriptionData = {
       customer_id: dodoCustomerId,
-      price_id: productId,
-      payment_behavior: 'default_incomplete',
-      success_url: successUrl,
-      cancel_url: cancelUrl,
-      embedded: true, // Enable embedded checkout
-      trial_period_days: 3, // 3-day trial
+      product_id: productId,
+      quantity: 1, // REQUIRED field for Dodo Payments
+      payment_link: true,
+      return_url: successUrl,
       metadata: {
         local_user_id: user.id,
         plan_type: planType,
@@ -255,7 +248,6 @@ serve(async (req: Request) => {
       });
       
       console.log(`[${timestamp}] create-subscription: Dodo subscription created: ${subscription.id}`);
-      // Bug Fix #9: Structured logs for subscription creation success
       console.log(`[${timestamp}] create-subscription: SUCCESS - Subscription created`, {
         subscription_id: subscription.id,
         user_id: user.id,
@@ -274,9 +266,8 @@ serve(async (req: Request) => {
       });
     }
 
-    // Now store subscription in our database after successful Dodo creation
+    // Store subscription in our database after successful Dodo creation
     try {
-      // Bug Fix #6: Pass metadata including local IDs
       const { error: dbError } = await supabase
         .from('subscriptions')
         .upsert({
@@ -285,7 +276,7 @@ serve(async (req: Request) => {
           dodo_subscription_id: subscription.id,
           plan_type: planType,
           billing_cycle: billingCycle,
-          status: subscription.status,
+          status: subscription.status || 'incomplete',
           current_period_start: subscription.current_period_start ? new Date(subscription.current_period_start * 1000).toISOString() : null,
           current_period_end: subscription.current_period_end ? new Date(subscription.current_period_end * 1000).toISOString() : null,
           updated_at: new Date().toISOString(),
@@ -293,12 +284,10 @@ serve(async (req: Request) => {
 
       if (dbError) {
         console.error(`[${timestamp}] create-subscription: Database error:`, dbError.message);
-        // Note: At this point subscription exists in Dodo but not in our DB
-        // Webhook should eventually sync it, but we should still return error
         return new Response(JSON.stringify({ 
           error: 'Failed to store subscription in database',
           details: dbError.message,
-          subscription_id: subscription.id // Include for manual recovery
+          subscription_id: subscription.id
         }), {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -316,15 +305,13 @@ serve(async (req: Request) => {
       });
     }
 
-    // Bug Fix #10: Return a safe, consistent payload for embedded checkout
+    // Return success response with payment link
     const result = {
       success: true,
       subscriptionId: subscription.id,
       status: subscription.status,
-      checkoutUrl: subscription.checkout_url || null,
-      clientSecret: subscription.client_secret || null,
-      embedded: true,
-      trial_days: 3
+      checkoutUrl: subscription.payment_link || null,
+      paymentLink: subscription.payment_link || null
     };
 
     console.log(`[${timestamp}] create-subscription: Returning success response:`, JSON.stringify(result, null, 2));
