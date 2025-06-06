@@ -29,6 +29,7 @@ const PRODUCT_IDS = {
   }
 };
 
+// Use correct Dodo Payments API endpoint
 const DODO_API_BASE = 'https://live.dodopayments.com';
 
 async function dodoRequest(endpoint: string, options: RequestInit = {}) {
@@ -222,11 +223,10 @@ serve(async (req: Request) => {
 
     const origin = req.headers.get('origin') || 'https://your-app.com';
     const successUrl = `${origin}/settings?tab=billing&subscription_process=success`;
-    const cancelUrl = `${origin}/settings?tab=billing&subscription_process=canceled`;
 
-    // Create subscription with Dodo Payments API - including REQUIRED quantity field
+    // Create subscription with Dodo Payments API - with all REQUIRED fields
     const subscriptionData = {
-      customer_id: dodoCustomerId,
+      customer: dodoCustomerId,  // Changed from customer_id to customer
       product_id: productId,
       quantity: 1, // REQUIRED field for Dodo Payments
       payment_link: true,

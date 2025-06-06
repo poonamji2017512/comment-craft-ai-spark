@@ -31,9 +31,9 @@ export const DODO_CONFIG = {
     period_days: 3
   },
   
-  // API configuration
+  // API configuration - Updated to use correct endpoint
   API: {
-    base_url: 'https://api.dodo.dev/v1',
+    base_url: 'https://live.dodopayments.com',
     timeout: 30000
   }
 };

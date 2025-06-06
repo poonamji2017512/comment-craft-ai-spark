@@ -18,7 +18,8 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 );
 
-const DODO_API_BASE = 'https://api.dodo.dev/v1';
+// Use correct Dodo Payments API endpoint
+const DODO_API_BASE = 'https://live.dodopayments.com';
 
 // Updated Product ID mapping
 const PRODUCT_IDS = {
