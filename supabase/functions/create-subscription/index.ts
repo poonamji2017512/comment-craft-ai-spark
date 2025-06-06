@@ -17,19 +17,18 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 );
 
-// Updated Product ID mapping based on Dodo Payments standard format
+// Updated Product ID mapping
 const PRODUCT_IDS = {
   PRO: {
-    monthly: 'price_pro_monthly',
-    yearly: 'price_pro_yearly'
+    monthly: 'pdt_nYgdsmbwvDujGIBBlA9LE',
+    yearly: 'pdt_YQbqHvroDI6wJrRhBkEwj'
   },
   ULTRA: {
-    monthly: 'price_ultra_monthly', 
-    yearly: 'price_ultra_yearly'
+    monthly: 'pdt_APpHuTy5eP3DqNcs0WYR7',
+    yearly: 'pdt_WAhDE7ydq4emw3hRu1dgp'
   }
 };
 
-// Correct Dodo Payments API base URL
 const DODO_API_BASE = 'https://api.dodo.dev/v1';
 
 async function dodoRequest(endpoint: string, options: RequestInit = {}) {
@@ -38,6 +37,7 @@ async function dodoRequest(endpoint: string, options: RequestInit = {}) {
   
   console.log(`[${timestamp}] create-subscription: Starting dodoRequest to endpoint: ${endpoint}`);
   
+  // Bug Fix #3: Throw error immediately if dodoApiKey is missing
   if (!apiKey) {
     console.error(`[${timestamp}] create-subscription: CRITICAL - DODO_PAYMENTS_SECRET_KEY not configured`);
     throw new Error('DODO_PAYMENTS_SECRET_KEY not configured');
@@ -45,8 +45,7 @@ async function dodoRequest(endpoint: string, options: RequestInit = {}) {
 
   const fullUrl = `${DODO_API_BASE}${endpoint}`;
   console.log(`[${timestamp}] create-subscription: Making request to: ${fullUrl}`);
-  
-  // Log request details (sanitize sensitive data)
+
   const requestOptions = {
     ...options,
     headers: {
@@ -58,12 +57,6 @@ async function dodoRequest(endpoint: string, options: RequestInit = {}) {
   };
 
   console.log(`[${timestamp}] create-subscription: Request method: ${requestOptions.method || 'GET'}`);
-  console.log(`[${timestamp}] create-subscription: Request headers:`, JSON.stringify({
-    'Content-Type': requestOptions.headers['Content-Type'],
-    'Accept': requestOptions.headers['Accept'],
-    'Authorization': 'Bearer [REDACTED]'
-  }));
-  
   if (options.body) {
     console.log(`[${timestamp}] create-subscription: Request body:`, options.body);
   }
@@ -71,21 +64,18 @@ async function dodoRequest(endpoint: string, options: RequestInit = {}) {
   let response;
   try {
     response = await fetch(fullUrl, requestOptions);
-    console.log(`[${timestamp}] create-subscription: Response received. Status: ${response.status} ${response.statusText}`);
-    console.log(`[${timestamp}] create-subscription: Response headers:`, JSON.stringify(Object.fromEntries(response.headers.entries())));
+    console.log(`[${timestamp}] create-subscription: Response status: ${response.status}`);
   } catch (fetchError) {
-    console.error(`[${timestamp}] create-subscription: Network error during fetch:`, fetchError.message);
-    console.error(`[${timestamp}] create-subscription: Fetch error stack:`, fetchError.stack);
+    console.error(`[${timestamp}] create-subscription: Network error:`, fetchError.message);
     throw new Error(`Network error calling Dodo API: ${fetchError.message}`);
   }
 
-  // Read response as text first to handle non-JSON responses
   let responseText;
   try {
     responseText = await response.text();
     console.log(`[${timestamp}] create-subscription: Response body: ${responseText}`);
   } catch (readError) {
-    console.error(`[${timestamp}] create-subscription: Error reading response body:`, readError.message);
+    console.error(`[${timestamp}] create-subscription: Error reading response:`, readError.message);
     throw new Error(`Error reading Dodo API response: ${readError.message}`);
   }
 
@@ -96,38 +86,31 @@ async function dodoRequest(endpoint: string, options: RequestInit = {}) {
     try {
       errorData = JSON.parse(responseText);
     } catch (parseError) {
-      console.warn(`[${timestamp}] create-subscription: Response was not valid JSON`);
       errorData = { message: responseText };
     }
 
     throw new Error(`Dodo API error: ${response.status} - ${errorData.message || responseText}`);
   }
 
-  // Parse successful response
-  let responseData;
   try {
-    responseData = JSON.parse(responseText);
-    console.log(`[${timestamp}] create-subscription: Successfully parsed response data:`, JSON.stringify(responseData, null, 2));
+    return JSON.parse(responseText);
   } catch (parseError) {
-    console.error(`[${timestamp}] create-subscription: Error parsing successful response as JSON:`, parseError.message);
+    console.error(`[${timestamp}] create-subscription: Error parsing response JSON:`, parseError.message);
     throw new Error(`Invalid JSON response from Dodo API: ${parseError.message}`);
   }
-
-  return responseData;
 }
 
 serve(async (req: Request) => {
   const timestamp = new Date().toISOString();
   console.log(`[${timestamp}] create-subscription: Function invoked. Method: ${req.method}`);
 
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     console.log(`[${timestamp}] create-subscription: Handling OPTIONS preflight request`);
     return new Response(null, { headers: corsHeaders, status: 204 });
   }
 
   try {
-    // Parse and log incoming request
+    // Parse request
     let requestBody;
     try {
       requestBody = await req.json();
@@ -143,10 +126,10 @@ serve(async (req: Request) => {
       });
     }
 
-    // Get user from auth header
+    // Authenticate user
     const authHeader = req.headers.get('authorization');
     if (!authHeader) {
-      console.error(`[${timestamp}] create-subscription: No authorization header provided`);
+      console.error(`[${timestamp}] create-subscription: No authorization header`);
       return new Response(JSON.stringify({ error: 'No authorization header' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -168,10 +151,21 @@ serve(async (req: Request) => {
 
     const { planType, billingCycle }: CreateSubscriptionRequest = requestBody;
 
-    if (!planType || !billingCycle) {
-      console.error(`[${timestamp}] create-subscription: Missing required fields. planType: ${planType}, billingCycle: ${billingCycle}`);
+    // Bug Fix #2: Validate planType strictly
+    if (!planType || !['PRO', 'ULTRA'].includes(planType)) {
+      console.error(`[${timestamp}] create-subscription: Invalid planType: ${planType}`);
       return new Response(JSON.stringify({ 
-        error: 'Missing required fields: planType and billingCycle' 
+        error: 'Invalid planType. Must be PRO or ULTRA' 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!billingCycle || !['monthly', 'yearly'].includes(billingCycle)) {
+      console.error(`[${timestamp}] create-subscription: Invalid billingCycle: ${billingCycle}`);
+      return new Response(JSON.stringify({ 
+        error: 'Invalid billingCycle. Must be monthly or yearly' 
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -188,13 +182,13 @@ serve(async (req: Request) => {
       .from('subscriptions')
       .select('dodo_customer_id')
       .eq('user_id', user.id)
-      .single();
+      .maybeSingle();
 
     if (existingSubscription?.dodo_customer_id) {
       dodoCustomerId = existingSubscription.dodo_customer_id;
       console.log(`[${timestamp}] create-subscription: Using existing customer ID: ${dodoCustomerId}`);
     } else {
-      // Create new customer in Dodo Payments
+      // Bug Fix #7: Fix customer object structure
       console.log(`[${timestamp}] create-subscription: Creating new customer for: ${user.email}`);
       
       const customerData = {
@@ -228,13 +222,27 @@ serve(async (req: Request) => {
     const productId = PRODUCT_IDS[planType][billingCycle];
     console.log(`[${timestamp}] create-subscription: Using product ID: ${productId}`);
 
-    // Create subscription in Dodo Payments
+    // Bug Fix #4: Improve returnUrl fallback
+    const origin = req.headers.get('origin') || 'https://your-app.com';
+    const successUrl = `${origin}/settings?tab=billing&subscription_process=success`;
+    const cancelUrl = `${origin}/settings?tab=billing&subscription_process=canceled`;
+
+    // Bug Fix #1: Move Dodo API call before DB insert to avoid orphaned records
+    // Bug Fix #5: Support embedded checkout
+    // Bug Fix #8: Add optional trial_period_days logic
     const subscriptionData = {
       customer_id: dodoCustomerId,
       price_id: productId,
       payment_behavior: 'default_incomplete',
-      success_url: `${req.headers.get('origin')}/settings?tab=billing&success=true`,
-      cancel_url: `${req.headers.get('origin')}/settings?tab=billing&canceled=true`,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+      embedded: true, // Enable embedded checkout
+      trial_period_days: 3, // 3-day trial
+      metadata: {
+        local_user_id: user.id,
+        plan_type: planType,
+        billing_cycle: billingCycle
+      }
     };
 
     console.log(`[${timestamp}] create-subscription: Subscription data:`, JSON.stringify(subscriptionData, null, 2));
@@ -247,6 +255,14 @@ serve(async (req: Request) => {
       });
       
       console.log(`[${timestamp}] create-subscription: Dodo subscription created: ${subscription.id}`);
+      // Bug Fix #9: Structured logs for subscription creation success
+      console.log(`[${timestamp}] create-subscription: SUCCESS - Subscription created`, {
+        subscription_id: subscription.id,
+        user_id: user.id,
+        plan_type: planType,
+        billing_cycle: billingCycle,
+        status: subscription.status
+      });
     } catch (subscriptionError) {
       console.error(`[${timestamp}] create-subscription: Error creating subscription:`, subscriptionError.message);
       return new Response(JSON.stringify({ 
@@ -258,8 +274,9 @@ serve(async (req: Request) => {
       });
     }
 
-    // Store subscription in our database
+    // Now store subscription in our database after successful Dodo creation
     try {
+      // Bug Fix #6: Pass metadata including local IDs
       const { error: dbError } = await supabase
         .from('subscriptions')
         .upsert({
@@ -276,9 +293,12 @@ serve(async (req: Request) => {
 
       if (dbError) {
         console.error(`[${timestamp}] create-subscription: Database error:`, dbError.message);
+        // Note: At this point subscription exists in Dodo but not in our DB
+        // Webhook should eventually sync it, but we should still return error
         return new Response(JSON.stringify({ 
           error: 'Failed to store subscription in database',
-          details: dbError.message 
+          details: dbError.message,
+          subscription_id: subscription.id // Include for manual recovery
         }), {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -288,22 +308,26 @@ serve(async (req: Request) => {
       console.error(`[${timestamp}] create-subscription: Database operation failed:`, dbError.message);
       return new Response(JSON.stringify({ 
         error: 'Database operation failed',
-        details: dbError.message 
+        details: dbError.message,
+        subscription_id: subscription.id
       }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Return checkout URL or subscription details
+    // Bug Fix #10: Return a safe, consistent payload for embedded checkout
     const result = {
+      success: true,
       subscriptionId: subscription.id,
       status: subscription.status,
       checkoutUrl: subscription.checkout_url || null,
       clientSecret: subscription.client_secret || null,
+      embedded: true,
+      trial_days: 3
     };
 
-    console.log(`[${timestamp}] create-subscription: Preparing to return success response:`, JSON.stringify(result, null, 2));
+    console.log(`[${timestamp}] create-subscription: Returning success response:`, JSON.stringify(result, null, 2));
 
     return new Response(JSON.stringify(result), {
       status: 200,

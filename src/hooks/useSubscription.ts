@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useEffect } from 'react';
 
 export interface Subscription {
   id: string;
@@ -11,7 +12,7 @@ export interface Subscription {
   dodo_subscription_id?: string;
   plan_type: 'PRO' | 'ULTRA';
   billing_cycle: 'monthly' | 'yearly';
-  status: 'active' | 'canceled' | 'past_due' | 'incomplete';
+  status: 'active' | 'canceled' | 'past_due' | 'incomplete' | 'trialing';
   current_period_start?: string;
   current_period_end?: string;
   created_at: string;
@@ -46,7 +47,7 @@ export const useSubscription = () => {
         .select('*')
         .eq('user_id', user.id)
         .eq('status', 'active')
-        .single();
+        .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
         throw error;
@@ -75,6 +76,47 @@ export const useSubscription = () => {
     enabled: !!user,
   });
 
+  // Real-time subscription updates
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('subscription-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'subscriptions',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('Subscription updated:', payload);
+          // Invalidate and refetch subscription data
+          queryClient.invalidateQueries({ queryKey: ['subscription', user.id] });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'billing_history',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('New billing history:', payload);
+          // Invalidate and refetch billing history
+          queryClient.invalidateQueries({ queryKey: ['billing-history', user.id] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, queryClient]);
+
   const createSubscriptionMutation = useMutation({
     mutationFn: async ({ planType, billingCycle }: { planType: 'PRO' | 'ULTRA'; billingCycle: 'monthly' | 'yearly' }) => {
       const { data, error } = await supabase.functions.invoke('create-subscription', {
@@ -86,8 +128,16 @@ export const useSubscription = () => {
     },
     onSuccess: (data) => {
       if (data.checkoutUrl) {
-        // Redirect to Dodo Payments checkout
-        window.location.href = data.checkoutUrl;
+        // For embedded checkout, open in overlay
+        if (data.embedded) {
+          // Trigger embedded checkout here
+          console.log('Opening embedded checkout:', data.checkoutUrl);
+          // You would integrate with Dodo's embedded checkout SDK here
+          window.open(data.checkoutUrl, '_blank');
+        } else {
+          // Redirect to Dodo Payments checkout
+          window.location.href = data.checkoutUrl;
+        }
       } else {
         toast({
           title: "Subscription Created",
@@ -118,10 +168,14 @@ export const useSubscription = () => {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      const message = data.provisional ? 
+        "Your subscription is being updated. Changes will be reflected shortly." :
+        "Your subscription has been updated successfully.";
+      
       toast({
         title: "Subscription Updated",
-        description: "Your subscription has been updated successfully.",
+        description: message,
       });
       queryClient.invalidateQueries({ queryKey: ['subscription'] });
       queryClient.invalidateQueries({ queryKey: ['billing-history'] });

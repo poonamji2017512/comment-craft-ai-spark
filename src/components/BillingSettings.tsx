@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Check, Crown, Download, CreditCard } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { format } from "date-fns";
+import { DODO_CONFIG } from "@/utils/config";
 
 const BillingSettings = () => {
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">("monthly");
@@ -17,9 +18,10 @@ const BillingSettings = () => {
     isManagingSubscription 
   } = useSubscription();
 
-  const getPrice = (monthlyPrice: number) => {
+  const getPrice = (planType: 'PRO' | 'ULTRA') => {
+    const pricing = DODO_CONFIG.PRICING[planType];
     if (billingPeriod === "yearly") {
-      const yearlyPrice = monthlyPrice * 12 * 0.8; // 20% discount
+      const yearlyPrice = pricing.yearly;
       const monthlyEquivalent = yearlyPrice / 12;
       return {
         display: `$${monthlyEquivalent.toFixed(2)}`,
@@ -28,14 +30,14 @@ const BillingSettings = () => {
       };
     }
     return {
-      display: `$${monthlyPrice.toFixed(2)}`,
+      display: `$${pricing.monthly.toFixed(2)}`,
       period: "/ month",
       note: null
     };
   };
 
-  const proPrice = getPrice(20);
-  const ultraPrice = getPrice(40);
+  const proPrice = getPrice('PRO');
+  const ultraPrice = getPrice('ULTRA');
 
   const handleCreateSubscription = (planType: 'PRO' | 'ULTRA') => {
     createSubscription({ planType, billingCycle: billingPeriod });
@@ -101,13 +103,20 @@ const BillingSettings = () => {
                     <>Next billing: {format(new Date(subscription.current_period_end), 'MMMM dd, yyyy')}</>
                   )}
                 </p>
+                {subscription.status === 'trialing' && (
+                  <Badge variant="secondary" className="mt-1">
+                    Free Trial ({DODO_CONFIG.TRIAL.period_days} days)
+                  </Badge>
+                )}
               </div>
               <Badge className={`${
                 subscription.status === 'active' ? 'bg-primary text-primary-foreground' : 
+                subscription.status === 'trialing' ? 'bg-blue-500 text-white' :
                 subscription.status === 'past_due' ? 'bg-yellow-500 text-white' :
                 'bg-gray-500 text-white'
               }`}>
                 {subscription.status === 'active' ? 'Active' : 
+                 subscription.status === 'trialing' ? 'Trial' :
                  subscription.status === 'past_due' ? 'Past Due' : 
                  subscription.status}
               </Badge>
@@ -130,6 +139,11 @@ const BillingSettings = () => {
             <p className="text-sm text-muted-foreground mt-2">
               Ideal for individual creators and getting started with AI comments.
             </p>
+            {DODO_CONFIG.TRIAL.enabled && !subscription && (
+              <Badge variant="outline" className="mt-2">
+                {DODO_CONFIG.TRIAL.period_days}-day free trial
+              </Badge>
+            )}
           </div>
           
           {subscription?.plan_type === 'PRO' ? (
@@ -147,7 +161,7 @@ const BillingSettings = () => {
               })}
               disabled={isManagingSubscription}
             >
-              Downgrade to Pro
+              {isManagingSubscription ? 'Processing...' : 'Downgrade to Pro'}
             </Button>
           ) : (
             <Button 
@@ -206,6 +220,11 @@ const BillingSettings = () => {
             <p className="text-sm text-muted-foreground mt-2">
               Best for power users, teams, and businesses needing advanced AI and collaboration.
             </p>
+            {DODO_CONFIG.TRIAL.enabled && !subscription && (
+              <Badge variant="outline" className="mt-2">
+                {DODO_CONFIG.TRIAL.period_days}-day free trial
+              </Badge>
+            )}
           </div>
           
           {subscription?.plan_type === 'ULTRA' ? (

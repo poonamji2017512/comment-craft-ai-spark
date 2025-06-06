@@ -1,9 +1,11 @@
+
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, Crown } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
+import { DODO_CONFIG } from "@/utils/config";
 
 interface UpgradeModalProps {
   open: boolean;
@@ -14,9 +16,10 @@ const UpgradeModal = ({ open, onOpenChange }: UpgradeModalProps) => {
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">("monthly");
   const { createSubscription, isCreatingSubscription } = useSubscription();
 
-  const getPrice = (monthlyPrice: number) => {
+  const getPrice = (planType: 'PRO' | 'ULTRA') => {
+    const pricing = DODO_CONFIG.PRICING[planType];
     if (billingPeriod === "yearly") {
-      const yearlyPrice = monthlyPrice * 12 * 0.8; // 20% discount
+      const yearlyPrice = pricing.yearly;
       const monthlyEquivalent = yearlyPrice / 12;
       return {
         display: `$${monthlyEquivalent.toFixed(2)}`,
@@ -25,14 +28,14 @@ const UpgradeModal = ({ open, onOpenChange }: UpgradeModalProps) => {
       };
     }
     return {
-      display: `$${monthlyPrice.toFixed(2)}`,
+      display: `$${pricing.monthly.toFixed(2)}`,
       period: "/ month",
       note: null
     };
   };
 
-  const proPrice = getPrice(20);
-  const ultraPrice = getPrice(40);
+  const proPrice = getPrice('PRO');
+  const ultraPrice = getPrice('ULTRA');
 
   const handleSelectPlan = (planType: 'PRO' | 'ULTRA') => {
     createSubscription({ planType, billingCycle: billingPeriod });
@@ -90,6 +93,11 @@ const UpgradeModal = ({ open, onOpenChange }: UpgradeModalProps) => {
               <p className="text-sm text-muted-foreground mt-2">
                 Ideal for individual creators and getting started with AI comments.
               </p>
+              {DODO_CONFIG.TRIAL.enabled && (
+                <Badge variant="outline" className="mt-2">
+                  {DODO_CONFIG.TRIAL.period_days}-day free trial
+                </Badge>
+              )}
             </div>
             
             <Button 
@@ -147,6 +155,11 @@ const UpgradeModal = ({ open, onOpenChange }: UpgradeModalProps) => {
               <p className="text-sm text-muted-foreground mt-2">
                 Best for power users, teams, and businesses needing advanced AI and collaboration.
               </p>
+              {DODO_CONFIG.TRIAL.enabled && (
+                <Badge variant="outline" className="mt-2">
+                  {DODO_CONFIG.TRIAL.period_days}-day free trial
+                </Badge>
+              )}
             </div>
             
             <Button 

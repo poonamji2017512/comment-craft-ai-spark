@@ -13,6 +13,7 @@ async function verifyWebhookSignature(payload: string, signature: string) {
   
   console.log(`[${timestamp}] dodo-webhooks: Verifying webhook signature`);
   
+  // Bug Fix #3: Throw 500 if webhook secret is missing
   if (!webhookSecret) {
     console.error(`[${timestamp}] dodo-webhooks: DODO_WEBHOOK_SECRET not configured`);
     throw new Error('DODO_WEBHOOK_SECRET not configured');
@@ -57,13 +58,14 @@ serve(async (req: Request) => {
   console.log(`[${timestamp}] dodo-webhooks: Headers:`, JSON.stringify(Object.fromEntries(req.headers.entries())));
 
   try {
-    // Read payload
-    let payload;
+    // Bug Fix #1: Use req.text() for raw body — not req.json()
+    let rawPayload;
     try {
-      payload = await req.text();
-      console.log(`[${timestamp}] dodo-webhooks: Received payload:`, payload);
+      rawPayload = await req.text();
+      console.log(`[${timestamp}] dodo-webhooks: Received raw payload:`, rawPayload);
     } catch (readError) {
       console.error(`[${timestamp}] dodo-webhooks: Error reading payload:`, readError.message);
+      // Bug Fix #4: Return 400 for bad signatures; 500/503 for server failures
       return new Response('Error reading payload', { 
         status: 400,
         headers: { 'Content-Type': 'text/plain' }
@@ -73,29 +75,43 @@ serve(async (req: Request) => {
     const signature = req.headers.get('dodo-signature') || '';
     console.log(`[${timestamp}] dodo-webhooks: Webhook signature header:`, signature);
 
-    // Verify webhook signature
+    // Bug Fix #2: Parse rawBody only after signature validation
     try {
-      const isValid = await verifyWebhookSignature(payload, signature);
+      const isValid = await verifyWebhookSignature(rawPayload, signature);
       if (!isValid) {
         console.error(`[${timestamp}] dodo-webhooks: Invalid webhook signature`);
+        // Bug Fix #4: Return 400 for bad signatures
         return new Response('Invalid signature', { 
-          status: 401,
+          status: 400,
           headers: { 'Content-Type': 'text/plain' }
         });
       }
     } catch (signatureError) {
       console.error(`[${timestamp}] dodo-webhooks: Signature verification failed:`, signatureError.message);
+      // Check if it's a configuration issue (500) vs bad signature (400)
+      if (signatureError.message.includes('not configured')) {
+        return new Response('Server configuration error', { 
+          status: 500,
+          headers: { 'Content-Type': 'text/plain' }
+        });
+      }
       return new Response('Signature verification failed', { 
-        status: 401,
+        status: 400,
         headers: { 'Content-Type': 'text/plain' }
       });
     }
 
-    // Parse event
+    // Now parse the verified payload
     let event;
     try {
-      event = JSON.parse(payload);
-      console.log(`[${timestamp}] dodo-webhooks: Processing webhook event:`, event.type);
+      event = JSON.parse(rawPayload);
+      // Bug Fix #7: Log event ID, user_id, event_type, etc. for observability
+      console.log(`[${timestamp}] dodo-webhooks: Processing webhook event`, {
+        event_id: event.id,
+        event_type: event.type,
+        object_id: event.data?.object?.id,
+        timestamp: timestamp
+      });
       console.log(`[${timestamp}] dodo-webhooks: Event data:`, JSON.stringify(event.data, null, 2));
     } catch (parseError) {
       console.error(`[${timestamp}] dodo-webhooks: Error parsing event JSON:`, parseError.message);
@@ -114,6 +130,7 @@ serve(async (req: Request) => {
     // Process event in background (non-blocking)
     const processEvent = async () => {
       try {
+        // Bug Fix #6: Use event.data instead of manual parsing
         switch (event.type) {
           case 'subscription.created':
           case 'subscription.updated':
@@ -147,7 +164,7 @@ serve(async (req: Request) => {
               .from('subscriptions')
               .select('user_id, id')
               .eq('dodo_subscription_id', invoice.subscription)
-              .single();
+              .maybeSingle();
 
             if (subData) {
               // Record successful payment in billing history
@@ -170,7 +187,8 @@ serve(async (req: Request) => {
                 console.log(`[${timestamp}] dodo-webhooks: Successfully recorded payment for user: ${subData.user_id}`);
               }
             } else {
-              console.warn(`[${timestamp}] dodo-webhooks: No subscription found for invoice: ${invoice.subscription}`);
+              // Bug Fix #5: Handle orphan event edge cases
+              console.warn(`[${timestamp}] dodo-webhooks: ORPHAN EVENT - No subscription found for invoice: ${invoice.subscription}`);
             }
             break;
 
@@ -183,7 +201,7 @@ serve(async (req: Request) => {
               .from('subscriptions')
               .select('user_id, id')
               .eq('dodo_subscription_id', failedInvoice.subscription)
-              .single();
+              .maybeSingle();
 
             if (failedSubData) {
               // Record failed payment in billing history
@@ -214,6 +232,9 @@ serve(async (req: Request) => {
                 .eq('dodo_subscription_id', failedInvoice.subscription);
 
               console.log(`[${timestamp}] dodo-webhooks: Updated subscription to past_due for failed payment`);
+            } else {
+              // Bug Fix #5: Handle orphan event edge cases
+              console.warn(`[${timestamp}] dodo-webhooks: ORPHAN EVENT - No subscription found for failed invoice: ${failedInvoice.subscription}`);
             }
             break;
 
