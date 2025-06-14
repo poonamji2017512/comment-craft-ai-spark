@@ -18,6 +18,7 @@ import History from "./pages/History";
 import Settings from "./pages/Settings";
 import Docs from "./pages/Docs";
 import Changelog from "./pages/Changelog";
+import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ const App = () => (
               <Route path="/landing" element={<Landing />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
+              <Route path="/onboarding" element={<Onboarding />} />
               
               {/* App routes with sidebar */}
               <Route path="/*" element={
