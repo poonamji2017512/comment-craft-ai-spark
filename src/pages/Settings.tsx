@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import BillingSettings from "@/components/BillingSettings";
+import { useMilestoneTracking } from "@/hooks/useMilestoneTracking";
 import { User, Settings as SettingsIcon, Bell, Database, Key, Trash2, Download, Eye, EyeOff, Check, X, Palette, MessageSquare, Shield, CreditCard, Users, Workflow, Crown, Mail, ExternalLink, Puzzle, Twitter, Linkedin, Globe, Clock } from "lucide-react";
 
 interface NotificationPrefs {
@@ -88,6 +90,34 @@ const Settings = () => {
     ai_features: defaultAIFeatures,
     dailyCommentTarget: 20
   });
+
+  // Use the milestone tracking hook
+  useMilestoneTracking(userProfile?.daily_prompt_count || 0, userSettings.dailyCommentTarget || 20);
+
+  // Validation functions
+  const validateNotificationPrefs = (prefs: any): NotificationPrefs => {
+    if (!prefs || typeof prefs !== 'object') {
+      return defaultNotificationPrefs;
+    }
+    return {
+      email_notifications: Boolean(prefs.email_notifications),
+      meeting_processed: Boolean(prefs.meeting_processed),
+      summary_ready: Boolean(prefs.summary_ready),
+      task_due: Boolean(prefs.task_due),
+      frequency: typeof prefs.frequency === 'string' ? prefs.frequency : 'real-time'
+    };
+  };
+
+  const validateAIFeatures = (features: any): AIFeatures => {
+    if (!features || typeof features !== 'object') {
+      return defaultAIFeatures;
+    }
+    return {
+      auto_summarization: Boolean(features.auto_summarization),
+      action_item_detection: Boolean(features.action_item_detection),
+      topic_extraction: Boolean(features.topic_extraction)
+    };
+  };
 
   // Categorized AI models for better UX
   const aiModelCategories = {
@@ -227,6 +257,146 @@ const Settings = () => {
     toast.success(`Daily target updated to ${newTarget} comments!`, {
       duration: 3000
     });
+  };
+
+  const handleProfileUpdate = async () => {
+    if (!user) {
+      toast.error('You must be logged in to update profile');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({
+          full_name: profileData.full_name,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        console.error('Error updating profile:', error);
+        toast.error(`Failed to update profile: ${error.message}`);
+        return;
+      }
+
+      toast.success('Profile updated successfully!');
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('An unexpected error occurred while updating profile');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const validateApiKey = async () => {
+    if (!userSettings.custom_api_key) {
+      toast.error('Please enter an API key');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Simple validation - just check if key has proper format
+      const apiKey = userSettings.custom_api_key.trim();
+      if (apiKey.length < 10) {
+        setApiKeyValid(false);
+        toast.error('API key appears to be too short');
+        return;
+      }
+
+      // For now, just mark as valid if it's not empty and has reasonable length
+      setApiKeyValid(true);
+      toast.success('API key format appears valid');
+    } catch (error) {
+      console.error('Error validating API key:', error);
+      setApiKeyValid(false);
+      toast.error('Error validating API key');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleExportData = async () => {
+    if (!user) {
+      toast.error('You must be logged in to export data');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Export user data including comments, settings, and usage history
+      const { data: comments } = await supabase
+        .from('generated_comments')
+        .select('*')
+        .eq('user_id', user.id);
+
+      const { data: settings } = await supabase
+        .from('user_settings')
+        .select('*')
+        .eq('user_id', user.id);
+
+      const exportData = {
+        user_profile: userProfile,
+        user_settings: settings,
+        generated_comments: comments,
+        export_date: new Date().toISOString()
+      };
+
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `ai-comment-agent-data-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast.success('Data exported successfully!');
+    } catch (error) {
+      console.error('Error exporting data:', error);
+      toast.error('Failed to export data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleClearData = async () => {
+    if (!user) {
+      toast.error('You must be logged in to clear data');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      'Are you sure you want to delete all your generated comments? This action cannot be undone.'
+    );
+
+    if (!confirmed) return;
+
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from('generated_comments')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error clearing data:', error);
+        toast.error(`Failed to clear data: ${error.message}`);
+        return;
+      }
+
+      toast.success('All data cleared successfully!');
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('An unexpected error occurred while clearing data');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const saveUserSettings = async (updatedSettings: Partial<UserSettings>) => {
