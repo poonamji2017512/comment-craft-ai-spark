@@ -12,6 +12,7 @@ import { ConfiguredPricing } from "@/components/ui/configured-pricing";
 import { FaqSection } from "@/components/ui/faq-section";
 import { CTASection } from "@/components/ui/cta-with-rectangle";
 import { Footer } from "@/components/ui/footer-section";
+import LandingPageNavbar from "@/components/LandingPageNavbar";
 
 const faqItems = [
   {
@@ -38,6 +39,7 @@ const faqItems = [
 
 const Landing = () => {
   return <div className="min-h-screen bg-background">
+      <LandingPageNavbar />
       <HeroSection />
       
       {/* Features Section */}
@@ -67,26 +69,28 @@ const Landing = () => {
       </section>
 
       {/* Why choose Interact Section */}
-      <SectionWithMockup 
-        title={<>
-          "You're building the product. Who's building the brand?"
-        </>} 
-        description={<>
-          Manual engagement takes hours. Robotic tools damage your voice. Hiring agencies? Expensive and impersonal.
-          <br />
-          <br />
-          Interact learns your brand voice and engages authentically across all platforms.
-          <br />
-          <br />
-          📊 Before/After:
-          <br />
-          ⏳ Time Spent: 2 hours daily → 10 mins
-          <br />
-          📈 Results: 30 Users → 130+ users in 2 days
-        </>} 
-        primaryImageSrc="https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=800&h=600&fit=crop" 
-        secondaryImageSrc="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop" 
-      />
+      <section id="why-choose-interact">
+        <SectionWithMockup 
+          title={<>
+            "You're building the product. Who's building the brand?"
+          </>} 
+          description={<>
+            Manual engagement takes hours. Robotic tools damage your voice. Hiring agencies? Expensive and impersonal.
+            <br />
+            <br />
+            Interact learns your brand voice and engages authentically across all platforms.
+            <br />
+            <br />
+            📊 Before/After:
+            <br />
+            ⏳ Time Spent: 2 hours daily → 10 mins
+            <br />
+            📈 Results: 30 Users → 130+ users in 2 days
+          </>} 
+          primaryImageSrc="https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=800&h=600&fit=crop" 
+          secondaryImageSrc="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop" 
+        />
+      </section>
 
       {/* Testimonials Section */}
       <section id="testimonials" className="py-20 px-4 sm:px-6 lg:px-8">

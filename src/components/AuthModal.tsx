@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { X, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 interface AuthModalProps {
   open: boolean;
@@ -19,6 +20,7 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +43,8 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
           options: {
             data: {
               full_name: email.split('@')[0] // Basic name from email
-            }
+            },
+            emailRedirectTo: `${window.location.origin}/`
           }
         });
       } else {
@@ -56,6 +59,10 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
       }
 
       onOpenChange(false);
+      
+      // Redirect to home page after successful authentication
+      navigate('/');
+      
       toast({
         title: isSignUp ? "Account Created!" : "Welcome Back!",
         description: isSignUp 
