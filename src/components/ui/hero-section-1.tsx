@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ArrowRight, ChevronRight, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -229,7 +228,7 @@ const menuItems = [{
   href: 'why-choose-interact'
 }, {
   name: 'Blog',
-  href: '/blog'
+  href: 'blog'
 }, {
   name: 'Testimonials',
   href: 'testimonials'
@@ -256,7 +255,9 @@ const HeroHeader = ({ onNavClick, onAuthClick }: HeroHeaderProps) => {
   }, []);
 
   const handleNavItemClick = (href: string) => {
-    if (href.startsWith('#')) {
+    if (href === 'blog') {
+      window.location.href = '/blog';
+    } else if (href.startsWith('#')) {
       onNavClick(href.substring(1));
     } else {
       onNavClick(href);
