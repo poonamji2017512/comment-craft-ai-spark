@@ -9,6 +9,8 @@ import SectionWithMockup from "@/components/ui/section-with-mockup";
 import { Testimonials } from "@/components/ui/testimonials-columns-1";
 import { ConfiguredPricing } from "@/components/ui/configured-pricing";
 import { FaqSection } from "@/components/ui/faq-section";
+import { CTASection } from "@/components/ui/cta-with-rectangle";
+import { Footer } from "@/components/ui/footer-section";
 
 const faqItems = [
   {
@@ -80,12 +82,7 @@ const Landing = () => {
 
       {/* Testimonials Section */}
       <section id="testimonials" className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            
-            
-          </div>
-          
+        <div className="max-w-7xl mx-auto">          
           <Testimonials />
         </div>
       </section>
@@ -106,46 +103,22 @@ const Landing = () => {
         }}
       />
 
+      {/* CTA Section */}
+      <CTASection
+        badge={{
+          text: "Get started"
+        }}
+        title="Ready to Transform Your Social Media?"
+        description="Join thousands of businesses already using Interact to automate their social media engagement and grow their online presence."
+        action={{
+          text: "Start Free Trial",
+          href: "/signup",
+          variant: "default"
+        }}
+      />
+
       {/* Footer */}
-      <footer id="contact" className="py-12 px-4 sm:px-6 lg:px-8 border-t border-border">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="font-bold text-lg mb-4">CommentCraft AI</h3>
-              <p className="text-muted-foreground">
-                AI-powered comment generation for better online engagement.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Product</h4>
-              <ul className="space-y-2 text-muted-foreground">
-                <li><a href="#features" className="hover:text-primary">Features</a></li>
-                <li><a href="#pricing" className="hover:text-primary">Pricing</a></li>
-                <li><a href="#" className="hover:text-primary">API</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Company</h4>
-              <ul className="space-y-2 text-muted-foreground">
-                <li><a href="#about" className="hover:text-primary">About</a></li>
-                <li><a href="#" className="hover:text-primary">Blog</a></li>
-                <li><a href="#" className="hover:text-primary">Careers</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Support</h4>
-              <ul className="space-y-2 text-muted-foreground">
-                <li><a href="#" className="hover:text-primary">Help Center</a></li>
-                <li><a href="#contact" className="hover:text-primary">Contact</a></li>
-                <li><a href="#" className="hover:text-primary">Status</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-border mt-8 pt-8 text-center text-muted-foreground">
-            <p>&copy; 2024 CommentCraft AI. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>;
 };
 
