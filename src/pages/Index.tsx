@@ -22,6 +22,20 @@ const Index = () => {
         </div>
       </main>
 
+      {/* Simple transparent footer */}
+      <footer className="bg-transparent border-t border-border/20 py-4">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-wrap justify-center items-center gap-6 text-sm text-muted-foreground">
+            <a href="#" className="hover:text-foreground transition-colors">Pro</a>
+            <a href="#" className="hover:text-foreground transition-colors">Ultra</a>
+            <a href="#" className="hover:text-foreground transition-colors">Enterprise</a>
+            <a href="#" className="hover:text-foreground transition-colors">Shop</a>
+            <a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a>
+            <a href="#" className="hover:text-foreground transition-colors">Terms & Conditions</a>
+          </div>
+        </div>
+      </footer>
+
       <AutoAuthModal />
       <FloatingAuthModal />
     </div>
