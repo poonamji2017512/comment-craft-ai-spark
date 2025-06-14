@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,6 +11,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { commentGenerationSchema, sanitizeText, sanitizeErrorMessage } from "@/lib/validation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useAuth } from "@/contexts/AuthContext";
+import { useMilestoneTracking } from "@/hooks/useMilestoneTracking";
 
 interface CommentSuggestion {
   id: number;
@@ -19,6 +22,7 @@ interface CommentSuggestion {
 }
 
 const CommentGenerator = () => {
+  const { userProfile } = useAuth();
   const [originalPost, setOriginalPost] = useState('');
   const [platform, setPlatform] = useState('twitter');
   const [tone, setTone] = useState('friendly');
@@ -27,12 +31,20 @@ const CommentGenerator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [lastGenerationTime, setLastGenerationTime] = useState<number>(0);
   const [validationError, setValidationError] = useState<string>('');
+  const [dailyTarget, setDailyTarget] = useState(20);
+
+  // Get current daily comment count from user profile
+  const currentDailyCount = userProfile?.daily_prompt_count || 0;
+  
+  // Use milestone tracking
+  const { getProgressInfo } = useMilestoneTracking(currentDailyCount, dailyTarget);
 
   // Load settings from sessionStorage on component mount
   useEffect(() => {
     const savedLength = sessionStorage.getItem('comment-length-setting');
     const savedPlatform = sessionStorage.getItem('comment-platform-setting');
     const savedTone = sessionStorage.getItem('comment-tone-setting');
+    const savedTarget = sessionStorage.getItem('daily-comment-target');
     
     if (savedLength) {
       const parsedLength = parseInt(savedLength);
@@ -47,6 +59,13 @@ const CommentGenerator = () => {
     
     if (savedTone) {
       setTone(savedTone);
+    }
+
+    if (savedTarget) {
+      const parsedTarget = parseInt(savedTarget);
+      if (!isNaN(parsedTarget) && parsedTarget >= 1 && parsedTarget <= 100) {
+        setDailyTarget(parsedTarget);
+      }
     }
   }, []);
 
@@ -189,8 +208,39 @@ const CommentGenerator = () => {
     youtube: "bg-red-500",
   };
 
+  const progressInfo = getProgressInfo();
+
   return (
     <div className="space-y-6">
+      {/* Progress Indicator */}
+      {userProfile && (
+        <Card className="bg-card border-border">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Daily Progress</p>
+                <p className="text-lg font-semibold text-foreground">
+                  {progressInfo.current}/{progressInfo.target} comments
+                </p>
+              </div>
+              <div className="text-right">
+                <Badge 
+                  variant={progressInfo.isTargetReached ? "default" : "secondary"}
+                  className={progressInfo.isTargetReached ? "bg-green-500 text-white" : ""}
+                >
+                  {progressInfo.percentage}%
+                </Badge>
+                {!progressInfo.isTargetReached && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {progressInfo.remaining} more to reach target
+                  </p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Input Section */}
       <Card className="bg-card border-border">
         <CardHeader>

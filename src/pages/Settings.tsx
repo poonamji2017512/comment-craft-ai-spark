@@ -42,6 +42,7 @@ interface UserSettings {
   custom_api_key?: string;
   notification_prefs: NotificationPrefs;
   ai_features: AIFeatures;
+  dailyCommentTarget?: number;
 }
 
 const Settings = () => {
@@ -84,7 +85,8 @@ const Settings = () => {
     use_custom_api_key: false,
     custom_api_key: '',
     notification_prefs: defaultNotificationPrefs,
-    ai_features: defaultAIFeatures
+    ai_features: defaultAIFeatures,
+    dailyCommentTarget: 20
   });
 
   // Categorized AI models for better UX
@@ -196,7 +198,8 @@ const Settings = () => {
           use_custom_api_key: data.use_custom_api_key || false,
           custom_api_key: data.custom_api_key || '',
           notification_prefs: notificationPrefs,
-          ai_features: aiFeatures
+          ai_features: aiFeatures,
+          dailyCommentTarget: data.daily_comment_target || 20
         });
       } else {
         setHasExistingSettings(false);
@@ -233,7 +236,8 @@ const Settings = () => {
         use_custom_api_key: settingsToSave.use_custom_api_key,
         custom_api_key: settingsToSave.custom_api_key,
         notification_prefs: settingsToSave.notification_prefs as any,
-        ai_features: settingsToSave.ai_features as any
+        ai_features: settingsToSave.ai_features as any,
+        daily_comment_target: settingsToSave.dailyCommentTarget || 20
       };
 
       let error;
@@ -268,117 +272,6 @@ const Settings = () => {
       toast.error('An unexpected error occurred while saving settings');
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleProfileUpdate = async () => {
-    if (!user) {
-      toast.error('You must be logged in to update profile');
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const { error: profileError } = await supabase
-        .from('user_profiles')
-        .update({
-          full_name: profileData.full_name
-        })
-        .eq('id', user.id);
-
-      if (profileError) {
-        console.error('Error updating profile:', profileError);
-        toast.error(`Failed to update profile: ${profileError.message}`);
-        return;
-      }
-
-      // Also save current settings
-      await saveUserSettings({});
-      
-      toast.success('Profile updated successfully!');
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error('An unexpected error occurred while updating profile');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const validateApiKey = async () => {
-    if (!userSettings.custom_api_key) return;
-    setIsLoading(true);
-    try {
-      const response = await fetch('https://generativelanguage.googleapis.com/v1/models?key=' + userSettings.custom_api_key);
-      if (response.ok) {
-        setApiKeyValid(true);
-        toast.success('API key is valid!');
-      } else {
-        setApiKeyValid(false);
-        toast.error('Invalid API key');
-      }
-    } catch (error) {
-      setApiKeyValid(false);
-      toast.error('Failed to validate API key');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleExportData = async () => {
-    if (!user) return;
-    try {
-      const { data, error } = await supabase
-        .from('generated_comments')
-        .select('*')
-        .eq('user_id', user.id);
-
-      if (error) {
-        toast.error('Failed to export data');
-        return;
-      }
-
-      const exportData = {
-        user_profile: userProfile,
-        generated_comments: data,
-        user_settings: userSettings,
-        exported_at: new Date().toISOString()
-      };
-
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `ai-comments-export-${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      toast.success('Data exported successfully');
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error('An error occurred while exporting data');
-    }
-  };
-
-  const handleClearData = async () => {
-    if (!user || !confirm('Are you sure you want to clear all your data? This action cannot be undone.')) return;
-    try {
-      const { error } = await supabase
-        .from('generated_comments')
-        .delete()
-        .eq('user_id', user.id);
-
-      if (error) {
-        console.error('Error clearing data:', error);
-        toast.error('Failed to clear data');
-        return;
-      }
-
-      toast.success('All data cleared successfully');
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error('An error occurred while clearing data');
     }
   };
 
@@ -864,6 +757,27 @@ const Settings = () => {
               <CardTitle className="text-foreground">Comment Workflow</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-foreground">Daily Comment Target</Label>
+                <Input 
+                  type="number" 
+                  min="1" 
+                  max="100"
+                  value={userSettings.dailyCommentTarget || 20}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value);
+                    if (!isNaN(value) && value >= 1 && value <= 100) {
+                      saveUserSettings({ dailyCommentTarget: value });
+                      sessionStorage.setItem('daily-comment-target', value.toString());
+                    }
+                  }}
+                  placeholder="20" 
+                  className="bg-background border-border text-foreground" 
+                />
+                <p className="text-sm text-muted-foreground">
+                  Set your daily goal for comment generation. You'll receive milestone notifications to track your progress.
+                </p>
+              </div>
               <div className="flex items-center justify-between">
                 <Label className="text-foreground">Auto Approval</Label>
                 <Switch
@@ -872,10 +786,6 @@ const Settings = () => {
                     ai_features: { ...userSettings.ai_features, auto_summarization: checked }
                   })}
                 />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-foreground">Comments per Day Limit</Label>
-                <Input type="number" placeholder="20" className="bg-background border-border text-foreground" />
               </div>
               <div className="space-y-2">
                 <Label className="text-foreground">Priority Targeting</Label>

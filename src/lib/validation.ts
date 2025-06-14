@@ -17,7 +17,8 @@ export const userSettingsSchema = z.object({
   theme: z.enum(['light', 'dark']).optional(),
   aiTone: z.string().max(50).optional(),
   customApiKey: z.string().max(200).optional(),
-  useCustomApiKey: z.boolean().optional()
+  useCustomApiKey: z.boolean().optional(),
+  dailyCommentTarget: z.number().min(1).max(100).optional()
 });
 
 // Sanitization functions
