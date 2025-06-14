@@ -41,7 +41,6 @@ const SectionWithMockup: React.FC<SectionWithMockupProps> = ({
     const textOrderClass = reverseLayout ? "md:col-start-2" : "";
     const imageOrderClass = reverseLayout ? "md:col-start-1" : "";
 
-
     return (
         <section className="relative py-24 md:py-48 bg-black overflow-hidden">
             <div className="container max-w-[1220px] w-full px-6 md:px-10 relative z-10 mx-auto">
@@ -56,7 +55,7 @@ const SectionWithMockup: React.FC<SectionWithMockupProps> = ({
                     <motion.div
                         className={`flex flex-col items-start gap-4 mt-10 md:mt-0 max-w-[546px] mx-auto md:mx-0 ${textOrderClass}`}
                         variants={itemVariants}
-                        transition={{ duration: 0.7, ease: [0.6, 0.01, -0.05, 0.95] }}
+                        transition={{ duration: 0.7, ease: "easeOut" }}
                     >
                          <div className="space-y-2 md:space-y-1">
                             <h2 className="text-white text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
@@ -67,17 +66,13 @@ const SectionWithMockup: React.FC<SectionWithMockupProps> = ({
                         <p className="text-[#868f97] text-sm md:text-[15px] leading-6">
                             {description}
                         </p>
-                         {/* Optional: Add a button or link here */}
-                         {/* <div>
-                            <button className="mt-4 px-6 py-3 bg-blue-600 text-white rounded-md">Learn More</button>
-                         </div> */}
                     </motion.div>
 
                     {/* App mockup/Image Content */}
                     <motion.div
                         className={`relative mt-10 md:mt-0 mx-auto ${imageOrderClass} w-full max-w-[300px] md:max-w-[471px]`}
                         variants={itemVariants}
-                        transition={{ duration: 0.7, ease: [0.6, 0.01, -0.05, 0.95] }}
+                        transition={{ duration: 0.7, ease: "easeOut" }}
                     >
                         {/* Decorative Background Element */}
                         <motion.div
@@ -92,7 +87,7 @@ const SectionWithMockup: React.FC<SectionWithMockupProps> = ({
                             }}
                             initial={{ y: reverseLayout ? 0 : 0 }}
                             whileInView={{ y: reverseLayout ? -20 : -30 }}
-                            transition={{ duration: 1.2, ease: [0.6, 0.01, -0.05, 0.95] }}
+                            transition={{ duration: 1.2, ease: "easeOut" }}
                             viewport={{ once: true, amount: 0.5 }}
                         >
                             <div
@@ -108,7 +103,7 @@ const SectionWithMockup: React.FC<SectionWithMockupProps> = ({
                             className="relative w-full h-[405px] md:h-[637px] bg-[#ffffff0a] rounded-[32px] backdrop-blur-[15px] backdrop-brightness-[100%] border-0 z-10 overflow-hidden"
                             initial={{ y: reverseLayout ? 0 : 0 }}
                             whileInView={{ y: reverseLayout ? 20 : 30 }}
-                             transition={{ duration: 1.2, ease: [0.6, 0.01, -0.05, 0.95], delay: 0.1 }}
+                             transition={{ duration: 1.2, ease: "easeOut", delay: 0.1 }}
                              viewport={{ once: true, amount: 0.5 }}
                         >
                             <div className="p-0 h-full">

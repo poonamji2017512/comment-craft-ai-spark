@@ -15,7 +15,7 @@ export function Pricing() {
 				<motion.div
 					initial={{ opacity: 0, y: 20 }}
 					whileInView={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+					transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
 					viewport={{ once: true }}
 					className="mx-auto max-w-xl space-y-5"
 				>
@@ -43,7 +43,7 @@ export function Pricing() {
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
 						whileInView={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+						transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
 						viewport={{ once: true }}
 						className="mx-auto w-full max-w-4xl space-y-2"
 					>	
