@@ -155,7 +155,7 @@ const Onboarding = () => {
               <div className="space-y-2">
                 <Label className="text-foreground font-medium">Describe yourself (used for AI context)</Label>
                 <Textarea
-                  placeholder='e.g., "I am a marketing expert focused on B2B SaaS growth." or "I am a casual gaming streamer who loves retro RPGs and engages with my community."'
+                  placeholder="e.g., I am a marketing expert focused on B2B SaaS growth. or I am a casual gaming streamer who loves retro RPGs and engages with my community."
                   value={formData.introduction}
                   onChange={(e) => updateFormData('introduction', e.target.value)}
                   className="min-h-[120px] bg-background border-border text-foreground"
@@ -185,7 +185,7 @@ const Onboarding = () => {
               <div className="space-y-2">
                 <Label className="text-foreground font-medium">Frequently Used Phrases</Label>
                 <Textarea
-                  placeholder='Enter common phrases you use, like "That\'s a great point!" or "Couldn\'t agree more."'
+                  placeholder="Enter common phrases you use, like That's a great point! or Couldn't agree more."
                   value={formData.frequentPhrases}
                   onChange={(e) => updateFormData('frequentPhrases', e.target.value)}
                   className="bg-background border-border text-foreground"
@@ -195,7 +195,7 @@ const Onboarding = () => {
               <div className="space-y-2">
                 <Label className="text-foreground font-medium">Brand CTAs and Catchphrases</Label>
                 <Textarea
-                  placeholder='e.g., "Check out the link in my bio!" or "Don\'t forget to smash that like button!"'
+                  placeholder="e.g., Check out the link in my bio! or Don't forget to smash that like button!"
                   value={formData.brandCtas}
                   onChange={(e) => updateFormData('brandCtas', e.target.value)}
                   className="bg-background border-border text-foreground"
@@ -206,7 +206,7 @@ const Onboarding = () => {
                 <div className="space-y-2">
                   <Label className="text-foreground font-medium">Always Say</Label>
                   <Textarea
-                    placeholder='Include phrases you want in most comments, like "Keep up the great work!"'
+                    placeholder="Include phrases you want in most comments, like Keep up the great work!"
                     value={formData.alwaysSay}
                     onChange={(e) => updateFormData('alwaysSay', e.target.value)}
                     className="bg-background border-border text-foreground"
@@ -216,7 +216,7 @@ const Onboarding = () => {
                 <div className="space-y-2">
                   <Label className="text-foreground font-medium">Never Say</Label>
                   <Textarea
-                    placeholder='List words or phrases to avoid, like "Literally" or slang you dislike.'
+                    placeholder="List words or phrases to avoid, like Literally or slang you dislike."
                     value={formData.neverSay}
                     onChange={(e) => updateFormData('neverSay', e.target.value)}
                     className="bg-background border-border text-foreground"
@@ -356,8 +356,6 @@ const Onboarding = () => {
   };
 
   const renderStepImage = () => {
-    const baseClasses = "w-full h-full object-cover rounded-lg";
-    
     switch (currentStep) {
       case 1:
         return (
