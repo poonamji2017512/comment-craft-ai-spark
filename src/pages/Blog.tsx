@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Footer } from '@/components/ui/footer-section';
@@ -161,9 +162,9 @@ const Blog = () => {
     <div className="min-h-screen bg-background">
       <BlogNavbar />
       
-      <div className="container mx-auto px-4 py-20 max-w-6xl">
+      <div className="container mx-auto px-4 py-20 max-w-7xl">
         {/* Header */}
-        <div className="mb-16">
+        <div className="mb-16 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Blog
           </h1>
@@ -174,27 +175,27 @@ const Blog = () => {
 
         {/* Featured Section */}
         {featuredPosts.length > 0 && (
-          <div className="mb-16">
-            <h2 className="text-2xl font-bold text-foreground mb-8">Featured</h2>
-            <div className="grid md:grid-cols-2 gap-6">
+          <div className="mb-20">
+            <h2 className="text-2xl font-bold text-foreground mb-8 text-center">Featured</h2>
+            <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
               {featuredPosts.map((post) => (
                 <Card 
                   key={post._id} 
-                  className="cursor-pointer hover:shadow-lg transition-all duration-200 bg-card border-border"
+                  className="cursor-pointer hover:shadow-lg transition-all duration-200 bg-card border-border h-80 flex flex-col"
                   onClick={() => handlePostClick(post.slug.current)}
                 >
-                  <CardHeader className="pb-4">
-                    <CardTitle className="text-xl font-semibold text-foreground line-clamp-2">
+                  <CardHeader className="pb-4 flex-shrink-0">
+                    <CardTitle className="text-xl font-semibold text-foreground line-clamp-2 mb-3">
                       {post.title}
                     </CardTitle>
-                    <CardDescription className="text-muted-foreground line-clamp-3">
+                    <CardDescription className="text-muted-foreground line-clamp-4 text-base leading-relaxed">
                       {post.excerpt}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="pt-0">
+                  <CardContent className="pt-0 mt-auto">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                        <span className="text-xs font-medium text-primary-foreground">
+                      <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                        <span className="text-sm font-medium text-primary-foreground">
                           {getAuthorInitials(post.author.name)}
                         </span>
                       </div>
@@ -212,23 +213,23 @@ const Blog = () => {
 
         {/* All Posts Section */}
         <div>
-          <h2 className="text-2xl font-bold text-foreground mb-8">All posts</h2>
-          <div className="grid md:grid-cols-3 gap-6">
+          <h2 className="text-2xl font-bold text-foreground mb-8 text-center">All posts</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {posts.map((post) => (
               <Card 
                 key={post._id} 
-                className="cursor-pointer hover:shadow-lg transition-all duration-200 bg-card border-border"
+                className="cursor-pointer hover:shadow-lg transition-all duration-200 bg-card border-border h-72 flex flex-col"
                 onClick={() => handlePostClick(post.slug.current)}
               >
-                <CardHeader className="pb-4">
-                  <CardTitle className="text-lg font-semibold text-foreground line-clamp-2">
+                <CardHeader className="pb-4 flex-shrink-0">
+                  <CardTitle className="text-lg font-semibold text-foreground line-clamp-2 mb-3">
                     {post.title}
                   </CardTitle>
-                  <CardDescription className="text-muted-foreground line-clamp-3">
+                  <CardDescription className="text-muted-foreground line-clamp-4 leading-relaxed">
                     {post.excerpt}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="pt-0">
+                <CardContent className="pt-0 mt-auto">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
                       <span className="text-xs font-medium text-primary-foreground">
