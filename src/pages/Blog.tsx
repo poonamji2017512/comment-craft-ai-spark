@@ -164,7 +164,7 @@ const Blog = () => {
       
       <div className="container mx-auto px-4 py-20 max-w-7xl">
         {/* Header */}
-        <div className="mb-16 text-center">
+        <div className="mb-16 text-left">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Blog
           </h1>
