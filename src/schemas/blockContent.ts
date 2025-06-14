@@ -48,17 +48,6 @@ export const blockContent = defineType({
     }),
     defineArrayMember({
       type: 'code',
-      options: {
-        languageAlternatives: [
-          { title: 'Javascript', value: 'javascript' },
-          { title: 'TypeScript', value: 'typescript' },
-          { title: 'HTML', value: 'html' },
-          { title: 'CSS', value: 'css' },
-          { title: 'React JSX', value: 'jsx' },
-          { title: 'React TSX', value: 'tsx' },
-        ],
-        withFilename: true,
-      },
     }),
   ],
 });
