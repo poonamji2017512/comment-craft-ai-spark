@@ -2,28 +2,21 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { ArrowRight, ArrowLeft, Check, User, MessageSquare, Target, Shield } from 'lucide-react';
 
 interface OnboardingData {
-  introduction: string;
-  frequentPhrases: string;
-  brandCtas: string;
+  description: string;
+  phrases: string;
+  ctas: string;
   alwaysSay: string;
   neverSay: string;
   dailyTarget: number;
-  avoidPolitics: boolean;
-  avoidReligion: boolean;
-  avoidTragedies: boolean;
-  avoidNsfw: boolean;
-  bannedKeywords: string;
+  boundaries: string;
+  guidelines: string;
 }
 
 const Onboarding = () => {
@@ -33,24 +26,28 @@ const Onboarding = () => {
   const { user } = useAuth();
 
   const [formData, setFormData] = useState<OnboardingData>({
-    introduction: '',
-    frequentPhrases: '',
-    brandCtas: '',
+    description: '',
+    phrases: '',
+    ctas: '',
     alwaysSay: '',
     neverSay: '',
-    dailyTarget: 20,
-    avoidPolitics: true,
-    avoidReligion: true,
-    avoidTragedies: true,
-    avoidNsfw: true,
-    bannedKeywords: ''
+    dailyTarget: 10,
+    boundaries: '',
+    guidelines: ''
   });
 
   const totalSteps = 4;
-  const progress = (currentStep / totalSteps) * 100;
+
+  const stepVisuals = {
+    1: '🤖',
+    2: '🎯', 
+    3: '⚡',
+    4: '🛡️',
+    5: '✨'
+  };
 
   const handleNext = () => {
-    if (currentStep < totalSteps) {
+    if (currentStep <= totalSteps) {
       setCurrentStep(prev => prev + 1);
     }
   };
@@ -93,6 +90,15 @@ const Onboarding = () => {
           auto_summarization: true,
           action_item_detection: true,
           topic_extraction: true
+        },
+        // Store onboarding data in settings
+        onboarding_data: {
+          frequent_phrases: formData.phrases,
+          brand_ctas: formData.ctas,
+          always_say: formData.alwaysSay,
+          never_say: formData.neverSay,
+          content_boundaries: formData.boundaries,
+          additional_guidelines: formData.guidelines
         }
       };
 
@@ -106,11 +112,11 @@ const Onboarding = () => {
         return;
       }
 
-      // Update user profile with introduction
+      // Update user profile with description
       const { error: profileError } = await supabase
         .from('user_profiles')
         .update({
-          introduction: formData.introduction,
+          introduction: formData.description,
           preferred_tone: 'friendly',
           updated_at: new Date().toISOString()
         })
@@ -140,132 +146,123 @@ const Onboarding = () => {
     switch (currentStep) {
       case 1:
         return (
-          <div className="space-y-6">
-            <div className="text-center space-y-2">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <User className="h-8 w-8 text-primary" />
-              </div>
-              <h1 className="text-3xl font-bold text-foreground">Welcome! Let's Set Up Your Interact Agent</h1>
-              <p className="text-lg text-muted-foreground max-w-md mx-auto">
-                First, give your AI some context. This helps it understand who it's commenting as.
-              </p>
-            </div>
+          <div className="step-content">
+            <h1 className="text-2xl font-semibold mb-2 text-white">Welcome! Let's Set Up Your Interact Agent</h1>
+            <p className="text-sm text-gray-400 mb-8 leading-relaxed">
+              First, give your AI some context. This helps it understand who it's commenting as.
+            </p>
             
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label className="text-foreground font-medium">Describe yourself (used for AI context)</Label>
-                <Textarea
-                  placeholder="e.g., I am a marketing expert focused on B2B SaaS growth. or I am a casual gaming streamer who loves retro RPGs and engages with my community."
-                  value={formData.introduction}
-                  onChange={(e) => updateFormData('introduction', e.target.value)}
-                  className="min-h-[120px] bg-background border-border text-foreground"
-                />
-                <p className="text-sm text-muted-foreground">
-                  The more context you provide, the better your AI will understand your perspective and expertise.
-                </p>
+            <div className="form-group mb-5">
+              <label className="block text-sm font-medium text-white mb-2">
+                Describe yourself (used for AI context)
+              </label>
+              <div className="text-xs text-gray-500 mb-2 leading-tight">
+                Tell the AI about your expertise, interests, and style.
               </div>
+              <Textarea
+                value={formData.description}
+                onChange={(e) => updateFormData('description', e.target.value)}
+                placeholder="e.g., I am a marketing expert focused on B2B SaaS growth..."
+                className="w-full p-3 border border-gray-700 rounded-md bg-gray-900 text-white text-sm resize-vertical min-h-[80px] focus:border-gray-600 focus:bg-gray-800"
+              />
             </div>
           </div>
         );
 
       case 2:
         return (
-          <div className="space-y-6">
-            <div className="text-center space-y-2">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <MessageSquare className="h-8 w-8 text-primary" />
-              </div>
-              <h1 className="text-3xl font-bold text-foreground">Define Your AI's Brand Voice</h1>
-              <p className="text-lg text-muted-foreground max-w-md mx-auto">
-                Teach the AI how you want it to sound. The more detail you provide, the more authentic it will be.
-              </p>
-            </div>
+          <div className="step-content">
+            <h1 className="text-2xl font-semibold mb-2 text-white">Define Your AI's Brand Voice</h1>
+            <p className="text-sm text-gray-400 mb-8 leading-relaxed">
+              Teach the AI how you want it to sound. The more detail you provide, the more authentic it will be.
+            </p>
             
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <Label className="text-foreground font-medium">Frequently Used Phrases</Label>
-                <Textarea
-                  placeholder="Enter common phrases you use, like That's a great point! or Couldn't agree more."
-                  value={formData.frequentPhrases}
-                  onChange={(e) => updateFormData('frequentPhrases', e.target.value)}
-                  className="bg-background border-border text-foreground"
-                />
+            <div className="form-group mb-5">
+              <label className="block text-sm font-medium text-white mb-2">
+                Frequently Used Phrases
+              </label>
+              <div className="text-xs text-gray-500 mb-2 leading-tight">
+                Enter common phrases you use in conversations.
               </div>
-              
-              <div className="space-y-2">
-                <Label className="text-foreground font-medium">Brand CTAs and Catchphrases</Label>
-                <Textarea
-                  placeholder="e.g., Check out the link in my bio! or Don't forget to smash that like button!"
-                  value={formData.brandCtas}
-                  onChange={(e) => updateFormData('brandCtas', e.target.value)}
-                  className="bg-background border-border text-foreground"
-                />
+              <Input
+                value={formData.phrases}
+                onChange={(e) => updateFormData('phrases', e.target.value)}
+                placeholder="That's a great point!, Couldn't agree more"
+                className="w-full p-3 border border-gray-700 rounded-md bg-gray-900 text-white text-sm focus:border-gray-600 focus:bg-gray-800"
+              />
+            </div>
+
+            <div className="form-group mb-5">
+              <label className="block text-sm font-medium text-white mb-2">
+                Brand CTAs and Catchphrases
+              </label>
+              <div className="text-xs text-gray-500 mb-2 leading-tight">
+                Include your signature calls-to-action.
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-foreground font-medium">Always Say</Label>
-                  <Textarea
-                    placeholder="Include phrases you want in most comments, like Keep up the great work!"
-                    value={formData.alwaysSay}
-                    onChange={(e) => updateFormData('alwaysSay', e.target.value)}
-                    className="bg-background border-border text-foreground"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label className="text-foreground font-medium">Never Say</Label>
-                  <Textarea
-                    placeholder="List words or phrases to avoid, like Literally or slang you dislike."
-                    value={formData.neverSay}
-                    onChange={(e) => updateFormData('neverSay', e.target.value)}
-                    className="bg-background border-border text-foreground"
-                  />
-                </div>
+              <Input
+                value={formData.ctas}
+                onChange={(e) => updateFormData('ctas', e.target.value)}
+                placeholder="Check out the link in my bio!"
+                className="w-full p-3 border border-gray-700 rounded-md bg-gray-900 text-white text-sm focus:border-gray-600 focus:bg-gray-800"
+              />
+            </div>
+
+            <div className="form-group mb-5">
+              <label className="block text-sm font-medium text-white mb-2">
+                Always Say
+              </label>
+              <div className="text-xs text-gray-500 mb-2 leading-tight">
+                Phrases you want included in most comments.
               </div>
+              <Input
+                value={formData.alwaysSay}
+                onChange={(e) => updateFormData('alwaysSay', e.target.value)}
+                placeholder="Keep up the great work!"
+                className="w-full p-3 border border-gray-700 rounded-md bg-gray-900 text-white text-sm focus:border-gray-600 focus:bg-gray-800"
+              />
+            </div>
+
+            <div className="form-group mb-5">
+              <label className="block text-sm font-medium text-white mb-2">
+                Never Say
+              </label>
+              <div className="text-xs text-gray-500 mb-2 leading-tight">
+                Words or phrases to avoid completely.
+              </div>
+              <Input
+                value={formData.neverSay}
+                onChange={(e) => updateFormData('neverSay', e.target.value)}
+                placeholder="Literally, Epic fail"
+                className="w-full p-3 border border-gray-700 rounded-md bg-gray-900 text-white text-sm focus:border-gray-600 focus:bg-gray-800"
+              />
             </div>
           </div>
         );
 
       case 3:
         return (
-          <div className="space-y-6">
-            <div className="text-center space-y-2">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Target className="h-8 w-8 text-primary" />
-              </div>
-              <h1 className="text-3xl font-bold text-foreground">Configure Your Workflow</h1>
-              <p className="text-lg text-muted-foreground max-w-md mx-auto">
-                How active do you want your AI to be? You can always change this later.
-              </p>
-            </div>
+          <div className="step-content">
+            <h1 className="text-2xl font-semibold mb-2 text-white">Configure Your Workflow</h1>
+            <p className="text-sm text-gray-400 mb-8 leading-relaxed">
+              How active do you want your AI to be? You can always change this later.
+            </p>
             
-            <div className="max-w-md mx-auto space-y-4">
-              <div className="space-y-2">
-                <Label className="text-foreground font-medium">Daily Comment Target</Label>
-                <div className="flex items-center gap-3">
-                  <Input
-                    type="number"
-                    min="1"
-                    max="1000"
-                    value={formData.dailyTarget}
-                    onChange={(e) => updateFormData('dailyTarget', parseInt(e.target.value) || 20)}
-                    className="bg-background border-border text-foreground w-32"
-                  />
-                  <span className="text-muted-foreground">comments per day</span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Set a daily goal for comment generation (1-1000). We'll track your progress and send you milestone notifications!
-                </p>
+            <div className="form-group mb-5">
+              <label className="block text-sm font-medium text-white mb-2">
+                Daily Comment Target
+              </label>
+              <div className="text-xs text-gray-500 mb-2 leading-tight">
+                Set a daily goal for comment generation (1-1000). We'll track your progress!
               </div>
-              
-              <div className="p-4 bg-muted/50 rounded-lg">
-                <h4 className="font-medium text-foreground mb-2">What to expect:</h4>
-                <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>• Progress tracking with motivational milestones</li>
-                  <li>• Notifications at 25%, 50%, 75%, and 100% completion</li>
-                  <li>• Analytics to help you understand your activity patterns</li>
-                </ul>
+              <div className="inline-block w-25">
+                <Input
+                  type="number"
+                  min="1"
+                  max="1000"
+                  value={formData.dailyTarget}
+                  onChange={(e) => updateFormData('dailyTarget', parseInt(e.target.value) || 10)}
+                  className="w-24 p-3 border border-gray-700 rounded-md bg-gray-900 text-white text-sm text-center focus:border-gray-600 focus:bg-gray-800"
+                />
               </div>
             </div>
           </div>
@@ -273,80 +270,58 @@ const Onboarding = () => {
 
       case 4:
         return (
-          <div className="space-y-6">
-            <div className="text-center space-y-2">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Shield className="h-8 w-8 text-primary" />
-              </div>
-              <h1 className="text-3xl font-bold text-foreground">Set Your Safety Rules</h1>
-              <p className="text-lg text-muted-foreground max-w-md mx-auto">
-                Configure guardrails to ensure your AI comments appropriately and avoids sensitive topics.
-              </p>
-            </div>
+          <div className="step-content">
+            <h1 className="text-2xl font-semibold mb-2 text-white">Set Your Safety & Guardrails</h1>
+            <p className="text-sm text-gray-400 mb-8 leading-relaxed">
+              Define boundaries to keep your AI interactions safe and on-brand.
+            </p>
             
-            <div className="max-w-lg mx-auto space-y-6">
-              <div className="space-y-4">
-                <h3 className="font-medium text-foreground">Never Comment On:</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="politics"
-                      checked={formData.avoidPolitics}
-                      onChange={(e) => updateFormData('avoidPolitics', e.target.checked)}
-                      className="rounded border-border"
-                    />
-                    <Label htmlFor="politics" className="text-foreground">Politics</Label>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="religion"
-                      checked={formData.avoidReligion}
-                      onChange={(e) => updateFormData('avoidReligion', e.target.checked)}
-                      className="rounded border-border"
-                    />
-                    <Label htmlFor="religion" className="text-foreground">Religion</Label>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="tragedies"
-                      checked={formData.avoidTragedies}
-                      onChange={(e) => updateFormData('avoidTragedies', e.target.checked)}
-                      className="rounded border-border"
-                    />
-                    <Label htmlFor="tragedies" className="text-foreground">Personal Tragedies</Label>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="nsfw"
-                      checked={formData.avoidNsfw}
-                      onChange={(e) => updateFormData('avoidNsfw', e.target.checked)}
-                      className="rounded border-border"
-                    />
-                    <Label htmlFor="nsfw" className="text-foreground">NSFW Content</Label>
-                  </div>
-                </div>
+            <div className="form-group mb-5">
+              <label className="block text-sm font-medium text-white mb-2">
+                Content Boundaries
+              </label>
+              <div className="text-xs text-gray-500 mb-2 leading-tight">
+                Topics your AI should avoid commenting on.
               </div>
-              
-              <div className="space-y-2">
-                <Label className="text-foreground font-medium">Additional Banned Keywords</Label>
-                <Textarea
-                  placeholder="Enter comma-separated keywords to avoid..."
-                  value={formData.bannedKeywords}
-                  onChange={(e) => updateFormData('bannedKeywords', e.target.value)}
-                  className="bg-background border-border text-foreground"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Add any specific words or phrases you want your AI to avoid using.
-                </p>
-              </div>
+              <Textarea
+                value={formData.boundaries}
+                onChange={(e) => updateFormData('boundaries', e.target.value)}
+                placeholder="e.g., Political discussions, controversial topics"
+                className="w-full p-3 border border-gray-700 rounded-md bg-gray-900 text-white text-sm resize-vertical min-h-[80px] focus:border-gray-600 focus:bg-gray-800"
+              />
             </div>
+
+            <div className="form-group mb-5">
+              <label className="block text-sm font-medium text-white mb-2">
+                Additional Guidelines
+              </label>
+              <div className="text-xs text-gray-500 mb-2 leading-tight">
+                Any other rules for your AI's behavior.
+              </div>
+              <Textarea
+                value={formData.guidelines}
+                onChange={(e) => updateFormData('guidelines', e.target.value)}
+                placeholder="e.g., Always be supportive, avoid arguments"
+                className="w-full p-3 border border-gray-700 rounded-md bg-gray-900 text-white text-sm resize-vertical min-h-[80px] focus:border-gray-600 focus:bg-gray-800"
+              />
+            </div>
+          </div>
+        );
+
+      case 5:
+        return (
+          <div className="step-content text-center py-5">
+            <h2 className="text-xl mb-2 text-white">You're All Set!</h2>
+            <p className="text-sm text-gray-400 mb-6 leading-relaxed">
+              Your AI is configured and ready to go. You can change any of these settings later from your Settings page.
+            </p>
+            <Button 
+              onClick={handleFinish}
+              disabled={isLoading}
+              className="w-full py-3 px-4 bg-white text-black rounded-md text-sm font-semibold hover:bg-gray-100 transition-all"
+            >
+              {isLoading ? 'Setting up...' : 'Go to Dashboard'}
+            </Button>
           </div>
         );
 
@@ -355,136 +330,97 @@ const Onboarding = () => {
     }
   };
 
-  const renderStepImage = () => {
-    switch (currentStep) {
-      case 1:
-        return (
-          <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center h-full">
-            <div className="text-center text-white p-8">
-              <User className="h-24 w-24 mx-auto mb-4 opacity-80" />
-              <h3 className="text-2xl font-bold mb-2">Tell Us About You</h3>
-              <p className="text-blue-100">Help your AI understand your expertise and perspective</p>
-            </div>
-          </div>
-        );
-      case 2:
-        return (
-          <div className="bg-gradient-to-br from-green-500 to-teal-600 rounded-lg flex items-center justify-center h-full">
-            <div className="text-center text-white p-8">
-              <MessageSquare className="h-24 w-24 mx-auto mb-4 opacity-80" />
-              <h3 className="text-2xl font-bold mb-2">Shape Your Voice</h3>
-              <p className="text-green-100">Define how your AI should sound and communicate</p>
-            </div>
-          </div>
-        );
-      case 3:
-        return (
-          <div className="bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center h-full">
-            <div className="text-center text-white p-8">
-              <Target className="h-24 w-24 mx-auto mb-4 opacity-80" />
-              <h3 className="text-2xl font-bold mb-2">Set Your Goals</h3>
-              <p className="text-orange-100">Choose how active you want your AI to be</p>
-            </div>
-          </div>
-        );
-      case 4:
-        return (
-          <div className="bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center h-full">
-            <div className="text-center text-white p-8">
-              <Shield className="h-24 w-24 mx-auto mb-4 opacity-80" />
-              <h3 className="text-2xl font-bold mb-2">Stay Safe</h3>
-              <p className="text-purple-100">Configure guardrails for appropriate commenting</p>
-            </div>
-          </div>
-        );
-      default:
-        return null;
-    }
+  const renderDots = () => {
+    return (
+      <div className="flex justify-center gap-2 mt-6">
+        {[1, 2, 3, 4].map((step) => (
+          <div
+            key={step}
+            className={`w-1.5 h-1.5 rounded-full transition-all ${
+              step === currentStep && currentStep <= totalSteps
+                ? 'bg-white'
+                : step < currentStep
+                ? 'bg-gray-500'
+                : 'bg-gray-700'
+            }`}
+          />
+        ))}
+      </div>
+    );
   };
 
   if (currentStep > totalSteps) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="w-full max-w-2xl">
-          <CardContent className="p-12 text-center">
-            <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Check className="h-10 w-10 text-green-500" />
+      <div className="min-h-screen bg-black text-white flex">
+        <div className="w-1/2 bg-black flex flex-col p-10 relative">
+          <div className="flex items-center gap-2 mb-15">
+            <div className="w-6 h-6 bg-white rounded flex items-center justify-center text-xs text-black font-bold">
+              AI
             </div>
-            <h1 className="text-3xl font-bold text-foreground mb-4">You're All Set!</h1>
-            <p className="text-lg text-muted-foreground mb-8 max-w-md mx-auto">
-              Your AI is configured and ready to go. You can change any of these settings later from your Settings page.
-            </p>
-            <Button onClick={() => navigate('/dashboard')} size="lg" className="px-8">
-              Go to Dashboard
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </CardContent>
-        </Card>
+            <span className="text-base font-semibold">Interact Agent</span>
+          </div>
+
+          <div className="absolute top-10 right-10 text-xs text-gray-500">
+            Complete
+          </div>
+
+          <div className="max-w-80 w-full mx-auto flex-1 flex flex-col justify-center">
+            {renderStepContent()}
+          </div>
+        </div>
+
+        <div className="w-1/2 bg-gray-600 flex items-center justify-center">
+          <div className="text-8xl opacity-30">✨</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
-        {/* Progress Bar */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm text-muted-foreground">Step {currentStep} of {totalSteps}</span>
-            <span className="text-sm text-muted-foreground">{Math.round(progress)}% Complete</span>
+    <div className="min-h-screen bg-black text-white flex">
+      <div className="w-1/2 bg-black flex flex-col p-10 relative">
+        <div className="flex items-center gap-2 mb-15">
+          <div className="w-6 h-6 bg-white rounded flex items-center justify-center text-xs text-black font-bold">
+            AI
           </div>
-          <Progress value={progress} className="h-2" />
+          <span className="text-base font-semibold">Interact Agent</span>
         </div>
 
-        {/* Two Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Left Column - Onboarding Content */}
-          <div className="order-2 lg:order-1">
-            <Card className="bg-card border-border">
-              <CardContent className="p-8">
-                {renderStepContent()}
-                
-                {/* Navigation Buttons */}
-                <div className="flex justify-between mt-8 pt-6 border-t border-border">
-                  <Button
-                    variant="outline"
-                    onClick={handlePrevious}
-                    disabled={currentStep === 1}
-                    className="flex items-center gap-2"
-                  >
-                    <ArrowLeft className="h-4 w-4" />
-                    Previous
-                  </Button>
-                  
-                  {currentStep === totalSteps ? (
-                    <Button
-                      onClick={handleFinish}
-                      disabled={isLoading}
-                      className="flex items-center gap-2"
-                    >
-                      {isLoading ? 'Saving...' : 'Finish Setup'}
-                      <Check className="h-4 w-4" />
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={handleNext}
-                      className="flex items-center gap-2"
-                    >
-                      Next
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+        <div className="absolute top-10 right-10 text-xs text-gray-500">
+          {currentStep <= totalSteps ? `Step ${currentStep} of ${totalSteps}` : 'Complete'}
+        </div>
 
-          {/* Right Column - Image */}
-          <div className="order-1 lg:order-2">
-            <div className="aspect-square lg:aspect-[4/5] w-full">
-              {renderStepImage()}
+        <div className="max-w-80 w-full mx-auto flex-1 flex flex-col justify-center">
+          {renderStepContent()}
+
+          {currentStep <= totalSteps && (
+            <div className="flex justify-between items-center mt-8 gap-3">
+              <button
+                onClick={handlePrevious}
+                className={`flex-1 py-2 px-4 border border-gray-700 rounded-md text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-900 transition-all ${
+                  currentStep === 1 ? 'invisible' : ''
+                }`}
+              >
+                ← Previous
+              </button>
+              
+              <button
+                onClick={currentStep === totalSteps ? handleFinish : handleNext}
+                disabled={isLoading}
+                className="flex-1 py-2 px-4 bg-white text-black rounded-md text-sm font-semibold hover:bg-gray-100 transition-all"
+              >
+                {isLoading ? 'Saving...' : currentStep === totalSteps ? 'Finish Setup' : 'Continue'}
+              </button>
             </div>
-          </div>
+          )}
+
+          {renderDots()}
+        </div>
+      </div>
+
+      <div className="w-1/2 bg-gray-600 flex items-center justify-center">
+        <div className="text-8xl opacity-30">
+          {stepVisuals[currentStep] || '✨'}
         </div>
       </div>
     </div>

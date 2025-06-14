@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,6 +32,15 @@ interface AIFeatures {
   topic_extraction: boolean;
 }
 
+interface OnboardingData {
+  frequent_phrases?: string;
+  brand_ctas?: string;
+  always_say?: string;
+  never_say?: string;
+  content_boundaries?: string;
+  additional_guidelines?: string;
+}
+
 interface UserSettings {
   theme: string;
   language: string;
@@ -46,6 +54,7 @@ interface UserSettings {
   notification_prefs: NotificationPrefs;
   ai_features: AIFeatures;
   dailyCommentTarget?: number;
+  onboarding_data?: OnboardingData;
 }
 
 const Settings = () => {
@@ -89,7 +98,8 @@ const Settings = () => {
     custom_api_key: '',
     notification_prefs: defaultNotificationPrefs,
     ai_features: defaultAIFeatures,
-    dailyCommentTarget: 20
+    dailyCommentTarget: 20,
+    onboarding_data: {}
   });
 
   // Use the milestone tracking hook
@@ -187,7 +197,7 @@ const Settings = () => {
       setProfileData({
         full_name: userProfile.full_name || '',
         email: userProfile.email || user?.email || '',
-        introduction: '',
+        introduction: userProfile.introduction || '',
         preferred_tone: 'Bold Founder'
       });
     }
@@ -212,6 +222,7 @@ const Settings = () => {
         setHasExistingSettings(true);
         const notificationPrefs = validateNotificationPrefs(data.notification_prefs);
         const aiFeatures = validateAIFeatures(data.ai_features);
+        const onboardingData = data.onboarding_data || {};
 
         setUserSettings({
           theme: data.theme || 'dark',
@@ -225,7 +236,8 @@ const Settings = () => {
           custom_api_key: data.custom_api_key || '',
           notification_prefs: notificationPrefs,
           ai_features: aiFeatures,
-          dailyCommentTarget: data.daily_comment_target || 20
+          dailyCommentTarget: data.daily_comment_target || 20,
+          onboarding_data: onboardingData
         });
       } else {
         setHasExistingSettings(false);
@@ -272,6 +284,7 @@ const Settings = () => {
         .from('user_profiles')
         .update({
           full_name: profileData.full_name,
+          introduction: profileData.introduction,
           updated_at: new Date().toISOString()
         })
         .eq('id', user.id);
@@ -428,7 +441,8 @@ const Settings = () => {
         custom_api_key: settingsToSave.custom_api_key,
         notification_prefs: settingsToSave.notification_prefs as any,
         ai_features: settingsToSave.ai_features as any,
-        daily_comment_target: settingsToSave.dailyCommentTarget || 20
+        daily_comment_target: settingsToSave.dailyCommentTarget || 20,
+        onboarding_data: settingsToSave.onboarding_data || {}
       };
 
       let error;
@@ -466,6 +480,15 @@ const Settings = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const updateOnboardingData = async (field: keyof OnboardingData, value: string) => {
+    const updatedOnboardingData = {
+      ...userSettings.onboarding_data,
+      [field]: value
+    };
+    
+    await saveUserSettings({ onboarding_data: updatedOnboardingData });
   };
 
   return (
@@ -651,6 +674,103 @@ const Settings = () => {
                   <option value="fr">French</option>
                   <option value="de">German</option>
                 </select>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Voice Tab - Display onboarding data */}
+        <TabsContent value="voice">
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="text-foreground">Voice Training</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-foreground">Frequently Used Phrases</Label>
+                <Textarea 
+                  placeholder="Enter phrases you commonly use..." 
+                  value={userSettings.onboarding_data?.frequent_phrases || ''}
+                  onChange={(e) => updateOnboardingData('frequent_phrases', e.target.value)}
+                  className="bg-background border-border text-foreground" 
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-foreground">Brand CTAs and Catchphrases</Label>
+                <Textarea 
+                  placeholder="Enter your brand catchphrases and CTAs..." 
+                  value={userSettings.onboarding_data?.brand_ctas || ''}
+                  onChange={(e) => updateOnboardingData('brand_ctas', e.target.value)}
+                  className="bg-background border-border text-foreground" 
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-foreground">Always Say</Label>
+                <Textarea 
+                  placeholder="Phrases to always include..." 
+                  value={userSettings.onboarding_data?.always_say || ''}
+                  onChange={(e) => updateOnboardingData('always_say', e.target.value)}
+                  className="bg-background border-border text-foreground" 
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-foreground">Never Say</Label>
+                <Textarea 
+                  placeholder="Phrases to never use..." 
+                  value={userSettings.onboarding_data?.never_say || ''}
+                  onChange={(e) => updateOnboardingData('never_say', e.target.value)}
+                  className="bg-background border-border text-foreground" 
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Safety Tab - Display onboarding safety data */}
+        <TabsContent value="safety">
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="text-foreground">Safety & Guardrails</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-foreground">Content Boundaries</Label>
+                <Textarea 
+                  placeholder="Enter comma-separated topics to avoid..." 
+                  value={userSettings.onboarding_data?.content_boundaries || ''}
+                  onChange={(e) => updateOnboardingData('content_boundaries', e.target.value)}
+                  className="bg-background border-border text-foreground" 
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-foreground">Additional Guidelines</Label>
+                <Textarea 
+                  placeholder="Enter additional safety guidelines..." 
+                  value={userSettings.onboarding_data?.additional_guidelines || ''}
+                  onChange={(e) => updateOnboardingData('additional_guidelines', e.target.value)}
+                  className="bg-background border-border text-foreground" 
+                />
+              </div>
+              <div className="space-y-3">
+                <Label className="text-foreground">Never Comment On</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-foreground text-sm">Politics</Label>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-foreground text-sm">Religion</Label>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-foreground text-sm">Personal Tragedies</Label>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-foreground text-sm">NSFW Content</Label>
+                    <Switch defaultChecked />
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -917,36 +1037,6 @@ const Settings = () => {
           </Card>
         </TabsContent>
 
-        {/* Voice Tab */}
-        <TabsContent value="voice">
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="text-foreground">Voice Training</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label className="text-foreground">Frequently Used Phrases</Label>
-                <Textarea placeholder="Enter phrases you commonly use..." className="bg-background border-border text-foreground" />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-foreground">Brand CTAs and Catchphrases</Label>
-                <Textarea placeholder="Enter your brand catchphrases and CTAs..." className="bg-background border-border text-foreground" />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-foreground">Always Say</Label>
-                <Textarea placeholder="Phrases to always include..." className="bg-background border-border text-foreground" />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-foreground">Never Say</Label>
-                <Textarea placeholder="Phrases to never use..." className="bg-background border-border text-foreground" />
-              </div>
-              <Button onClick={() => toast.success('Voice settings saved!')} className="w-full">
-                Save Voice Settings
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
         {/* Workflow Tab */}
         <TabsContent value="workflow">
           <Card className="bg-card border-border">
@@ -1064,45 +1154,6 @@ const Settings = () => {
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Safety Tab */}
-        <TabsContent value="safety">
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="text-foreground">Safety & Guardrails</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <Label className="text-foreground">Never Comment On</Label>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-foreground text-sm">Politics</Label>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <Label className="text-foreground text-sm">Religion</Label>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <Label className="text-foreground text-sm">Personal Tragedies</Label>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <Label className="text-foreground text-sm">NSFW Content</Label>
-                    <Switch defaultChecked />
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-foreground">Banned Keywords</Label>
-                <Textarea placeholder="Enter comma-separated keywords to avoid..." className="bg-background border-border text-foreground" />
-              </div>
-              <Button onClick={() => toast.success('Safety settings saved!')} className="w-full">
-                Save Safety Settings
-              </Button>
             </CardContent>
           </Card>
         </TabsContent>
