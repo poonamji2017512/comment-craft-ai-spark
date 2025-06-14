@@ -8,6 +8,30 @@ import { cn } from "@/lib/utils";
 import SectionWithMockup from "@/components/ui/section-with-mockup";
 import { Testimonials } from "@/components/ui/testimonials-columns-1";
 import { ConfiguredPricing } from "@/components/ui/configured-pricing";
+import { FaqSection } from "@/components/ui/faq-section";
+
+const faqItems = [
+  {
+    question: "Will it sound robotic?",
+    answer: "No. Multi-model AI + brand-specific personas ensure human-like replies."
+  },
+  {
+    question: "Can I trust it with my brand?",
+    answer: "Yes. You control every post, and smart onboarding trains it on your tone."
+  },
+  {
+    question: "Do I need another tool?",
+    answer: "Interact complements your scheduler. It powers engagement, not just publishing."
+  },
+  {
+    question: "What if I only use LinkedIn or Reddit?",
+    answer: "One platform is enough — ROI starts with a single touchpoint."
+  },
+  {
+    question: "Is it worth the price?",
+    answer: "Absolutely. Close deals, grow followers, and save hours — faster than a VA."
+  }
+];
 
 const Landing = () => {
   return <div className="min-h-screen bg-background">
@@ -69,22 +93,18 @@ const Landing = () => {
       {/* Pricing Section */}
       <ConfiguredPricing />
 
-      {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-6">
-            Ready to Transform Your Comments?
-          </h2>
-          <p className="text-xl text-muted-foreground mb-8">
-            Join thousands of users who are already creating better content with AI
-          </p>
-          <a href="/dashboard">
-            <button className="rounded-md inline-flex items-center justify-center whitespace-nowrap text-lg font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-11 rounded-md px-8 text-lg px-8 py-6 bg-primary text-primary-foreground hover:bg-primary/90">
-              Start Free Trial
-            </button>
-          </a>
-        </div>
-      </section>
+      {/* FAQ Section */}
+      <FaqSection
+        title="Frequently Asked Questions"
+        description="Everything you need to know about our platform"
+        items={faqItems}
+        contactInfo={{
+          title: "Still have questions?",
+          description: "We're here to help you get started",
+          buttonText: "Contact Support",
+          onContact: () => console.log("Contact support clicked"),
+        }}
+      />
 
       {/* Footer */}
       <footer id="contact" className="py-12 px-4 sm:px-6 lg:px-8 border-t border-border">
@@ -128,6 +148,7 @@ const Landing = () => {
       </footer>
     </div>;
 };
+
 interface GridItemProps {
   area: string;
   icon: React.ReactNode;
