@@ -254,6 +254,7 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          introduction: string | null
           last_login: string | null
           last_prompt_reset: string | null
           updated_at: string
@@ -265,6 +266,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
+          introduction?: string | null
           last_login?: string | null
           last_prompt_reset?: string | null
           updated_at?: string
@@ -276,6 +278,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          introduction?: string | null
           last_login?: string | null
           last_prompt_reset?: string | null
           updated_at?: string
@@ -294,6 +297,7 @@ export type Database = {
           id: string
           language: string | null
           notification_prefs: Json | null
+          onboarding_data: Json | null
           summary_length: string | null
           theme: string | null
           timezone: string | null
@@ -312,6 +316,7 @@ export type Database = {
           id?: string
           language?: string | null
           notification_prefs?: Json | null
+          onboarding_data?: Json | null
           summary_length?: string | null
           theme?: string | null
           timezone?: string | null
@@ -330,6 +335,7 @@ export type Database = {
           id?: string
           language?: string | null
           notification_prefs?: Json | null
+          onboarding_data?: Json | null
           summary_length?: string | null
           theme?: string | null
           timezone?: string | null

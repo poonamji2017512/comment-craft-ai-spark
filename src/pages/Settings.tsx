@@ -68,7 +68,7 @@ const Settings = () => {
   const [profileData, setProfileData] = useState({
     full_name: userProfile?.full_name || '',
     email: user?.email || '',
-    introduction: '',
+    introduction: userProfile?.introduction || '',
     preferred_tone: 'Bold Founder'
   });
 
@@ -222,7 +222,7 @@ const Settings = () => {
         setHasExistingSettings(true);
         const notificationPrefs = validateNotificationPrefs(data.notification_prefs);
         const aiFeatures = validateAIFeatures(data.ai_features);
-        const onboardingData = data.onboarding_data || {};
+        const onboardingData = (data as any).onboarding_data || {};
 
         setUserSettings({
           theme: data.theme || 'dark',
