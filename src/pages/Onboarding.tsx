@@ -432,33 +432,45 @@ const Onboarding = () => {
           {renderStepContent()}
 
           {currentStep <= totalSteps && (
-            <div className="flex justify-between items-center mt-8 gap-3">
-              <button
-                onClick={handlePrevious}
-                className={`flex-1 py-2 px-4 border border-gray-700 rounded-md text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-900 transition-all ${
-                  currentStep === 1 ? 'invisible' : ''
-                }`}
-              >
-                ← Previous
-              </button>
-              
-              <div className="flex gap-2 flex-1">
+            <>
+              <div className="flex justify-between items-center mt-8 gap-3">
                 <button
-                  onClick={handleSkip}
-                  className="flex-1 py-2 px-4 border border-gray-700 rounded-md text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-900 transition-all"
+                  onClick={handlePrevious}
+                  className={`flex-1 py-2 px-4 border border-gray-700 rounded-md text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-900 transition-all ${
+                    currentStep === 1 ? 'invisible' : ''
+                  }`}
                 >
-                  Skip
+                  ← Previous
                 </button>
                 
+                <div className="flex gap-2 flex-1">
+                  <button
+                    onClick={handleSkip}
+                    className="flex-1 py-2 px-4 border border-gray-700 rounded-md text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-900 transition-all"
+                  >
+                    Skip
+                  </button>
+                  
+                  <button
+                    onClick={currentStep === totalSteps ? handleFinish : handleNext}
+                    disabled={isLoading}
+                    className="flex-1 py-2 px-4 bg-white text-black rounded-md text-sm font-semibold hover:bg-gray-100 transition-all"
+                  >
+                    {isLoading ? 'Saving...' : currentStep === totalSteps ? 'Finish Setup' : 'Continue'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Skip button at the bottom */}
+              <div className="flex justify-center mt-4">
                 <button
-                  onClick={currentStep === totalSteps ? handleFinish : handleNext}
-                  disabled={isLoading}
-                  className="flex-1 py-2 px-4 bg-white text-black rounded-md text-sm font-semibold hover:bg-gray-100 transition-all"
+                  onClick={handleSkip}
+                  className="py-2 px-6 text-sm text-gray-500 hover:text-gray-300 transition-colors underline"
                 >
-                  {isLoading ? 'Saving...' : currentStep === totalSteps ? 'Finish Setup' : 'Continue'}
+                  Skip for now
                 </button>
               </div>
-            </div>
+            </>
           )}
 
           {renderDots()}
