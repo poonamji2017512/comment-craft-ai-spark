@@ -11,7 +11,6 @@ import { ConfiguredPricing } from "@/components/ui/configured-pricing";
 import { FaqSection } from "@/components/ui/faq-section";
 import { CTASection } from "@/components/ui/cta-with-rectangle";
 import { Footer } from "@/components/ui/footer-section";
-import LandingPageNavbar from "@/components/LandingPageNavbar";
 
 const faqItems = [
   {
