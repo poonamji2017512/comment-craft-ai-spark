@@ -23,7 +23,7 @@ export function BorderTrail({
   const BASE_TRANSITION = {
     repeat: Infinity,
     duration: 5,
-    ease: 'linear',
+    ease: [0, 0, 1, 1] as [number, number, number, number],
   };
 
   return (
