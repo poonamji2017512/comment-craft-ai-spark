@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { sanityClient } from '@/lib/sanity';
 import { NavBar } from '@/components/ui/tubelight-navbar';
 import { Component as EtheralShadow } from '@/components/ui/etheral-shadow';
+import { Footer } from '@/components/ui/footer-section';
 import BlogTableOfContents from '@/components/BlogTableOfContents';
 
 interface BlogPostData {
@@ -269,6 +270,9 @@ const BlogPost = () => {
             </div>
           </article>
         </div>
+
+        {/* Footer */}
+        <Footer />
       </div>
     </div>
   );
