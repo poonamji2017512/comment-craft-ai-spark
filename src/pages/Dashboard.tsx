@@ -239,122 +239,87 @@ const Dashboard = () => {
 
       {/* Recent Activity and Platform Distribution */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader className="border-b bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 rounded-t-lg">
+        <Card>
+          <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Activity className="w-5 h-5 text-blue-600" />
+              <Activity className="w-5 h-5" />
               Recent Activity
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-0">
-            <div className="space-y-0">
+          <CardContent>
+            <div className="space-y-4">
               {recentActivity.length > 0 ? (
                 recentActivity.map((activity, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 border-b last:border-b-0 hover:bg-muted/50 transition-colors">
-                    <div className="flex items-center gap-4">
-                      <div className={`${platformColors[activity.platform as keyof typeof platformColors] || 'bg-gray-500'} p-3 rounded-xl shadow-sm`}>
-                        <span className="text-white text-sm font-medium">
+                  <div key={index} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`${platformColors[activity.platform as keyof typeof platformColors] || 'bg-gray-500'} p-2 rounded-lg`}>
+                        <span className="text-white text-sm">
                           {platformIcons[activity.platform as keyof typeof platformIcons] || '💬'}
                         </span>
                       </div>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="text-xs font-medium border-2 px-3 py-1">
-                            {activity.platform.charAt(0).toUpperCase() + activity.platform.slice(1)}
-                          </Badge>
-                        </div>
+                      <div>
+                        <p className="font-medium">{activity.platform}</p>
                         <Badge 
-                          className={`text-xs font-medium px-2 py-1 ${toneColors[activity.tone as keyof typeof toneColors] || 'bg-gray-100 text-gray-800'}`}
+                          className={`text-xs ${toneColors[activity.tone as keyof typeof toneColors] || 'bg-gray-100 text-gray-800'}`}
                         >
-                          {activity.tone.charAt(0).toUpperCase() + activity.tone.slice(1)} tone
+                          {activity.tone}
                         </Badge>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Clock className="w-4 h-4" />
-                      <span className="text-sm font-medium">{activity.time}</span>
-                    </div>
+                    <span className="text-sm text-muted-foreground">{activity.time}</span>
                   </div>
                 ))
               ) : (
-                <div className="text-center py-12 px-4">
-                  <Activity className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-                  <p className="text-muted-foreground font-medium">
-                    No recent activity
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Generate your first comment to see activity here!
-                  </p>
-                </div>
+                <p className="text-muted-foreground">No recent activity</p>
               )}
             </div>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader className="border-b bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950 rounded-t-lg">
+        <Card>
+          <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-purple-600" />
+              <BarChart3 className="w-5 h-5" />
               Platform Distribution
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6">
-            <div className="space-y-6">
-              <div className="flex items-center justify-between group hover:bg-muted/50 p-3 rounded-lg transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="bg-blue-500 p-2 rounded-lg shadow-sm">
-                    <span className="text-white text-sm font-medium">𝕏</span>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="bg-blue-500 p-2 rounded-lg">
+                    <span className="text-white text-sm">𝕏</span>
                   </div>
-                  <span className="font-medium">Twitter</span>
+                  <span>Twitter</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-24 h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div className="w-20 h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full shadow-sm"></div>
-                  </div>
-                  <span className="text-sm font-bold text-blue-600 min-w-[3rem] text-right">78%</span>
-                </div>
+                <span className="text-sm font-medium">45%</span>
               </div>
-              <div className="flex items-center justify-between group hover:bg-muted/50 p-3 rounded-lg transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="bg-blue-700 p-2 rounded-lg shadow-sm">
-                    <span className="text-white text-sm font-medium">💼</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="bg-blue-700 p-2 rounded-lg">
+                    <span className="text-white text-sm">💼</span>
                   </div>
-                  <span className="font-medium">LinkedIn</span>
+                  <span>LinkedIn</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-24 h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div className="w-12 h-full bg-gradient-to-r from-blue-700 to-blue-800 rounded-full shadow-sm"></div>
-                  </div>
-                  <span className="text-sm font-bold text-blue-700 min-w-[3rem] text-right">45%</span>
-                </div>
+                <span className="text-sm font-medium">30%</span>
               </div>
-              <div className="flex items-center justify-between group hover:bg-muted/50 p-3 rounded-lg transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="bg-blue-600 p-2 rounded-lg shadow-sm">
-                    <span className="text-white text-sm font-medium">📘</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="bg-blue-600 p-2 rounded-lg">
+                    <span className="text-white text-sm">📘</span>
                   </div>
-                  <span className="font-medium">Facebook</span>
+                  <span>Facebook</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-24 h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div className="w-8 h-full bg-gradient-to-r from-blue-600 to-blue-700 rounded-full shadow-sm"></div>
-                  </div>
-                  <span className="text-sm font-bold text-blue-600 min-w-[3rem] text-right">32%</span>
-                </div>
+                <span className="text-sm font-medium">15%</span>
               </div>
-              <div className="flex items-center justify-between group hover:bg-muted/50 p-3 rounded-lg transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="bg-pink-500 p-2 rounded-lg shadow-sm">
-                    <span className="text-white text-sm font-medium">📷</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="bg-pink-500 p-2 rounded-lg">
+                    <span className="text-white text-sm">📷</span>
                   </div>
-                  <span className="font-medium">Instagram</span>
+                  <span>Instagram</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-24 h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div className="w-7 h-full bg-gradient-to-r from-pink-500 to-pink-600 rounded-full shadow-sm"></div>
-                  </div>
-                  <span className="text-sm font-bold text-pink-500 min-w-[3rem] text-right">28%</span>
-                </div>
+                <span className="text-sm font-medium">10%</span>
               </div>
             </div>
           </CardContent>

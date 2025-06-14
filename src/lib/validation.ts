@@ -9,7 +9,7 @@ export const commentGenerationSchema = z.object({
     .max(10000, 'Original post is too long')
     .refine((text) => text.trim().length > 0, 'Original post cannot be just whitespace'),
   platform: z.enum(['twitter', 'linkedin', 'facebook', 'instagram', 'reddit', 'youtube']),
-  tone: z.enum(['friendly', 'professional', 'casual', 'enthusiastic', 'thoughtful', 'humorous', 'gen-z']),
+  tone: z.enum(['friendly', 'professional', 'casual', 'enthusiastic', 'thoughtful', 'humorous', 'gen-z', 'thanks']),
   maxLength: z.number().min(50).max(10000).optional()
 });
 
