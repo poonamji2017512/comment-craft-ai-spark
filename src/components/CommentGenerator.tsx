@@ -79,7 +79,8 @@ const CommentGenerator = () => {
     { value: 'enthusiastic', label: 'Enthusiastic' },
     { value: 'thoughtful', label: 'Thoughtful' },
     { value: 'humorous', label: 'Humorous' },
-    { value: 'gen-z', label: 'Gen-Z' }
+    { value: 'gen-z', label: 'Gen-Z' },
+    { value: 'thanks', label: 'Thanks' }
   ];
 
   const validateInput = () => {

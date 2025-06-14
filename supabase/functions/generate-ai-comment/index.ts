@@ -1,4 +1,3 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -30,7 +29,7 @@ const validateInput = (body: RequestBody): { isValid: boolean; error?: string; s
     return { isValid: false, error: 'Invalid platform specified' };
   }
   
-  const allowedTones = ['friendly', 'professional', 'casual', 'enthusiastic', 'thoughtful', 'humorous', 'gen-z'];
+  const allowedTones = ['friendly', 'professional', 'casual', 'enthusiastic', 'thoughtful', 'humorous', 'gen-z', 'thanks'];
   if (!allowedTones.includes(body.tone)) {
     return { isValid: false, error: 'Invalid tone specified' };
   }
@@ -109,7 +108,8 @@ serve(async (req) => {
       enthusiastic: "Show genuine excitement and energy. Use positive language and express interest in the topic.",
       thoughtful: "Provide deep, reflective insights. Ask meaningful questions and show genuine consideration of the topic.",
       humorous: "Add light humor where appropriate, but ensure it's tasteful and relevant. Don't force jokes.",
-      'gen-z': "Use modern slang and expressions. Be authentic, relatable, and use current internet language. Keep it real and engaging with Gen-Z vibes."
+      'gen-z': "Use modern slang and expressions. Be authentic, relatable, and use current internet language. Keep it real and engaging with Gen-Z vibes.",
+      'thanks': "Express genuine gratitude and appreciation. Use thankful language, acknowledge the value of the post, and show sincere appreciation for the content or message shared."
     };
 
     const prompt = `You are an expert social media comment writer. Your task is to generate 3 high-quality, human-like comments in response to the following post.

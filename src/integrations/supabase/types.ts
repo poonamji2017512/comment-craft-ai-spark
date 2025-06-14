@@ -210,6 +210,7 @@ export type Database = {
           dodo_customer_id: string | null
           dodo_subscription_id: string | null
           id: string
+          plan_id: string
           plan_type: string
           status: string
           updated_at: string
@@ -223,6 +224,7 @@ export type Database = {
           dodo_customer_id?: string | null
           dodo_subscription_id?: string | null
           id?: string
+          plan_id: string
           plan_type: string
           status?: string
           updated_at?: string
@@ -236,6 +238,7 @@ export type Database = {
           dodo_customer_id?: string | null
           dodo_subscription_id?: string | null
           id?: string
+          plan_id?: string
           plan_type?: string
           status?: string
           updated_at?: string

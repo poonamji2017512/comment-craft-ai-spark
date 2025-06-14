@@ -1,8 +1,7 @@
-
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, MessageSquare, Clock, TrendingUp, Users, Target, Zap, Globe, Calendar, Star } from "lucide-react";
+import { Sparkles, MessageSquare, Clock, TrendingUp, Users, Target, Zap, Globe, Calendar, Star, Activity, BarChart3 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import HourlyActivityChart from "@/components/HourlyActivityChart";
 
@@ -186,6 +185,35 @@ const Dashboard = () => {
     }
   ];
 
+  const platformIcons = {
+    twitter: '𝕏',
+    linkedin: '💼',
+    facebook: '📘',
+    instagram: '📷',
+    reddit: '🔴',
+    youtube: '📺',
+  };
+
+  const platformColors = {
+    twitter: 'bg-blue-500',
+    linkedin: 'bg-blue-700',
+    facebook: 'bg-blue-600',
+    instagram: 'bg-pink-500',
+    reddit: 'bg-orange-500',
+    youtube: 'bg-red-500',
+  };
+
+  const toneColors = {
+    friendly: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+    professional: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+    casual: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
+    enthusiastic: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
+    thoughtful: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300',
+    humorous: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+    'gen-z': 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300',
+    thanks: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300',
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
       <div className="flex items-center gap-3 mb-8">
@@ -211,82 +239,121 @@ const Dashboard = () => {
 
       {/* Recent Activity and Platform Distribution */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardHeader className="border-b bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 rounded-t-lg">
             <CardTitle className="flex items-center gap-2">
-              <Clock className="w-5 h-5" />
+              <Activity className="w-5 h-5 text-blue-600" />
               Recent Activity
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
+          <CardContent className="p-0">
+            <div className="space-y-0">
               {recentActivity.length > 0 ? (
                 recentActivity.map((activity, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <MessageSquare className="w-5 h-5 text-primary" />
-                      <div>
+                  <div key={index} className="flex items-center justify-between p-4 border-b last:border-b-0 hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center gap-4">
+                      <div className={`${platformColors[activity.platform as keyof typeof platformColors] || 'bg-gray-500'} p-3 rounded-xl shadow-sm`}>
+                        <span className="text-white text-sm font-medium">
+                          {platformIcons[activity.platform as keyof typeof platformIcons] || '💬'}
+                        </span>
+                      </div>
+                      <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <Badge variant="secondary">{activity.platform}</Badge>
-                          <Badge variant="outline">{activity.tone}</Badge>
+                          <Badge variant="outline" className="text-xs font-medium border-2 px-3 py-1">
+                            {activity.platform.charAt(0).toUpperCase() + activity.platform.slice(1)}
+                          </Badge>
                         </div>
+                        <Badge 
+                          className={`text-xs font-medium px-2 py-1 ${toneColors[activity.tone as keyof typeof toneColors] || 'bg-gray-100 text-gray-800'}`}
+                        >
+                          {activity.tone.charAt(0).toUpperCase() + activity.tone.slice(1)} tone
+                        </Badge>
                       </div>
                     </div>
-                    <span className="text-sm text-muted-foreground">{activity.time}</span>
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Clock className="w-4 h-4" />
+                      <span className="text-sm font-medium">{activity.time}</span>
+                    </div>
                   </div>
                 ))
               ) : (
-                <p className="text-muted-foreground text-center py-4">
-                  No recent activity. Generate your first comment to see activity here!
-                </p>
+                <div className="text-center py-12 px-4">
+                  <Activity className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+                  <p className="text-muted-foreground font-medium">
+                    No recent activity
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Generate your first comment to see activity here!
+                  </p>
+                </div>
               )}
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardHeader className="border-b bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950 rounded-t-lg">
             <CardTitle className="flex items-center gap-2">
-              <Globe className="w-5 h-5" />
+              <BarChart3 className="w-5 h-5 text-purple-600" />
               Platform Distribution
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Twitter</span>
-                <div className="flex items-center gap-2">
-                  <div className="w-20 h-2 bg-gray-200 rounded-full">
-                    <div className="w-16 h-2 bg-blue-500 rounded-full"></div>
+          <CardContent className="p-6">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between group hover:bg-muted/50 p-3 rounded-lg transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="bg-blue-500 p-2 rounded-lg shadow-sm">
+                    <span className="text-white text-sm font-medium">𝕏</span>
                   </div>
-                  <span className="text-sm text-muted-foreground">78%</span>
+                  <span className="font-medium">Twitter</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-24 h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div className="w-20 h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full shadow-sm"></div>
+                  </div>
+                  <span className="text-sm font-bold text-blue-600 min-w-[3rem] text-right">78%</span>
                 </div>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">LinkedIn</span>
-                <div className="flex items-center gap-2">
-                  <div className="w-20 h-2 bg-gray-200 rounded-full">
-                    <div className="w-10 h-2 bg-green-500 rounded-full"></div>
+              <div className="flex items-center justify-between group hover:bg-muted/50 p-3 rounded-lg transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="bg-blue-700 p-2 rounded-lg shadow-sm">
+                    <span className="text-white text-sm font-medium">💼</span>
                   </div>
-                  <span className="text-sm text-muted-foreground">45%</span>
+                  <span className="font-medium">LinkedIn</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-24 h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div className="w-12 h-full bg-gradient-to-r from-blue-700 to-blue-800 rounded-full shadow-sm"></div>
+                  </div>
+                  <span className="text-sm font-bold text-blue-700 min-w-[3rem] text-right">45%</span>
                 </div>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Facebook</span>
-                <div className="flex items-center gap-2">
-                  <div className="w-20 h-2 bg-gray-200 rounded-full">
-                    <div className="w-8 h-2 bg-purple-500 rounded-full"></div>
+              <div className="flex items-center justify-between group hover:bg-muted/50 p-3 rounded-lg transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="bg-blue-600 p-2 rounded-lg shadow-sm">
+                    <span className="text-white text-sm font-medium">📘</span>
                   </div>
-                  <span className="text-sm text-muted-foreground">32%</span>
+                  <span className="font-medium">Facebook</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-24 h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div className="w-8 h-full bg-gradient-to-r from-blue-600 to-blue-700 rounded-full shadow-sm"></div>
+                  </div>
+                  <span className="text-sm font-bold text-blue-600 min-w-[3rem] text-right">32%</span>
                 </div>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Instagram</span>
-                <div className="flex items-center gap-2">
-                  <div className="w-20 h-2 bg-gray-200 rounded-full">
-                    <div className="w-6 h-2 bg-pink-500 rounded-full"></div>
+              <div className="flex items-center justify-between group hover:bg-muted/50 p-3 rounded-lg transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="bg-pink-500 p-2 rounded-lg shadow-sm">
+                    <span className="text-white text-sm font-medium">📷</span>
                   </div>
-                  <span className="text-sm text-muted-foreground">28%</span>
+                  <span className="font-medium">Instagram</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-24 h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div className="w-7 h-full bg-gradient-to-r from-pink-500 to-pink-600 rounded-full shadow-sm"></div>
+                  </div>
+                  <span className="text-sm font-bold text-pink-500 min-w-[3rem] text-right">28%</span>
                 </div>
               </div>
             </div>
