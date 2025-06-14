@@ -38,7 +38,6 @@ const faqItems = [
 
 const Landing = () => {
   return <div className="min-h-screen bg-background">
-      <LandingPageNavbar />
       <HeroSection />
       
       {/* Features Section */}
