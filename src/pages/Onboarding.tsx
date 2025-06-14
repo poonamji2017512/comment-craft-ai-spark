@@ -1,7 +1,5 @@
+
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,8 +12,6 @@ interface OnboardingData {
   alwaysSay: string;
   neverSay: string;
   dailyTarget: number;
-  boundaries: string;
-  guidelines: string;
 }
 
 const Onboarding = () => {
@@ -30,24 +26,24 @@ const Onboarding = () => {
     ctas: '',
     alwaysSay: '',
     neverSay: '',
-    dailyTarget: 10,
-    boundaries: '',
-    guidelines: ''
+    dailyTarget: 10
   });
 
-  const totalSteps = 4;
+  const maxSteps = 3;
 
-  const stepVisuals = {
+  const stepIcons = {
     1: '🤖',
     2: '🎯', 
-    3: '⚡',
-    4: '🛡️',
-    5: '✨'
+    3: '⚡'
   };
 
+  const phraseExamples = ['Absolutely agree!', 'Love this perspective', 'Great insight'];
+
   const handleNext = () => {
-    if (currentStep <= totalSteps) {
+    if (currentStep < maxSteps) {
       setCurrentStep(prev => prev + 1);
+    } else {
+      handleFinish();
     }
   };
 
@@ -74,16 +70,14 @@ const Onboarding = () => {
         .from('user_settings')
         .select('id')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
-      // Prepare onboarding data
+      // Prepare onboarding data with proper JSON structure
       const onboardingData = {
         frequent_phrases: formData.phrases,
         brand_ctas: formData.ctas,
         always_say: formData.alwaysSay,
-        never_say: formData.neverSay,
-        content_boundaries: formData.boundaries,
-        additional_guidelines: formData.guidelines
+        never_say: formData.neverSay
       };
 
       if (existingSettings) {
@@ -92,7 +86,7 @@ const Onboarding = () => {
           .from('user_settings')
           .update({
             daily_comment_target: formData.dailyTarget,
-            onboarding_data: onboardingData
+            onboarding_data: onboardingData as any
           })
           .eq('user_id', user.id);
 
@@ -121,13 +115,13 @@ const Onboarding = () => {
             summary_ready: true,
             task_due: true,
             frequency: 'real-time'
-          },
+          } as any,
           ai_features: {
             auto_summarization: true,
             action_item_detection: true,
             topic_extraction: true
-          },
-          onboarding_data: onboardingData
+          } as any,
+          onboarding_data: onboardingData as any
         };
 
         const { error: settingsError } = await supabase
@@ -146,7 +140,6 @@ const Onboarding = () => {
         .from('user_profiles')
         .update({
           introduction: formData.description,
-          preferred_tone: 'friendly',
           updated_at: new Date().toISOString()
         })
         .eq('id', user.id);
@@ -171,28 +164,27 @@ const Onboarding = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handlePhraseTagClick = (phrase: string) => {
+    setFormData(prev => ({ ...prev, phrases: phrase }));
+  };
+
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
         return (
-          <div className="step-content">
-            <h1 className="text-2xl font-semibold mb-2 text-white">Welcome! Let's Set Up Your Interact Agent</h1>
-            <p className="text-sm text-gray-400 mb-8 leading-relaxed">
-              First, give your AI some context. This helps it understand who it's commenting as.
-            </p>
+          <div className="step active">
+            <h1 className="title">Welcome! Let's Set Up Your Interact Agent</h1>
+            <p className="subtitle">First, give your AI some context. This helps it understand who it's commenting as.</p>
             
-            <div className="form-group mb-5">
-              <label className="block text-sm font-medium text-white mb-2">
-                Describe yourself (used for AI context)
-              </label>
-              <div className="text-xs text-gray-500 mb-2 leading-tight">
-                Tell the AI about your expertise, interests, and style.
-              </div>
-              <Textarea
+            <div className="form-group">
+              <label className="form-label">Describe yourself (used for AI context)</label>
+              <p className="form-description">Tell the AI about your expertise, interests, and style.</p>
+              <textarea 
+                className="input-field" 
+                rows={4} 
+                placeholder="e.g. I am a marketing expert focused on B2B SaaS growth..."
                 value={formData.description}
                 onChange={(e) => updateFormData('description', e.target.value)}
-                placeholder="e.g., I am a marketing expert focused on B2B SaaS growth..."
-                className="w-full p-3 border border-gray-700 rounded-md bg-gray-900 text-white text-sm resize-vertical min-h-[80px] focus:border-gray-600 focus:bg-gray-800"
               />
             </div>
           </div>
@@ -200,69 +192,66 @@ const Onboarding = () => {
 
       case 2:
         return (
-          <div className="step-content">
-            <h1 className="text-2xl font-semibold mb-2 text-white">Define Your AI's Brand Voice</h1>
-            <p className="text-sm text-gray-400 mb-8 leading-relaxed">
-              Teach the AI how you want it to sound. The more detail you provide, the more authentic it will be.
-            </p>
+          <div className="step active">
+            <h1 className="title">Define Your AI's Brand Voice</h1>
+            <p className="subtitle">Teach the AI how you want it to sound. The more detail you provide, the more authentic it will be.</p>
             
-            <div className="form-group mb-5">
-              <label className="block text-sm font-medium text-white mb-2">
-                Frequently Used Phrases
-              </label>
-              <div className="text-xs text-gray-500 mb-2 leading-tight">
-                Enter common phrases you use in conversations.
-              </div>
-              <Input
+            <div className="form-group">
+              <label className="form-label">Frequently Used Phrases</label>
+              <p className="form-description">Enter common phrases you use in conversations.</p>
+              <input 
+                type="text" 
+                className="input-field" 
+                placeholder="That's a great point! Couldn't agree more"
                 value={formData.phrases}
                 onChange={(e) => updateFormData('phrases', e.target.value)}
-                placeholder="That's a great point!, Couldn't agree more"
-                className="w-full p-3 border border-gray-700 rounded-md bg-gray-900 text-white text-sm focus:border-gray-600 focus:bg-gray-800"
               />
+              <div className="phrase-examples">
+                {phraseExamples.map((phrase, index) => (
+                  <span 
+                    key={index}
+                    className="phrase-tag"
+                    onClick={() => handlePhraseTagClick(phrase)}
+                  >
+                    {phrase}
+                  </span>
+                ))}
+              </div>
             </div>
 
-            <div className="form-group mb-5">
-              <label className="block text-sm font-medium text-white mb-2">
-                Brand CTAs and Catchphrases
-              </label>
-              <div className="text-xs text-gray-500 mb-2 leading-tight">
-                Include your signature calls-to-action.
-              </div>
-              <Input
+            <div className="form-group">
+              <label className="form-label">Brand CTAs and Catchphrases</label>
+              <p className="form-description">Include your signature calls-to-action.</p>
+              <input 
+                type="text" 
+                className="input-field" 
+                placeholder="Check out the link in my bio!"
                 value={formData.ctas}
                 onChange={(e) => updateFormData('ctas', e.target.value)}
-                placeholder="Check out the link in my bio!"
-                className="w-full p-3 border border-gray-700 rounded-md bg-gray-900 text-white text-sm focus:border-gray-600 focus:bg-gray-800"
               />
             </div>
 
-            <div className="form-group mb-5">
-              <label className="block text-sm font-medium text-white mb-2">
-                Always Say
-              </label>
-              <div className="text-xs text-gray-500 mb-2 leading-tight">
-                Phrases you want included in most comments.
-              </div>
-              <Input
+            <div className="form-group">
+              <label className="form-label">Always Say</label>
+              <p className="form-description">Phrases you want to include in most comments.</p>
+              <input 
+                type="text" 
+                className="input-field" 
+                placeholder="Keep up the great work!"
                 value={formData.alwaysSay}
                 onChange={(e) => updateFormData('alwaysSay', e.target.value)}
-                placeholder="Keep up the great work!"
-                className="w-full p-3 border border-gray-700 rounded-md bg-gray-900 text-white text-sm focus:border-gray-600 focus:bg-gray-800"
               />
             </div>
 
-            <div className="form-group mb-5">
-              <label className="block text-sm font-medium text-white mb-2">
-                Never Say
-              </label>
-              <div className="text-xs text-gray-500 mb-2 leading-tight">
-                Words or phrases to avoid completely.
-              </div>
-              <Input
+            <div className="form-group">
+              <label className="form-label">Never Say</label>
+              <p className="form-description">Words or phrases to avoid completely.</p>
+              <input 
+                type="text" 
+                className="input-field" 
+                placeholder="Literally, Epic fail"
                 value={formData.neverSay}
                 onChange={(e) => updateFormData('neverSay', e.target.value)}
-                placeholder="Literally, Epic fail"
-                className="w-full p-3 border border-gray-700 rounded-md bg-gray-900 text-white text-sm focus:border-gray-600 focus:bg-gray-800"
               />
             </div>
           </div>
@@ -270,95 +259,23 @@ const Onboarding = () => {
 
       case 3:
         return (
-          <div className="step-content">
-            <h1 className="text-2xl font-semibold mb-2 text-white">Configure Your Workflow</h1>
-            <p className="text-sm text-gray-400 mb-8 leading-relaxed">
-              How active do you want your AI to be? You can always change this later.
-            </p>
+          <div className="step active">
+            <h1 className="title">Configure Your Workflow</h1>
+            <p className="subtitle">How active do you want your AI to be? You can always change this later.</p>
             
-            <div className="form-group mb-5">
-              <label className="block text-sm font-medium text-white mb-2">
-                Daily Comment Target
-              </label>
-              <div className="text-xs text-gray-500 mb-2 leading-tight">
-                Set a daily goal for comment generation (1-1000). We'll track your progress!
-              </div>
-              <div className="inline-block w-25">
-                <Input
-                  type="number"
-                  min="1"
-                  max="1000"
-                  value={formData.dailyTarget}
+            <div className="form-group">
+              <label className="form-label">Daily Comment Target</label>
+              <p className="form-description">Set a daily goal for comment generation (1-100). We'll track your progress.</p>
+              <div className="daily-target">
+                <input 
+                  type="number" 
+                  value={formData.dailyTarget} 
+                  min="1" 
+                  max="100"
                   onChange={(e) => updateFormData('dailyTarget', parseInt(e.target.value) || 10)}
-                  className="w-24 p-3 border border-gray-700 rounded-md bg-gray-900 text-white text-sm text-center focus:border-gray-600 focus:bg-gray-800"
                 />
+                <span>comments per day</span>
               </div>
-            </div>
-          </div>
-        );
-
-      case 4:
-        return (
-          <div className="step-content">
-            <h1 className="text-2xl font-semibold mb-2 text-white">Set Your Safety & Guardrails</h1>
-            <p className="text-sm text-gray-400 mb-8 leading-relaxed">
-              Define boundaries to keep your AI interactions safe and on-brand.
-            </p>
-            
-            <div className="form-group mb-5">
-              <label className="block text-sm font-medium text-white mb-2">
-                Content Boundaries
-              </label>
-              <div className="text-xs text-gray-500 mb-2 leading-tight">
-                Topics your AI should avoid commenting on.
-              </div>
-              <Textarea
-                value={formData.boundaries}
-                onChange={(e) => updateFormData('boundaries', e.target.value)}
-                placeholder="e.g., Political discussions, controversial topics"
-                className="w-full p-3 border border-gray-700 rounded-md bg-gray-900 text-white text-sm resize-vertical min-h-[80px] focus:border-gray-600 focus:bg-gray-800"
-              />
-            </div>
-
-            <div className="form-group mb-5">
-              <label className="block text-sm font-medium text-white mb-2">
-                Additional Guidelines
-              </label>
-              <div className="text-xs text-gray-500 mb-2 leading-tight">
-                Any other rules for your AI's behavior.
-              </div>
-              <Textarea
-                value={formData.guidelines}
-                onChange={(e) => updateFormData('guidelines', e.target.value)}
-                placeholder="e.g., Always be supportive, avoid arguments"
-                className="w-full p-3 border border-gray-700 rounded-md bg-gray-900 text-white text-sm resize-vertical min-h-[80px] focus:border-gray-600 focus:bg-gray-800"
-              />
-            </div>
-          </div>
-        );
-
-      case 5:
-        return (
-          <div className="step-content text-center py-5">
-            <h2 className="text-xl mb-2 text-white">You're All Set!</h2>
-            <p className="text-sm text-gray-400 mb-6 leading-relaxed">
-              Your AI is configured and ready to go. You can change any of these settings later from your Settings page.
-            </p>
-            <div className="flex gap-3">
-              <Button 
-                onClick={handleSkip}
-                variant="outline"
-                className="flex-1 py-3 px-4 border border-gray-700 text-gray-400 hover:text-white hover:bg-gray-900"
-              >
-                Skip for Now
-              </Button>
-              <Button 
-                onClick={handleFinish}
-                disabled={isLoading}
-                className="flex-1 py-3 px-4 bg-white text-black rounded-md text-sm font-semibold hover:bg-gray-100 transition-all"
-              >
-                {isLoading ? 'Setting up...' : 'Go to Dashboard'}
-              </Button>
             </div>
           </div>
         );
@@ -368,134 +285,407 @@ const Onboarding = () => {
     }
   };
 
-  const renderDots = () => {
-    return (
-      <div className="flex justify-center gap-2 mt-6">
-        {[1, 2, 3, 4].map((step) => (
-          <div
-            key={step}
-            className={`w-1.5 h-1.5 rounded-full transition-all ${
-              step === currentStep && currentStep <= totalSteps
-                ? 'bg-white'
-                : step < currentStep
-                ? 'bg-gray-500'
-                : 'bg-gray-700'
-            }`}
-          />
-        ))}
-      </div>
-    );
-  };
-
-  if (currentStep > totalSteps) {
-    return (
-      <div className="min-h-screen bg-black text-white flex">
-        <div className="w-1/2 bg-black flex flex-col p-10 relative">
-          <div className="flex items-center gap-2 mb-15">
-            <div className="w-6 h-6 bg-white rounded flex items-center justify-center text-xs text-black font-bold">
-              AI
-            </div>
-            <span className="text-base font-semibold">Interact Agent</span>
-          </div>
-
-          <div className="absolute top-10 right-10 text-xs text-gray-500">
-            Complete
-          </div>
-
-          <div className="max-w-80 w-full mx-auto flex-1 flex flex-col justify-center">
-            {renderStepContent()}
-          </div>
-        </div>
-
-        <div className="w-1/2 bg-gray-600 flex items-center justify-center">
-          <div className="text-8xl opacity-30">✨</div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-black text-white flex">
-      <div className="w-1/2 bg-black flex flex-col p-10 relative">
-        <div className="flex items-center gap-2 mb-15">
-          <div className="w-6 h-6 bg-white rounded flex items-center justify-center text-xs text-black font-bold">
-            AI
+    <>
+      <style jsx>{`
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        .onboarding-container {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+          background: #191A1A;
+          color: #ffffff;
+          overflow: hidden;
+          height: 100vh;
+          padding: 10px;
+        }
+
+        .container {
+          display: flex;
+          height: calc(100vh - 20px);
+          gap: 10px;
+        }
+
+        .left-panel {
+          flex: 1;
+          padding: 40px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          position: relative;
+          background: rgba(30, 30, 30, 0.8);
+          backdrop-filter: blur(10px);
+          border-radius: 10px;
+        }
+
+        .right-panel {
+          flex: 1;
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 10px;
+          position: relative;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .logo {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          position: absolute;
+          top: 40px;
+          left: 40px;
+          font-size: 18px;
+          font-weight: 600;
+          color: #20d4aa;
+        }
+
+        .logo-icon {
+          width: 32px;
+          height: 32px;
+          background: linear-gradient(135deg, #20d4aa, #2563eb);
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: bold;
+          font-size: 16px;
+          color: white;
+        }
+
+        .step-indicator {
+          position: absolute;
+          top: 40px;
+          right: 40px;
+          font-size: 14px;
+          color: #9ca3af;
+          font-weight: 500;
+        }
+
+        .content {
+          max-width: 500px;
+        }
+
+        .title {
+          font-size: 32px;
+          font-weight: 700;
+          margin-bottom: 12px;
+          background: linear-gradient(135deg, #ffffff, #e5e7eb);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          line-height: 1.2;
+        }
+
+        .subtitle {
+          font-size: 16px;
+          color: #9ca3af;
+          margin-bottom: 40px;
+          line-height: 1.5;
+        }
+
+        .form-group {
+          margin-bottom: 32px;
+        }
+
+        .form-label {
+          display: block;
+          font-size: 16px;
+          font-weight: 600;
+          margin-bottom: 8px;
+          color: #ffffff;
+        }
+
+        .form-description {
+          font-size: 14px;
+          color: #9ca3af;
+          margin-bottom: 16px;
+          line-height: 1.4;
+        }
+
+        .input-field {
+          width: 100%;
+          padding: 16px 20px;
+          background: rgba(30, 41, 59, 0.8);
+          border: 1px solid rgba(148, 163, 184, 0.2);
+          border-radius: 12px;
+          color: #ffffff;
+          font-size: 15px;
+          transition: all 0.2s ease;
+          backdrop-filter: blur(10px);
+          resize: vertical;
+          min-height: 60px;
+        }
+
+        .input-field:focus {
+          outline: none;
+          border-color: #20d4aa;
+          box-shadow: 0 0 0 3px rgba(32, 212, 170, 0.1);
+          background: rgba(30, 41, 59, 0.9);
+        }
+
+        .input-field::placeholder {
+          color: #64748b;
+        }
+
+        .phrase-examples {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-top: 12px;
+        }
+
+        .phrase-tag {
+          padding: 8px 14px;
+          background: rgba(32, 212, 170, 0.1);
+          border: 1px solid rgba(32, 212, 170, 0.2);
+          border-radius: 20px;
+          font-size: 13px;
+          color: #20d4aa;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .phrase-tag:hover {
+          background: rgba(32, 212, 170, 0.2);
+          transform: translateY(-1px);
+        }
+
+        .daily-target {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          background: rgba(30, 41, 59, 0.6);
+          padding: 16px 20px;
+          border-radius: 12px;
+          border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .daily-target input {
+          background: transparent;
+          border: none;
+          color: #ffffff;
+          font-size: 18px;
+          font-weight: 600;
+          width: 60px;
+          text-align: center;
+        }
+
+        .daily-target input:focus {
+          outline: none;
+        }
+
+        .buttons {
+          display: flex;
+          gap: 16px;
+          margin-top: 40px;
+        }
+
+        .btn {
+          padding: 14px 24px;
+          border: none;
+          border-radius: 10px;
+          font-size: 15px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          text-decoration: none;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .btn-primary {
+          background: linear-gradient(135deg, #20d4aa, #2563eb);
+          color: white;
+        }
+
+        .btn-primary:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(32, 212, 170, 0.3);
+        }
+
+        .btn-primary:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none;
+          box-shadow: none;
+        }
+
+        .btn-secondary {
+          background: rgba(148, 163, 184, 0.1);
+          color: #9ca3af;
+          border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .btn-secondary:hover {
+          background: rgba(148, 163, 184, 0.2);
+          color: #ffffff;
+        }
+
+        .skip-link {
+          position: absolute;
+          bottom: 40px;
+          left: 40px;
+          color: #64748b;
+          text-decoration: none;
+          font-size: 14px;
+          transition: color 0.2s ease;
+          cursor: pointer;
+        }
+
+        .skip-link:hover {
+          color: #20d4aa;
+        }
+
+        .progress-dots {
+          position: absolute;
+          bottom: 40px;
+          left: 50%;
+          transform: translateX(-50%);
+          display: flex;
+          gap: 8px;
+        }
+
+        .dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: rgba(148, 163, 184, 0.3);
+          transition: all 0.2s ease;
+        }
+
+        .dot.active {
+          background: #20d4aa;
+        }
+
+        .agent-icon {
+          width: 120px;
+          height: 120px;
+          border-radius: 24px;
+          background: rgba(255, 255, 255, 0.1);
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 48px;
+          margin-bottom: 24px;
+          position: relative;
+          z-index: 1;
+        }
+
+        .agent-label {
+          color: rgba(255, 255, 255, 0.9);
+          font-size: 16px;
+          font-weight: 500;
+          position: relative;
+          z-index: 1;
+        }
+
+        .floating-circle {
+          position: absolute;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.05);
+          animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-circle:nth-child(1) {
+          width: 100px;
+          height: 100px;
+          top: 20%;
+          right: 20%;
+          animation-delay: 0s;
+        }
+
+        .floating-circle:nth-child(2) {
+          width: 60px;
+          height: 60px;
+          top: 60%;
+          right: 10%;
+          animation-delay: 2s;
+        }
+
+        .floating-circle:nth-child(3) {
+          width: 80px;
+          height: 80px;
+          top: 40%;
+          left: 10%;
+          animation-delay: 4s;
+        }
+
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-20px) rotate(5deg); }
+        }
+      `}</style>
+
+      <div className="onboarding-container">
+        <div className="container">
+          <div className="left-panel">
+            <div className="logo">
+              <div className="logo-icon">AI</div>
+              Interact Agent
+            </div>
+            
+            <div className="step-indicator">
+              Step {currentStep} of {maxSteps}
+            </div>
+
+            <div className="content">
+              {renderStepContent()}
+
+              <div className="buttons">
+                {currentStep > 1 && (
+                  <button className="btn btn-secondary" onClick={handlePrevious}>
+                    ← Previous
+                  </button>
+                )}
+                <button className="btn btn-secondary" onClick={handleSkip}>
+                  Skip
+                </button>
+                <button 
+                  className="btn btn-primary" 
+                  onClick={handleNext}
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Saving...' : currentStep === maxSteps ? 'Complete Setup' : 'Continue'}
+                </button>
+              </div>
+            </div>
+
+            <div className="skip-link" onClick={handleSkip}>
+              Skip for now
+            </div>
+            
+            <div className="progress-dots">
+              {[1, 2, 3].map((step) => (
+                <div 
+                  key={step}
+                  className={`dot ${step <= currentStep ? 'active' : ''}`}
+                />
+              ))}
+            </div>
           </div>
-          <span className="text-base font-semibold">Interact Agent</span>
-        </div>
 
-        <div className="absolute top-10 right-10 text-xs text-gray-500">
-          {currentStep <= totalSteps ? `Step ${currentStep} of ${totalSteps}` : 'Complete'}
-        </div>
-
-        <div className="max-w-80 w-full mx-auto flex-1 flex flex-col justify-center">
-          {renderStepContent()}
-
-          {currentStep <= totalSteps && (
-            <>
-              <div className="flex justify-between items-center mt-8 gap-3">
-                <button
-                  onClick={handlePrevious}
-                  className={`flex-1 py-2 px-4 border border-gray-700 rounded-md text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-900 transition-all ${
-                    currentStep === 1 ? 'invisible' : ''
-                  }`}
-                >
-                  ← Previous
-                </button>
-                
-                <div className="flex gap-2 flex-1">
-                  <button
-                    onClick={handleSkip}
-                    className="flex-1 py-2 px-4 border border-gray-700 rounded-md text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-900 transition-all"
-                  >
-                    Skip
-                  </button>
-                  
-                  <button
-                    onClick={currentStep === totalSteps ? handleFinish : handleNext}
-                    disabled={isLoading}
-                    className="flex-1 py-2 px-4 bg-white text-black rounded-md text-sm font-semibold hover:bg-gray-100 transition-all"
-                  >
-                    {isLoading ? 'Saving...' : currentStep === totalSteps ? 'Finish Setup' : 'Continue'}
-                  </button>
-                </div>
-              </div>
-
-              {/* Skip button at the bottom */}
-              <div className="flex justify-center mt-4">
-                <button
-                  onClick={handleSkip}
-                  className="py-2 px-6 text-sm text-gray-500 hover:text-gray-300 transition-colors underline"
-                >
-                  Skip for now
-                </button>
-              </div>
-            </>
-          )}
-
-          {renderDots()}
+          <div className="right-panel">
+            <div className="floating-circle"></div>
+            <div className="floating-circle"></div>
+            <div className="floating-circle"></div>
+            
+            <div className="agent-icon">
+              {stepIcons[currentStep as keyof typeof stepIcons]}
+            </div>
+            <div className="agent-label">AI Comment Agent</div>
+          </div>
         </div>
       </div>
-
-      <div className="w-1/2 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center relative overflow-hidden">
-        {/* Background pattern */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-20 left-20 w-32 h-32 bg-white rounded-full blur-3xl"></div>
-          <div className="absolute bottom-40 right-20 w-48 h-48 bg-blue-400 rounded-full blur-3xl"></div>
-          <div className="absolute top-1/2 left-1/3 w-24 h-24 bg-purple-400 rounded-full blur-2xl"></div>
-        </div>
-        
-        {/* Main visual */}
-        <div className="relative z-10 text-center">
-          <div className="text-8xl opacity-80 mb-4">
-            {stepVisuals[currentStep] || '✨'}
-          </div>
-          <div className="text-white/60 text-sm font-medium">
-            AI Comment Agent
-          </div>
-        </div>
-      </div>
-    </div>
+    </>
   );
 };
 
