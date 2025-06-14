@@ -31,7 +31,7 @@ const SectionWithMockup: React.FC<SectionWithMockupProps> = ({
 
     const itemVariants = {
         hidden: { opacity: 0, y: 50 },
-        visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.6, 0.01, -0.05, 0.95] } },
+        visible: { opacity: 1, y: 0 },
     };
 
     const layoutClasses = reverseLayout
@@ -56,6 +56,7 @@ const SectionWithMockup: React.FC<SectionWithMockupProps> = ({
                     <motion.div
                         className={`flex flex-col items-start gap-4 mt-10 md:mt-0 max-w-[546px] mx-auto md:mx-0 ${textOrderClass}`}
                         variants={itemVariants}
+                        transition={{ duration: 0.7, ease: [0.6, 0.01, -0.05, 0.95] }}
                     >
                          <div className="space-y-2 md:space-y-1">
                             <h2 className="text-white text-3xl md:text-[40px] font-semibold leading-tight md:leading-[53px]">
@@ -76,6 +77,7 @@ const SectionWithMockup: React.FC<SectionWithMockupProps> = ({
                     <motion.div
                         className={`relative mt-10 md:mt-0 mx-auto ${imageOrderClass} w-full max-w-[300px] md:max-w-[471px]`}
                         variants={itemVariants}
+                        transition={{ duration: 0.7, ease: [0.6, 0.01, -0.05, 0.95] }}
                     >
                         {/* Decorative Background Element */}
                         <motion.div
