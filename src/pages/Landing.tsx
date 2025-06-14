@@ -1,8 +1,9 @@
+
 import React from "react";
 import { HeroSection } from "@/components/ui/hero-section-1";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, Star, Zap, Shield, Users, Brain, MessageSquare, Users2, TrendingUp, DollarSign, Bot, Smartphone, Globe, Flame, BarChart3, CheckCircle, Zap as ZapIcon, Link2 } from "lucide-react";
+import { Check, Star, Zap, Shield, Users, Brain, MessageSquare, Users2, TrendingUp, DollarSign, Bot, Smartphone, Globe, Flame, BarChart3, CheckCircle, Zap as ZapIcon, Link2, Home, Briefcase, FileText, User, Heart } from "lucide-react";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { cn } from "@/lib/utils";
 import SectionWithMockup from "@/components/ui/section-with-mockup";
@@ -11,6 +12,7 @@ import { ConfiguredPricing } from "@/components/ui/configured-pricing";
 import { FaqSection } from "@/components/ui/faq-section";
 import { CTASection } from "@/components/ui/cta-with-rectangle";
 import { Footer } from "@/components/ui/footer-section";
+import { NavBar } from "@/components/ui/tubelight-navbar";
 
 const faqItems = [
   {
@@ -36,7 +38,16 @@ const faqItems = [
 ];
 
 const Landing = () => {
+  const navItems = [
+    { name: 'Features', url: '#features', icon: Briefcase },
+    { name: 'Why Choose Interact', url: '#why-choose-interact', icon: Heart },
+    { name: 'Blog', url: '/blog', icon: FileText },
+    { name: 'Testimonials', url: '#testimonials', icon: Users },
+    { name: 'Pricing', url: '#pricing', icon: DollarSign }
+  ];
+
   return <div className="min-h-screen bg-background">
+      <NavBar items={navItems} />
       <HeroSection />
       
       {/* Features Section */}
