@@ -7,6 +7,8 @@ import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { cn } from "@/lib/utils";
 import SectionWithMockup from "@/components/ui/section-with-mockup";
 import { Testimonials } from "@/components/ui/testimonials-columns-1";
+import { Pricing } from "@/components/ui/single-pricing-card-1";
+
 const Landing = () => {
   return <div className="min-h-screen bg-background">
       <HeroSection />
@@ -65,122 +67,7 @@ const Landing = () => {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4">
-              Simple Pricing
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Choose the plan that works best for you
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {/* Free Plan */}
-            <Card className="border-2 border-border">
-              <CardHeader className="text-center">
-                <CardTitle className="text-2xl">Free</CardTitle>
-                <div className="text-4xl font-bold">$0</div>
-                <CardDescription>Perfect for getting started</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-primary mr-2" />
-                    20 comments per day
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-primary mr-2" />
-                    Basic AI models
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-primary mr-2" />
-                    Standard support
-                  </li>
-                </ul>
-                
-                <a href="/dashboard">
-                  <button className="w-full mt-6 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 variant-outline">
-                    Get Started
-                  </button>
-                </a>
-              </CardContent>
-            </Card>
-
-            {/* Pro Plan */}
-            <Card className="border-2 border-primary relative">
-              <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                Most Popular
-              </Badge>
-              <CardHeader className="text-center">
-                <CardTitle className="text-2xl">Pro</CardTitle>
-                <div className="text-4xl font-bold">$20</div>
-                <CardDescription>For power users</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-primary mr-2" />
-                    Unlimited comments
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-primary mr-2" />
-                    Advanced AI models
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-primary mr-2" />
-                    Priority support
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-primary mr-2" />
-                    Custom tone settings
-                  </li>
-                </ul>
-                <a href="/dashboard">
-                  <button className="w-full mt-6 rounded-md inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90">
-                    Upgrade to Pro
-                  </button>
-                </a>
-              </CardContent>
-            </Card>
-
-            {/* Ultra Plan */}
-            <Card className="border-2 border-border">
-              <CardHeader className="text-center">
-                <CardTitle className="text-2xl">Ultra</CardTitle>
-                <div className="text-4xl font-bold">$40</div>
-                <CardDescription>For teams and agencies</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-primary mr-2" />
-                    Everything in Pro
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-primary mr-2" />
-                    Team collaboration
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-primary mr-2" />
-                    Analytics dashboard
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-5 w-5 text-primary mr-2" />
-                    API access
-                  </li>
-                </ul>
-                <a href="/dashboard">
-                  <button className="w-full mt-6 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 variant-outline">
-                    Upgrade to Ultra
-                  </button>
-                </a>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
+      <Pricing />
 
       {/* CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
