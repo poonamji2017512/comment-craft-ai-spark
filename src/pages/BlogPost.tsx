@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Home, MessageSquare } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { sanityClient } from '@/lib/sanity';
-import { FloatingNav } from '@/components/ui/floating-navbar';
+import BlogNavbar from '@/components/BlogNavbar';
 import BlogTableOfContents from '@/components/BlogTableOfContents';
 
 interface BlogPostData {
@@ -93,23 +93,10 @@ const BlogPost = () => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
 
-  const navItems = [
-    {
-      name: "Home",
-      link: "/",
-      icon: <Home className="h-4 w-4 text-neutral-500 dark:text-white" />,
-    },
-    {
-      name: "Blog",
-      link: "/blog",
-      icon: <MessageSquare className="h-4 w-4 text-neutral-500 dark:text-white" />,
-    },
-  ];
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <FloatingNav navItems={navItems} />
+        <BlogNavbar />
         <div className="container mx-auto px-4 py-20">
           <div className="text-center">Loading...</div>
         </div>
@@ -120,7 +107,7 @@ const BlogPost = () => {
   if (!post) {
     return (
       <div className="min-h-screen bg-background">
-        <FloatingNav navItems={navItems} />
+        <BlogNavbar />
         <div className="container mx-auto px-4 py-20">
           <div className="text-center">Post not found</div>
         </div>
@@ -130,7 +117,7 @@ const BlogPost = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <FloatingNav navItems={navItems} />
+      <BlogNavbar />
       
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Back button */}
