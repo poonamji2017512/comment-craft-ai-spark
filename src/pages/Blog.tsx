@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Footer } from '@/components/ui/footer-section';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Home, MessageSquare, User } from 'lucide-react';
 import { sanityClient } from '@/lib/sanity';
-import BlogNavbar from '@/components/BlogNavbar';
+import { FloatingNav } from '@/components/ui/floating-navbar';
 
 interface BlogPost {
   _id: string;
@@ -130,6 +130,19 @@ const Blog = () => {
     fetchPosts();
   }, []);
 
+  const navItems = [
+    {
+      name: "Home",
+      link: "/",
+      icon: <Home className="h-4 w-4 text-neutral-500 dark:text-white" />,
+    },
+    {
+      name: "Blog",
+      link: "/blog",
+      icon: <MessageSquare className="h-4 w-4 text-neutral-500 dark:text-white" />,
+    },
+  ];
+
   const handlePostClick = (slug: string) => {
     navigate(`/blog/${slug}`);
   };
@@ -149,7 +162,7 @@ const Blog = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <BlogNavbar />
+        <FloatingNav navItems={navItems} />
         <div className="container mx-auto px-4 py-20">
           <div className="text-center">Loading...</div>
         </div>
@@ -159,7 +172,7 @@ const Blog = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <BlogNavbar />
+      <FloatingNav navItems={navItems} />
       
       <div className="container mx-auto px-4 py-20 max-w-6xl">
         {/* Header */}
