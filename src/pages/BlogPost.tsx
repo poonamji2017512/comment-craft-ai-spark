@@ -1,9 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { sanityClient } from '@/lib/sanity';
+import BlogNavbar from '@/components/BlogNavbar';
+import BlogTableOfContents from '@/components/BlogTableOfContents';
 
 interface BlogPostData {
   _id: string;
@@ -30,6 +31,12 @@ const BlogPost = () => {
   const navigate = useNavigate();
   const [post, setPost] = useState<BlogPostData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Table of contents data
+  const tableOfContents = [
+    { id: 'setup', title: 'Setup', level: 1 },
+    { id: 'problem', title: 'Problem', level: 1 },
+  ];
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -89,6 +96,7 @@ const BlogPost = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
+        <BlogNavbar />
         <div className="container mx-auto px-4 py-20">
           <div className="text-center">Loading...</div>
         </div>
@@ -99,6 +107,7 @@ const BlogPost = () => {
   if (!post) {
     return (
       <div className="min-h-screen bg-background">
+        <BlogNavbar />
         <div className="container mx-auto px-4 py-20">
           <div className="text-center">Post not found</div>
         </div>
@@ -108,6 +117,8 @@ const BlogPost = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <BlogNavbar />
+      
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Back button */}
         <Button 
@@ -148,6 +159,9 @@ const BlogPost = () => {
             </div>
           </div>
 
+          {/* Table of Contents */}
+          <BlogTableOfContents sections={tableOfContents} />
+
           {/* Article content */}
           <div className="text-foreground space-y-8">
             <p className="text-lg leading-relaxed">
@@ -155,7 +169,7 @@ const BlogPost = () => {
             </p>
 
             {/* Setup section */}
-            <div>
+            <div id="setup">
               <h2 className="text-2xl font-bold text-foreground mb-4">Setup</h2>
               <div className="space-y-4 text-muted-foreground">
                 <p>
@@ -194,7 +208,7 @@ const BlogPost = () => {
             </div>
 
             {/* Problem section */}
-            <div>
+            <div id="problem">
               <h2 className="text-2xl font-bold text-foreground mb-4">Problem</h2>
               <div className="space-y-4 text-muted-foreground">
                 <p>

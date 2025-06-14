@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft } from 'lucide-react';
 import { sanityClient } from '@/lib/sanity';
+import BlogNavbar from '@/components/BlogNavbar';
 
 interface BlogPost {
   _id: string;
@@ -148,6 +149,7 @@ const Blog = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
+        <BlogNavbar />
         <div className="container mx-auto px-4 py-20">
           <div className="text-center">Loading...</div>
         </div>
@@ -157,6 +159,7 @@ const Blog = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <BlogNavbar />
       
       <div className="container mx-auto px-4 py-20 max-w-6xl">
         {/* Header */}
