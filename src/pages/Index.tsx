@@ -5,6 +5,8 @@ import AutoAuthModal from "@/components/AutoAuthModal";
 import FloatingAuthModal from "@/components/FloatingAuthModal";
 
 const Index = () => {
+  console.log("Index component is rendering");
+  
   return (
     <div className="min-h-full bg-background flex flex-col">
       <main className="flex-1 container mx-auto px-4 py-8">
