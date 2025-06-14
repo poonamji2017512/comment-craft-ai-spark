@@ -12,16 +12,16 @@ import { commentGenerationSchema, sanitizeText, sanitizeErrorMessage } from "@/l
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMilestoneTracking } from "@/hooks/useMilestoneTracking";
+
 interface CommentSuggestion {
   id: number;
   text: string;
   platform: string;
   length: number;
 }
+
 const CommentGenerator = () => {
-  const {
-    userProfile
-  } = useAuth();
+  const { userProfile } = useAuth();
   const [originalPost, setOriginalPost] = useState('');
   const [platform, setPlatform] = useState('twitter');
   const [tone, setTone] = useState('friendly');
@@ -36,9 +36,7 @@ const CommentGenerator = () => {
   const currentDailyCount = userProfile?.daily_prompt_count || 0;
 
   // Use milestone tracking
-  const {
-    getProgressInfo
-  } = useMilestoneTracking(currentDailyCount, dailyTarget);
+  const { getProgressInfo } = useMilestoneTracking(currentDailyCount, dailyTarget);
 
   // Load settings from sessionStorage on component mount
   useEffect(() => {
@@ -76,50 +74,26 @@ const CommentGenerator = () => {
   useEffect(() => {
     sessionStorage.setItem('comment-tone-setting', tone);
   }, [tone]);
-  const platforms = [{
-    value: 'twitter',
-    label: 'Twitter/X'
-  }, {
-    value: 'linkedin',
-    label: 'LinkedIn'
-  }, {
-    value: 'facebook',
-    label: 'Facebook'
-  }, {
-    value: 'instagram',
-    label: 'Instagram'
-  }, {
-    value: 'reddit',
-    label: 'Reddit'
-  }, {
-    value: 'youtube',
-    label: 'YouTube'
-  }];
-  const tones = [{
-    value: 'friendly',
-    label: 'Friendly'
-  }, {
-    value: 'professional',
-    label: 'Professional'
-  }, {
-    value: 'casual',
-    label: 'Casual'
-  }, {
-    value: 'enthusiastic',
-    label: 'Enthusiastic'
-  }, {
-    value: 'thoughtful',
-    label: 'Thoughtful'
-  }, {
-    value: 'humorous',
-    label: 'Humorous'
-  }, {
-    value: 'gen-z',
-    label: 'Gen-Z'
-  }, {
-    value: 'thanks',
-    label: 'Thanks'
-  }];
+  const platforms = [
+    { value: 'twitter', label: 'Twitter/X' },
+    { value: 'linkedin', label: 'LinkedIn' },
+    { value: 'facebook', label: 'Facebook' },
+    { value: 'instagram', label: 'Instagram' },
+    { value: 'reddit', label: 'Reddit' },
+    { value: 'youtube', label: 'YouTube' }
+  ];
+
+  const tones = [
+    { value: 'friendly', label: 'Friendly' },
+    { value: 'professional', label: 'Professional' },
+    { value: 'casual', label: 'Casual' },
+    { value: 'enthusiastic', label: 'Enthusiastic' },
+    { value: 'thoughtful', label: 'Thoughtful' },
+    { value: 'humorous', label: 'Humorous' },
+    { value: 'gen-z', label: 'Gen-Z' },
+    { value: 'thanks', label: 'Thanks' }
+  ];
+
   const validateInput = () => {
     try {
       setValidationError('');
@@ -136,35 +110,33 @@ const CommentGenerator = () => {
       return null;
     }
   };
+
   const generateComments = async () => {
     const validatedInput = validateInput();
     if (!validatedInput) {
       toast.error(validationError);
       return;
     }
+
     setIsGenerating(true);
     try {
-      const {
-        data: {
-          session
-        }
-      } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         toast.error('Please sign in to generate comments');
         setIsGenerating(false);
         return;
       }
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('generate-ai-comment', {
+
+      const { data, error } = await supabase.functions.invoke('generate-ai-comment', {
         body: validatedInput
       });
+
       if (error) {
         console.error('Error generating comments:', error);
         toast.error('Failed to generate comments. Please try again.');
         return;
       }
+
       if (data?.comments) {
         // Sanitize generated comments before displaying
         const sanitizedComments = data.comments.map((comment: any) => ({
@@ -184,6 +156,7 @@ const CommentGenerator = () => {
       setIsGenerating(false);
     }
   };
+
   const regenerateComments = async () => {
     // Add a small delay to prevent too frequent regenerations
     const timeSinceLastGeneration = Date.now() - lastGenerationTime;
@@ -193,6 +166,7 @@ const CommentGenerator = () => {
     }
     await generateComments();
   };
+
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -201,6 +175,7 @@ const CommentGenerator = () => {
       toast.error("Failed to copy comment");
     }
   };
+
   const platformIcons = {
     twitter: '𝕏',
     linkedin: '💼',
@@ -209,6 +184,7 @@ const CommentGenerator = () => {
     reddit: '🔴',
     youtube: '📺'
   };
+
   const platformColors = {
     twitter: "bg-blue-500",
     linkedin: "bg-blue-700",
@@ -217,11 +193,13 @@ const CommentGenerator = () => {
     reddit: "bg-orange-500",
     youtube: "bg-red-500"
   };
-  const progressInfo = getProgressInfo();
-  return <div className="space-y-6">
-      {/* Progress Indicator */}
-      {userProfile}
 
+  const progressInfo = getProgressInfo();
+
+  return (
+    <div className="space-y-6">
+      {/* Progress Indicator */}
+      
       {/* Input Section */}
       <Card className="bg-card border-border">
         <CardHeader>
@@ -234,17 +212,25 @@ const CommentGenerator = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {validationError && <Alert variant="destructive">
+          {validationError && (
+            <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>{validationError}</AlertDescription>
-            </Alert>}
+            </Alert>
+          )}
           
           <div>
             <label className="text-sm font-medium mb-2 block text-foreground">Original Post Content</label>
-            <Textarea placeholder="Paste the original post content here..." value={originalPost} onChange={e => {
-            setOriginalPost(e.target.value);
-            setValidationError('');
-          }} className="min-h-[120px] bg-background border-border text-foreground" maxLength={10000} />
+            <Textarea
+              placeholder="Paste the original post content here..."
+              value={originalPost}
+              onChange={(e) => {
+                setOriginalPost(e.target.value);
+                setValidationError('');
+              }}
+              className="min-h-[120px] bg-background border-border text-foreground"
+              maxLength={10000}
+            />
             <div className="text-xs text-muted-foreground mt-1">
               {originalPost.length}/10,000 characters
             </div>
@@ -258,9 +244,11 @@ const CommentGenerator = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-background border-border">
-                  {platforms.map(p => <SelectItem key={p.value} value={p.value} className="text-foreground hover:bg-muted">
+                  {platforms.map((p) => (
+                    <SelectItem key={p.value} value={p.value} className="text-foreground hover:bg-muted">
                       {p.label}
-                    </SelectItem>)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -272,9 +260,11 @@ const CommentGenerator = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-background border-border">
-                  {tones.map(t => <SelectItem key={t.value} value={t.value} className="text-foreground hover:bg-muted">
+                  {tones.map((t) => (
+                    <SelectItem key={t.value} value={t.value} className="text-foreground hover:bg-muted">
                       {t.label}
-                    </SelectItem>)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -283,24 +273,41 @@ const CommentGenerator = () => {
               <label className="text-sm font-medium mb-2 block text-foreground">
                 Length: {length[0]} characters
               </label>
-              <Slider value={length} onValueChange={setLength} max={platform === 'linkedin' ? 3000 : platform === 'reddit' ? 10000 : 280} min={50} step={10} className="mt-2" />
+              <Slider
+                value={length}
+                onValueChange={setLength}
+                max={platform === 'linkedin' ? 3000 : platform === 'reddit' ? 10000 : 280}
+                min={50}
+                step={10}
+                className="mt-2"
+              />
             </div>
           </div>
 
-          <Button onClick={generateComments} disabled={isGenerating || !originalPost.trim() || !!validationError} className="w-full" size="lg">
-            {isGenerating ? <>
+          <Button
+            onClick={generateComments}
+            disabled={isGenerating || !originalPost.trim() || !!validationError}
+            className="w-full"
+            size="lg"
+          >
+            {isGenerating ? (
+              <>
                 <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
                 Generating Comments...
-              </> : <>
+              </>
+            ) : (
+              <>
                 <Sparkles className="w-4 h-4 mr-2" />
                 Generate Comments
-              </>}
+              </>
+            )}
           </Button>
         </CardContent>
       </Card>
 
       {/* Generated Comments Section */}
-      {generatedComments.length > 0 && <Card className="bg-card border-border">
+      {generatedComments.length > 0 && (
+        <Card className="bg-card border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div>
               <CardTitle className="text-foreground">Generated Comments</CardTitle>
@@ -308,14 +315,21 @@ const CommentGenerator = () => {
                 AI-generated comments ready to use
               </CardDescription>
             </div>
-            <Button variant="outline" size="sm" onClick={regenerateComments} disabled={isGenerating} className="ml-4 border-border text-foreground hover:bg-muted">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={regenerateComments}
+              disabled={isGenerating}
+              className="ml-4 border-border text-foreground hover:bg-muted"
+            >
               <RefreshCw className="w-4 h-4 mr-2" />
               Regenerate
             </Button>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {generatedComments.map((comment, index) => <Card key={`${comment.id}-${lastGenerationTime}`} className="bg-background border-border">
+              {generatedComments.map((comment, index) => (
+                <Card key={`${comment.id}-${lastGenerationTime}`} className="bg-background border-border">
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
@@ -350,16 +364,25 @@ const CommentGenerator = () => {
                     </div>
 
                     <div className="flex justify-end mt-3">
-                      <Button onClick={() => copyToClipboard(comment.text)} variant="outline" size="sm" className="border-border text-foreground hover:bg-muted">
+                      <Button
+                        onClick={() => copyToClipboard(comment.text)}
+                        variant="outline"
+                        size="sm"
+                        className="border-border text-foreground hover:bg-muted"
+                      >
                         <Copy className="h-4 w-4 mr-2" />
                         Copy
                       </Button>
                     </div>
                   </CardContent>
-                </Card>)}
+                </Card>
+              ))}
             </div>
           </CardContent>
-        </Card>}
-    </div>;
+        </Card>
+      )}
+    </div>
+  );
 };
+
 export default CommentGenerator;
