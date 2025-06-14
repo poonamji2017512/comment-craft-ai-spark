@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -131,6 +132,39 @@ const Settings = () => {
     { value: 'Pacific/Auckland', label: 'Pacific/Auckland (NZST/NZDT)' },
     { value: 'UTC', label: 'UTC (Coordinated Universal Time)' }
   ].sort((a, b) => a.label.localeCompare(b.label));
+
+  // Generate compliment messages for reaching targets
+  const getComplimentMessage = (targetReached: number) => {
+    const compliments = [
+      `🎉 Incredible! You've reached your daily target of ${targetReached} comments! You're absolutely crushing it!`,
+      `🌟 Amazing work! ${targetReached} comments completed - you're a commenting superstar!`,
+      `🚀 Fantastic achievement! You've hit your target of ${targetReached} comments today. Keep up the excellent work!`,
+      `⭐ Outstanding! Your dedication to reach ${targetReached} comments is truly inspiring!`,
+      `🎯 Perfect! You've successfully completed your daily goal of ${targetReached} comments. You're unstoppable!`,
+      `💫 Brilliant! Reaching ${targetReached} comments shows your commitment to excellence!`,
+      `🏆 Exceptional work! Your ${targetReached} comment target is complete - you're a true professional!`
+    ];
+    return compliments[Math.floor(Math.random() * compliments.length)];
+  };
+
+  // Check if user has reached their target and show congratulations
+  useEffect(() => {
+    const currentCount = userProfile?.daily_prompt_count || 0;
+    const target = userSettings.dailyCommentTarget || 20;
+    
+    if (currentCount >= target && currentCount > 0) {
+      const hasShownToday = sessionStorage.getItem(`target-reached-${new Date().toDateString()}`);
+      if (!hasShownToday) {
+        setTimeout(() => {
+          toast.success(getComplimentMessage(target), {
+            duration: 6000,
+            description: `You've successfully completed ${currentCount} comments today!`
+          });
+          sessionStorage.setItem(`target-reached-${new Date().toDateString()}`, 'true');
+        }, 1000);
+      }
+    }
+  }, [userProfile?.daily_prompt_count, userSettings.dailyCommentTarget]);
 
   useEffect(() => {
     if (userProfile) {
@@ -361,6 +395,26 @@ const Settings = () => {
     }
   };
 
+  const handleDailyTargetChange = async (newTarget: number) => {
+    if (newTarget < 1 || newTarget > 100) {
+      toast.error('Daily target must be between 1 and 100');
+      return;
+    }
+
+    const updatedSettings = { ...userSettings, dailyCommentTarget: newTarget };
+    setUserSettings(updatedSettings);
+    
+    // Save to session storage immediately
+    sessionStorage.setItem('daily-comment-target', newTarget.toString());
+    
+    // Save to database
+    await saveUserSettings({ dailyCommentTarget: newTarget });
+    
+    toast.success(`Daily target updated to ${newTarget} comments!`, {
+      duration: 3000
+    });
+  };
+
   const saveUserSettings = async (updatedSettings: Partial<UserSettings>) => {
     if (!user) {
       toast.error('You must be logged in to save settings');
@@ -418,7 +472,9 @@ const Settings = () => {
       }
 
       setUserSettings(settingsToSave);
-      toast.success('Settings saved successfully!');
+      if (!updatedSettings.dailyCommentTarget) {
+        toast.success('Settings saved successfully!');
+      }
     } catch (error) {
       console.error('Error:', error);
       toast.error('An unexpected error occurred while saving settings');
@@ -436,7 +492,7 @@ const Settings = () => {
         </div>
         {userProfile && (
           <Badge variant="secondary" className="bg-muted text-muted-foreground">
-            Daily Comments: {userProfile.daily_prompt_count || 0}/20
+            Daily Comments: {userProfile.daily_prompt_count || 0}/{userSettings.dailyCommentTarget || 20}
           </Badge>
         )}
       </div>
@@ -911,24 +967,67 @@ const Settings = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label className="text-foreground">Daily Comment Target</Label>
-                <Input 
-                  type="number" 
-                  min="1" 
-                  max="100"
-                  value={userSettings.dailyCommentTarget || 20}
-                  onChange={(e) => {
-                    const value = parseInt(e.target.value);
-                    if (!isNaN(value) && value >= 1 && value <= 100) {
-                      saveUserSettings({ dailyCommentTarget: value });
-                      sessionStorage.setItem('daily-comment-target', value.toString());
-                    }
-                  }}
-                  placeholder="20" 
-                  className="bg-background border-border text-foreground" 
-                />
+                <div className="flex items-center gap-3">
+                  <Input 
+                    type="number" 
+                    min="1" 
+                    max="100"
+                    value={userSettings.dailyCommentTarget || 20}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value);
+                      if (!isNaN(value)) {
+                        setUserSettings(prev => ({ ...prev, dailyCommentTarget: value }));
+                      }
+                    }}
+                    onBlur={(e) => {
+                      const value = parseInt(e.target.value);
+                      if (!isNaN(value) && value >= 1 && value <= 100) {
+                        handleDailyTargetChange(value);
+                      } else {
+                        setUserSettings(prev => ({ ...prev, dailyCommentTarget: 20 }));
+                        toast.error('Please enter a valid target between 1 and 100');
+                      }
+                    }}
+                    placeholder="20" 
+                    className="bg-background border-border text-foreground w-24" 
+                  />
+                  <Button 
+                    onClick={() => {
+                      const target = userSettings.dailyCommentTarget || 20;
+                      if (target >= 1 && target <= 100) {
+                        handleDailyTargetChange(target);
+                      } else {
+                        toast.error('Please enter a valid target between 1 and 100');
+                      }
+                    }}
+                    variant="outline"
+                    size="sm"
+                    disabled={isLoading}
+                  >
+                    Save Target
+                  </Button>
+                </div>
                 <p className="text-sm text-muted-foreground">
-                  Set your daily goal for comment generation. You'll receive milestone notifications to track your progress.
+                  Set your daily goal for comment generation (1-100). You'll receive milestone notifications and congratulations when you reach your target!
                 </p>
+                {userProfile && (
+                  <div className="mt-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Today's Progress:</span>
+                      <span className="text-foreground font-medium">
+                        {userProfile.daily_prompt_count || 0} / {userSettings.dailyCommentTarget || 20}
+                      </span>
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-2 mt-1">
+                      <div 
+                        className="bg-primary h-2 rounded-full transition-all duration-300" 
+                        style={{ 
+                          width: `${Math.min(((userProfile.daily_prompt_count || 0) / (userSettings.dailyCommentTarget || 20)) * 100, 100)}%` 
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="flex items-center justify-between">
                 <Label className="text-foreground">Auto Approval</Label>
