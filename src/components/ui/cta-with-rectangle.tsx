@@ -54,14 +54,21 @@ export function CTASection({
         )}
 
         {/* Action Button */}
-        <Button
-          variant={action.variant || "default"}
-          size="lg"
-          className="opacity-0 animate-fade-in-up delay-500"
-          asChild
-        >
-          <a href={action.href}>{action.text}</a>
-        </Button>
+        <div className="flex flex-col items-center gap-3">
+          <Button
+            variant={action.variant || "default"}
+            size="lg"
+            className="opacity-0 animate-fade-in-up delay-500"
+            asChild
+          >
+            <a href={action.href}>{action.text}</a>
+          </Button>
+          
+          {/* Required line under button */}
+          <p className="text-sm text-muted-foreground opacity-0 animate-fade-in-up delay-600">
+            No credit card required. Cancel anytime. Full Pro access.
+          </p>
+        </div>
 
         {/* Glow Effect */}
         {withGlow && (

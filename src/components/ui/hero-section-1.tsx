@@ -75,7 +75,7 @@ export function HeroSection() {
                             <div className="text-center sm:mx-auto lg:mr-auto lg:mt-0">
                                 <AnimatedGroup variants={transitionVariants}>
                                     <a href="#link" className="hover:bg-background dark:hover:border-t-border bg-muted group mx-auto flex w-fit items-center gap-4 rounded-full border p-1 pl-4 shadow-md shadow-black/5 transition-all duration-300 dark:border-t-white/5 dark:shadow-zinc-950">
-                                        <span className="text-foreground text-sm">Introducing Support for AI Models</span>
+                                        <span className="text-foreground text-sm">🦾 AI Social Media Manager</span>
                                         <span className="dark:border-background block h-4 w-0.5 border-l bg-white dark:bg-zinc-700"></span>
 
                                         <div className="bg-background group-hover:bg-muted size-6 overflow-hidden rounded-full duration-500">
@@ -91,10 +91,10 @@ export function HeroSection() {
                                     </a>
                         
                                     <h1 className="mt-8 max-w-4xl mx-auto text-balance text-6xl md:text-7xl lg:mt-16 xl:text-[5.25rem]">
-                                        Modern Solutions for Customer Engagement
+                                        Build Your Brand Without Burnout
                                     </h1>
                                     <p className="mx-auto mt-8 max-w-2xl text-balance text-lg">
-                                        AI-powered social media management and engagement platform that automates your interactions with intelligent comments, DMs, and viral content creation.
+                                        AI Social Media Manager that engages like a human across LinkedIn, X, Reddit, YouTube, and more. One-click comments, DMs, and content that actually sound like you.
                                     </p>
                                 </AnimatedGroup>
 
@@ -112,13 +112,26 @@ export function HeroSection() {
                                     <div key={1} className="bg-foreground/10 rounded-[14px] border p-0.5">
                                         <Button asChild size="lg" className="rounded-xl px-5 text-base">
                                             <a href="#link">
-                                                <span className="text-nowrap">Start Building</span>
+                                                <span className="text-nowrap">👉 Start 3-Day Free Trial</span>
                                             </a>
                                         </Button>
                                     </div>
-                                    <Button key={2} asChild size="lg" variant="ghost" className="h-10.5 rounded-xl px-5">
-                                        
-                                    </Button>
+                                </AnimatedGroup>
+
+                                <AnimatedGroup variants={{
+                container: {
+                  visible: {
+                    transition: {
+                      staggerChildren: 0.05,
+                      delayChildren: 0.85
+                    }
+                  }
+                },
+                item: transitionVariants.item
+              }} className="mt-4">
+                                    <p className="text-sm text-muted-foreground">
+                                        No credit card required • Full Pro access • 50+ languages
+                                    </p>
                                 </AnimatedGroup>
                             </div>
                         </div>

@@ -66,19 +66,26 @@ const Landing = () => {
       </section>
 
       {/* Why choose Interact Section */}
-      <SectionWithMockup title={<>
-            Why choose
-            <br />
-            Interact?
-          </>} description={<>
-            Transform your social media presence with AI-powered automation that 
-            <br />
-            feels authentic. Our intelligent platform learns your brand voice,
-            <br />
-            creates engaging content, and manages interactions across all major
-            <br />
-            platforms while you focus on growing your business.
-          </>} primaryImageSrc="https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=800&h=600&fit=crop" secondaryImageSrc="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop" />
+      <SectionWithMockup 
+        title={<>
+          "You're building the product. Who's building the brand?"
+        </>} 
+        description={<>
+          Manual engagement takes hours. Robotic tools damage your voice. Hiring agencies? Expensive and impersonal.
+          <br />
+          <br />
+          Interact learns your brand voice and engages authentically across all platforms.
+          <br />
+          <br />
+          📊 Before/After:
+          <br />
+          ⏳ Time Spent: 2 hours daily → 10 mins
+          <br />
+          📈 Results: 30 Users → 130+ users in 2 days
+        </>} 
+        primaryImageSrc="https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=800&h=600&fit=crop" 
+        secondaryImageSrc="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop" 
+      />
 
       {/* Testimonials Section */}
       <section id="testimonials" className="py-20 px-4 sm:px-6 lg:px-8">
@@ -108,13 +115,14 @@ const Landing = () => {
         badge={{
           text: "Get started"
         }}
-        title="Ready to Transform Your Social Media?"
+        title="Ready to Build Your Brand Without Burnout?"
         description="Join thousands of businesses already using Interact to automate their social media engagement and grow their online presence."
         action={{
-          text: "Start Free Trial",
+          text: "👉 Start Your 3-Day Free Trial",
           href: "/signup",
           variant: "default"
         }}
+        className="border-t border-brand"
       />
 
       {/* Footer */}
@@ -155,4 +163,5 @@ const GridItem = ({
       </div>
     </li>;
 };
+
 export default Landing;
