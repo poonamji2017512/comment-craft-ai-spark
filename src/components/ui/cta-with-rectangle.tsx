@@ -61,7 +61,7 @@ export function CTASection({
             className="opacity-0 animate-fade-in-up delay-500"
             asChild
           >
-            <a href={action.href}>{action.text}</a>
+            <a href={action.href}>Start Your 3-Day Free Trial</a>
           </Button>
           
           {/* Required line under button */}
