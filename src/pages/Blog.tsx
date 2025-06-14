@@ -7,6 +7,7 @@ import { ArrowLeft, Home, User, Briefcase, FileText } from 'lucide-react';
 import { sanityClient } from '@/lib/sanity';
 import { NavBar } from '@/components/ui/tubelight-navbar';
 import { Component as EtheralShadow } from '@/components/ui/etheral-shadow';
+
 interface BlogPost {
   _id: string;
   title: string;
@@ -27,11 +28,13 @@ interface BlogPost {
   estimatedReadingTime: number;
   categories: string[];
 }
+
 const Blog = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [featuredPosts, setFeaturedPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -146,9 +149,11 @@ const Blog = () => {
     };
     fetchPosts();
   }, []);
+
   const handlePostClick = (slug: string) => {
     navigate(`/blog/${slug}`);
   };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -156,6 +161,7 @@ const Blog = () => {
       day: 'numeric'
     });
   };
+
   const getAuthorInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
@@ -203,9 +209,14 @@ const Blog = () => {
           </div>
 
           {/* Featured Section */}
-          {featuredPosts.length > 0 && <div className="mb-20">
-              <h2 className="text-2xl font-bold text-foreground mb-8 text-center">Featured</h2>
-              <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+          {featuredPosts.length > 0 && <div className="mb-20 px-[45px]">
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold text-foreground mb-2">Featured</h2>
+                <p className="text-lg text-muted-foreground">
+                  Highlighted articles from our latest research and insights
+                </p>
+              </div>
+              <div className="grid md:grid-cols-2 gap-8">
                 {featuredPosts.map(post => <Card key={post._id} className="cursor-pointer hover:shadow-lg transition-all duration-200 bg-card/80 backdrop-blur-sm border-border h-[450px] flex flex-col" onClick={() => handlePostClick(post.slug.current)}>
                     <CardHeader className="pb-4 flex-shrink-0">
                       <CardTitle className="text-xl font-semibold text-foreground line-clamp-2 mb-3">
@@ -233,9 +244,14 @@ const Blog = () => {
             </div>}
 
           {/* All Posts Section */}
-          <div>
-            <h2 className="text-2xl font-bold text-foreground mb-8 text-center">All posts</h2>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="px-[45px]">
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-foreground mb-2">All posts</h2>
+              <p className="text-lg text-muted-foreground">
+                Explore our complete collection of articles and updates
+              </p>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {posts.map(post => <Card key={post._id} className="cursor-pointer hover:shadow-lg transition-all duration-200 bg-card/80 backdrop-blur-sm border-border h-[408px] flex flex-col" onClick={() => handlePostClick(post.slug.current)}>
                   <CardHeader className="pb-4 flex-shrink-0">
                     <CardTitle className="text-lg font-semibold text-foreground line-clamp-2 mb-3">
