@@ -1,4 +1,3 @@
-
 import React from "react";
 import { HeroSection } from "@/components/ui/hero-section-1";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,8 +11,6 @@ import { ConfiguredPricing } from "@/components/ui/configured-pricing";
 import { FaqSection } from "@/components/ui/faq-section";
 import { CTASection } from "@/components/ui/cta-with-rectangle";
 import { Footer } from "@/components/ui/footer-section";
-
-console.log("Landing page component loading...");
 
 const faqItems = [
   {
@@ -39,10 +36,7 @@ const faqItems = [
 ];
 
 const Landing = () => {
-  console.log("Landing component rendering...");
-  
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       <HeroSection />
       
       {/* Features Section */}
@@ -136,8 +130,7 @@ const Landing = () => {
 
       {/* Footer */}
       <Footer />
-    </div>
-  );
+    </div>;
 };
 
 interface GridItemProps {
@@ -153,8 +146,7 @@ const GridItem = ({
   title,
   description
 }: GridItemProps) => {
-  return (
-    <li className={cn("min-h-[14rem] list-none", area)}>
+  return <li className={cn("min-h-[14rem] list-none", area)}>
       <div className="relative h-full rounded-[1.25rem] border-[0.75px] border-border p-2 md:rounded-[1.5rem] md:p-3">
         <GlowingEffect spread={40} glow={true} disabled={false} proximity={64} inactiveZone={0.01} borderWidth={3} />
         <div className="relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-xl border-[0.75px] bg-background p-6 shadow-sm dark:shadow-[0px_0px_27px_0px_rgba(45,45,45,0.3)] md:p-6">
@@ -173,10 +165,7 @@ const GridItem = ({
           </div>
         </div>
       </div>
-    </li>
-  );
+    </li>;
 };
-
-console.log("Landing component definition complete");
 
 export default Landing;
