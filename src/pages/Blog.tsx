@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft } from 'lucide-react';
 import { sanityClient } from '@/lib/sanity';
 import BlogNavbar from '@/components/BlogNavbar';
+import { Component as EtheralShadow } from '@/components/ui/etheral-shadow';
 interface BlogPost {
   _id: string;
   title: string;
@@ -166,37 +167,79 @@ const Blog = () => {
         </div>
       </div>;
   }
-  return <div className="min-h-screen bg-background">
-      <BlogNavbar />
-      
-      <div className="container mx-auto px-4 py-20 max-w-7xl">
-        {/* Header */}
-        <div className="mb-16 text-left px-[45px]">
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Blog
-          </h1>
-          <p className="text-xl text-muted-foreground">
-            Compiled notes from the team
-          </p>
-        </div>
+  return <div className="min-h-screen bg-background relative">
+      {/* Background Component */}
+      <div className="fixed inset-0 z-0">
+        <EtheralShadow
+          color="rgba(128, 128, 128, 0.3)"
+          animation={{ scale: 80, speed: 70 }}
+          noise={{ opacity: 0.8, scale: 1.1 }}
+          sizing="fill"
+          className="w-full h-full"
+        />
+      </div>
 
-        {/* Featured Section */}
-        {featuredPosts.length > 0 && <div className="mb-20">
-            <h2 className="text-2xl font-bold text-foreground mb-8 text-center">Featured</h2>
-            <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-              {featuredPosts.map(post => <Card key={post._id} className="cursor-pointer hover:shadow-lg transition-all duration-200 bg-card border-border h-80 flex flex-col" onClick={() => handlePostClick(post.slug.current)}>
+      <div className="relative z-10">
+        <BlogNavbar />
+        
+        <div className="container mx-auto px-4 py-20 max-w-7xl">
+          {/* Header */}
+          <div className="mb-16 text-left px-[45px]">
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+              Blog
+            </h1>
+            <p className="text-xl text-muted-foreground">
+              Compiled notes from the team
+            </p>
+          </div>
+
+          {/* Featured Section */}
+          {featuredPosts.length > 0 && <div className="mb-20">
+              <h2 className="text-2xl font-bold text-foreground mb-8 text-center">Featured</h2>
+              <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+                {featuredPosts.map(post => <Card key={post._id} className="cursor-pointer hover:shadow-lg transition-all duration-200 bg-card/80 backdrop-blur-sm border-border h-[450px] flex flex-col" onClick={() => handlePostClick(post.slug.current)}>
+                    <CardHeader className="pb-4 flex-shrink-0">
+                      <CardTitle className="text-xl font-semibold text-foreground line-clamp-2 mb-3">
+                        {post.title}
+                      </CardTitle>
+                      <CardDescription className="text-muted-foreground line-clamp-4 text-base leading-relaxed">
+                        {post.excerpt}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-0 mt-auto">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                          <span className="text-sm font-medium text-primary-foreground">
+                            {getAuthorInitials(post.author.name)}
+                          </span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-foreground">By {post.author.name}</span>
+                          <span className="text-xs text-muted-foreground">{post.estimatedReadingTime} minutes read</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>)}
+              </div>
+            </div>}
+
+          {/* All Posts Section */}
+          <div>
+            <h2 className="text-2xl font-bold text-foreground mb-8 text-center">All posts</h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              {posts.map(post => <Card key={post._id} className="cursor-pointer hover:shadow-lg transition-all duration-200 bg-card/80 backdrop-blur-sm border-border h-[408px] flex flex-col" onClick={() => handlePostClick(post.slug.current)}>
                   <CardHeader className="pb-4 flex-shrink-0">
-                    <CardTitle className="text-xl font-semibold text-foreground line-clamp-2 mb-3">
+                    <CardTitle className="text-lg font-semibold text-foreground line-clamp-2 mb-3">
                       {post.title}
                     </CardTitle>
-                    <CardDescription className="text-muted-foreground line-clamp-4 text-base leading-relaxed">
+                    <CardDescription className="text-muted-foreground line-clamp-4 leading-relaxed">
                       {post.excerpt}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pt-0 mt-auto">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                        <span className="text-sm font-medium text-primary-foreground">
+                      <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                        <span className="text-xs font-medium text-primary-foreground">
                           {getAuthorInitials(post.author.name)}
                         </span>
                       </div>
@@ -208,40 +251,12 @@ const Blog = () => {
                   </CardContent>
                 </Card>)}
             </div>
-          </div>}
-
-        {/* All Posts Section */}
-        <div>
-          <h2 className="text-2xl font-bold text-foreground mb-8 text-center">All posts</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {posts.map(post => <Card key={post._id} className="cursor-pointer hover:shadow-lg transition-all duration-200 bg-card border-border h-72 flex flex-col" onClick={() => handlePostClick(post.slug.current)}>
-                <CardHeader className="pb-4 flex-shrink-0">
-                  <CardTitle className="text-lg font-semibold text-foreground line-clamp-2 mb-3">
-                    {post.title}
-                  </CardTitle>
-                  <CardDescription className="text-muted-foreground line-clamp-4 leading-relaxed">
-                    {post.excerpt}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pt-0 mt-auto">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                      <span className="text-xs font-medium text-primary-foreground">
-                        {getAuthorInitials(post.author.name)}
-                      </span>
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium text-foreground">By {post.author.name}</span>
-                      <span className="text-xs text-muted-foreground">{post.estimatedReadingTime} minutes read</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>)}
           </div>
         </div>
-      </div>
 
-      <Footer />
+        <Footer />
+      </div>
     </div>;
 };
+
 export default Blog;
