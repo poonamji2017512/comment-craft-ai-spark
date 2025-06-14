@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ArrowRight, ChevronRight, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -224,14 +225,17 @@ const menuItems = [{
   name: 'Features',
   href: 'features'
 }, {
+  name: 'Why choose Interact',
+  href: 'why-choose-interact'
+}, {
+  name: 'Blog',
+  href: '/blog'
+}, {
   name: 'Testimonials',
   href: 'testimonials'
 }, {
   name: 'Pricing',
   href: 'pricing'
-}, {
-  name: 'Why choose Interact',
-  href: '#why-choose-interact'
 }];
 
 interface HeroHeaderProps {
