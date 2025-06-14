@@ -6,7 +6,7 @@ import { Check, Star, Zap, Shield, Users, Brain, MessageSquare, Users2, Trending
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { cn } from "@/lib/utils";
 import SectionWithMockup from "@/components/ui/section-with-mockup";
-import { StaggerTestimonials } from "@/components/ui/stagger-testimonials";
+import { Testimonials } from "@/components/ui/testimonials-columns-1";
 
 const Landing = () => {
   return (
@@ -120,7 +120,7 @@ const Landing = () => {
             </p>
           </div>
           
-          <StaggerTestimonials />
+          <Testimonials />
         </div>
       </section>
 
