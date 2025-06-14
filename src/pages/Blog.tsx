@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Footer } from '@/components/ui/footer-section';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Home, User, Briefcase, FileText } from 'lucide-react';
 import { sanityClient } from '@/lib/sanity';
-import BlogNavbar from '@/components/BlogNavbar';
+import { NavBar } from '@/components/ui/tubelight-navbar';
 import { Component as EtheralShadow } from '@/components/ui/etheral-shadow';
 interface BlogPost {
   _id: string;
@@ -159,14 +159,23 @@ const Blog = () => {
   const getAuthorInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
+
+  const navItems = [
+    { name: 'Home', url: '/landing', icon: Home },
+    { name: 'Features', url: '#features', icon: Briefcase },
+    { name: 'Blog', url: '/blog', icon: FileText },
+    { name: 'Pricing', url: '#pricing', icon: User }
+  ];
+
   if (isLoading) {
     return <div className="min-h-screen bg-background">
-        <BlogNavbar />
+        <NavBar items={navItems} />
         <div className="container mx-auto px-4 py-20">
           <div className="text-center">Loading...</div>
         </div>
       </div>;
   }
+
   return <div className="min-h-screen bg-background relative">
       {/* Background Component */}
       <div className="fixed inset-0 z-0">
@@ -180,7 +189,7 @@ const Blog = () => {
       </div>
 
       <div className="relative z-10">
-        <BlogNavbar />
+        <NavBar items={navItems} />
         
         <div className="container mx-auto px-4 py-20 max-w-7xl">
           {/* Header */}
