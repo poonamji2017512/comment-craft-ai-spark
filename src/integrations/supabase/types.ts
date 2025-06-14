@@ -289,6 +289,7 @@ export type Database = {
           ai_tone: string | null
           created_at: string
           custom_api_key: string | null
+          daily_comment_target: number | null
           dashboard_view: string | null
           id: string
           language: string | null
@@ -306,6 +307,7 @@ export type Database = {
           ai_tone?: string | null
           created_at?: string
           custom_api_key?: string | null
+          daily_comment_target?: number | null
           dashboard_view?: string | null
           id?: string
           language?: string | null
@@ -323,6 +325,7 @@ export type Database = {
           ai_tone?: string | null
           created_at?: string
           custom_api_key?: string | null
+          daily_comment_target?: number | null
           dashboard_view?: string | null
           id?: string
           language?: string | null

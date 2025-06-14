@@ -209,6 +209,158 @@ const Settings = () => {
     }
   };
 
+  const handleProfileUpdate = async () => {
+    if (!user) {
+      toast.error('You must be logged in to update profile');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({
+          full_name: profileData.full_name,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        console.error('Error updating profile:', error);
+        toast.error('Failed to update profile');
+        return;
+      }
+
+      toast.success('Profile updated successfully!');
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const validateApiKey = async () => {
+    if (!userSettings.custom_api_key) {
+      toast.error('Please enter an API key');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Simple validation - check if key format looks correct
+      const isValidFormat = (userSettings.custom_api_key.length > 20) && 
+                           (userSettings.custom_api_key.startsWith('sk-') || 
+                            userSettings.custom_api_key.startsWith('AIza'));
+      
+      setApiKeyValid(isValidFormat);
+      
+      if (isValidFormat) {
+        toast.success('API key format appears valid');
+      } else {
+        toast.error('API key format appears invalid');
+      }
+    } catch (error) {
+      console.error('Error validating API key:', error);
+      setApiKeyValid(false);
+      toast.error('Failed to validate API key');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleExportData = async () => {
+    if (!user) {
+      toast.error('You must be logged in to export data');
+      return;
+    }
+
+    try {
+      // Fetch user's generated comments
+      const { data: comments, error: commentsError } = await supabase
+        .from('generated_comments')
+        .select('*')
+        .eq('user_id', user.id);
+
+      if (commentsError) {
+        console.error('Error fetching comments:', commentsError);
+        toast.error('Failed to fetch comments data');
+        return;
+      }
+
+      // Fetch user settings
+      const { data: settings, error: settingsError } = await supabase
+        .from('user_settings')
+        .select('*')
+        .eq('user_id', user.id);
+
+      if (settingsError) {
+        console.error('Error fetching settings:', settingsError);
+        toast.error('Failed to fetch settings data');
+        return;
+      }
+
+      const exportData = {
+        user_profile: userProfile,
+        generated_comments: comments,
+        user_settings: settings,
+        export_date: new Date().toISOString()
+      };
+
+      // Create and download JSON file
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `ai-comment-data-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast.success('Data exported successfully!');
+    } catch (error) {
+      console.error('Error exporting data:', error);
+      toast.error('Failed to export data');
+    }
+  };
+
+  const handleClearData = async () => {
+    if (!user) {
+      toast.error('You must be logged in to clear data');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      'Are you sure you want to delete all your generated comments? This action cannot be undone.'
+    );
+
+    if (!confirmed) return;
+
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from('generated_comments')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error clearing data:', error);
+        toast.error('Failed to clear data');
+        return;
+      }
+
+      toast.success('All comment data has been cleared');
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const saveUserSettings = async (updatedSettings: Partial<UserSettings>) => {
     if (!user) {
       toast.error('You must be logged in to save settings');
