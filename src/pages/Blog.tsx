@@ -171,7 +171,7 @@ const Blog = () => {
       {/* Background Component */}
       <div className="fixed inset-0 z-0">
         <EtheralShadow
-          color="rgba(128, 128, 128, 0.3)"
+          color="#209aab"
           animation={{ scale: 80, speed: 70 }}
           noise={{ opacity: 0.8, scale: 1.1 }}
           sizing="fill"
