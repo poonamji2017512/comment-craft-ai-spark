@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Check, Star, Zap, Shield, Users, Brain, MessageSquare, Users2, TrendingUp, DollarSign, Bot, Smartphone, Globe, Flame, BarChart3, CheckCircle, Zap as ZapIcon, Link2 } from "lucide-react";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { cn } from "@/lib/utils";
+import SectionWithMockup from "@/components/ui/section-with-mockup";
+import { StaggerTestimonials } from "@/components/ui/stagger-testimonials";
 
 const Landing = () => {
   return (
@@ -79,6 +81,46 @@ const Landing = () => {
               description="Flexible connections with CRM, marketing, and project management tools"
             />
           </ul>
+        </div>
+      </section>
+
+      {/* Why choose Interact Section */}
+      <SectionWithMockup
+        title={
+          <>
+            Why choose
+            <br />
+            Interact?
+          </>
+        }
+        description={
+          <>
+            Transform your social media presence with AI-powered automation that 
+            <br />
+            feels authentic. Our intelligent platform learns your brand voice,
+            <br />
+            creates engaging content, and manages interactions across all major
+            <br />
+            platforms while you focus on growing your business.
+          </>
+        }
+        primaryImageSrc="https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=800&h=600&fit=crop"
+        secondaryImageSrc="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop"
+      />
+
+      {/* Testimonials Section */}
+      <section id="testimonials" className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4">
+              Loved by Users
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              See what our users are saying about Interact
+            </p>
+          </div>
+          
+          <StaggerTestimonials />
         </div>
       </section>
 
@@ -196,45 +238,6 @@ const Landing = () => {
                 </a>
               </CardContent>
             </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section id="testimonials" className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4">
-              Loved by Users
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              See what our users are saying about CommentCraft AI
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            {[1, 2, 3].map((i) => (
-              <Card key={i} className="border-0 shadow-lg">
-                <CardContent className="pt-6">
-                  <div className="flex mb-4">
-                    {[...Array(5)].map((_, j) => (
-                      <Star key={j} className="h-5 w-5 text-yellow-500 fill-current" />
-                    ))}
-                  </div>
-                  <p className="text-muted-foreground mb-4">
-                    "CommentCraft AI has revolutionized how I engage on social media. 
-                    The comments are always relevant and help me build better connections."
-                  </p>
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 bg-primary rounded-full mr-3" />
-                    <div>
-                      <div className="font-semibold">Sarah Johnson</div>
-                      <div className="text-sm text-muted-foreground">Marketing Manager</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
           </div>
         </div>
       </section>
