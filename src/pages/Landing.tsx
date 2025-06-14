@@ -122,7 +122,6 @@ const Landing = () => {
           href: "/signup",
           variant: "default"
         }}
-        className="border-t border-brand"
       />
 
       {/* Footer */}
