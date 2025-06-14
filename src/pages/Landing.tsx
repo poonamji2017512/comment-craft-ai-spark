@@ -7,7 +7,7 @@ import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { cn } from "@/lib/utils";
 import SectionWithMockup from "@/components/ui/section-with-mockup";
 import { Testimonials } from "@/components/ui/testimonials-columns-1";
-import { Pricing } from "@/components/ui/single-pricing-card-1";
+import { ConfiguredPricing } from "@/components/ui/configured-pricing";
 
 const Landing = () => {
   return <div className="min-h-screen bg-background">
@@ -67,7 +67,7 @@ const Landing = () => {
       </section>
 
       {/* Pricing Section */}
-      <Pricing />
+      <ConfiguredPricing />
 
       {/* CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
