@@ -23,6 +23,19 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Layout component for pages with sidebar
+const SidebarLayout = ({ children }: { children: React.ReactNode }) => (
+  <SidebarProvider>
+    <div className="min-h-screen flex w-full bg-background">
+      <AppSidebar />
+      <main className="flex-1 overflow-hidden">
+        {children}
+      </main>
+    </div>
+    <ChangelogNotificationModal />
+  </SidebarProvider>
+);
+
 const App = () => {
   console.log("App component is rendering");
   
@@ -35,32 +48,20 @@ const App = () => {
             <Sonner />
             <BrowserRouter>
               <Routes>
-                {/* Landing and blog pages with their own navbar */}
+                {/* Pages without sidebar */}
                 <Route path="/landing" element={<Landing />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
                 <Route path="/onboarding" element={<Onboarding />} />
                 
-                {/* App routes with sidebar */}
-                <Route path="/*" element={
-                  <SidebarProvider>
-                    <div className="min-h-screen flex w-full bg-background">
-                      <AppSidebar />
-                      <main className="flex-1 overflow-hidden">
-                        <Routes>
-                          <Route path="/" element={<Index />} />
-                          <Route path="/dashboard" element={<Dashboard />} />
-                          <Route path="/history" element={<History />} />
-                          <Route path="/settings" element={<Settings />} />
-                          <Route path="/docs" element={<Docs />} />
-                          <Route path="/changelog" element={<Changelog />} />
-                          <Route path="*" element={<NotFound />} />
-                        </Routes>
-                      </main>
-                    </div>
-                    <ChangelogNotificationModal />
-                  </SidebarProvider>
-                } />
+                {/* Pages with sidebar */}
+                <Route path="/" element={<SidebarLayout><Index /></SidebarLayout>} />
+                <Route path="/dashboard" element={<SidebarLayout><Dashboard /></SidebarLayout>} />
+                <Route path="/history" element={<SidebarLayout><History /></SidebarLayout>} />
+                <Route path="/settings" element={<SidebarLayout><Settings /></SidebarLayout>} />
+                <Route path="/docs" element={<SidebarLayout><Docs /></SidebarLayout>} />
+                <Route path="/changelog" element={<SidebarLayout><Changelog /></SidebarLayout>} />
+                <Route path="*" element={<SidebarLayout><NotFound /></SidebarLayout>} />
               </Routes>
             </BrowserRouter>
           </TooltipProvider>
