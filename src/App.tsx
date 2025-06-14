@@ -11,6 +11,8 @@ import AppSidebar from "@/components/AppSidebar";
 import ChangelogNotificationModal from "@/components/ChangelogNotificationModal";
 import Index from "./pages/Index";
 import Landing from "./pages/Landing";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import Dashboard from "./pages/Dashboard";
 import History from "./pages/History";
 import Settings from "./pages/Settings";
@@ -29,8 +31,10 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              {/* Landing page with its own navbar */}
+              {/* Landing and blog pages with their own navbar */}
               <Route path="/landing" element={<Landing />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
               
               {/* App routes with sidebar */}
               <Route path="/*" element={

@@ -49,6 +49,9 @@ const LandingPageNavbar = () => {
                 <a href="#why-choose-interact" className="text-foreground hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">
                   Why choose Interact
                 </a>
+                <a href="/blog" className="text-foreground hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                  Blog
+                </a>
                 <a href="#contact" className="text-foreground hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">
                   Contact
                 </a>
@@ -108,6 +111,9 @@ const LandingPageNavbar = () => {
                 </a>
                 <a href="#why-choose-interact" className="text-foreground hover:text-primary block px-3 py-2 rounded-md text-base font-medium transition-colors">
                   Why choose Interact
+                </a>
+                <a href="/blog" className="text-foreground hover:text-primary block px-3 py-2 rounded-md text-base font-medium transition-colors">
+                  Blog
                 </a>
                 <a href="#contact" className="text-foreground hover:text-primary block px-3 py-2 rounded-md text-base font-medium transition-colors">
                   Contact
