@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ArrowRight, ChevronRight, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -110,7 +109,7 @@ export function HeroSection() {
                                     <h1 className="mt-8 max-w-4xl mx-auto text-balance text-6xl md:text-7xl lg:mt-16 xl:text-[5.25rem]">
                                         Build Your Brand Without Burnout
                                     </h1>
-                                    <p className="mx-auto mt-8 max-w-2xl text-balance text-lg">
+                                    <p className="mx-auto mt-8 max-w-3xl text-balance text-lg">
                                         AI Social Media Manager that engages like a human across LinkedIn, X, Reddit, YouTube, and more. One-click comments, DMs, and content that actually sound like you.
                                     </p>
                                 </AnimatedGroup>
@@ -151,6 +150,7 @@ export function HeroSection() {
                             </div>
                         </div>
 
+                        
                         <AnimatedGroup variants={{
             container: {
               visible: {
@@ -230,8 +230,8 @@ const menuItems = [{
   name: 'Pricing',
   href: 'pricing'
 }, {
-  name: 'About',
-  href: '#about'
+  name: 'Why choose Interact',
+  href: '#why-choose-interact'
 }];
 
 interface HeroHeaderProps {
@@ -289,6 +289,7 @@ const HeroHeader = ({ onNavClick, onAuthClick }: HeroHeaderProps) => {
                             </ul>
                         </div>
 
+                        
                         <div className="bg-background group-data-[state=active]:block lg:group-data-[state=active]:flex mb-6 hidden w-full flex-wrap items-center justify-end space-y-8 rounded-3xl border p-6 shadow-2xl shadow-zinc-300/20 md:flex-nowrap lg:m-0 lg:flex lg:w-fit lg:gap-6 lg:space-y-0 lg:border-transparent lg:bg-transparent lg:p-0 lg:shadow-none dark:shadow-none dark:lg:bg-transparent">
                             <div className="lg:hidden">
                                 <ul className="space-y-6 text-base">
