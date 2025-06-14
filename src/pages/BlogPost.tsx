@@ -3,11 +3,13 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Home, User, Briefcase, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { sanityClient } from '@/lib/sanity';
+import { Badge } from '@/components/ui/badge';
+import { sanityClient, urlFor } from '@/lib/sanity';
 import { NavBar } from '@/components/ui/tubelight-navbar';
 import { Component as EtheralShadow } from '@/components/ui/etheral-shadow';
 import { Footer } from '@/components/ui/footer-section';
 import BlogTableOfContents from '@/components/BlogTableOfContents';
+import PortableText from '@/components/PortableText';
 
 interface BlogPostData {
   _id: string;
@@ -17,16 +19,24 @@ interface BlogPostData {
   publishedAt: string;
   author: {
     name: string;
-    image?: string;
+    image?: {
+      asset: {
+        _ref: string;
+      };
+    };
   };
   mainImage?: {
     asset: {
       _ref: string;
     };
+    alt?: string;
   };
   estimatedReadingTime: number;
   body: any[];
-  categories: string[];
+  categories?: {
+    title: string;
+    slug: { current: string };
+  }[];
 }
 
 const BlogPost = () => {
@@ -34,12 +44,7 @@ const BlogPost = () => {
   const navigate = useNavigate();
   const [post, setPost] = useState<BlogPostData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Table of contents data
-  const tableOfContents = [
-    { id: 'setup', title: 'Setup', level: 1 },
-    { id: 'problem', title: 'Problem', level: 1 },
-  ];
+  const [tableOfContents, setTableOfContents] = useState<{ id: string; title: string; level: number }[]>([]);
 
   const navItems = [
     { name: 'Home', url: '/landing', icon: Home },
@@ -57,30 +62,37 @@ const BlogPost = () => {
           slug,
           excerpt,
           publishedAt,
-          author->{name, image},
+          author->{
+            name, 
+            image
+          },
           mainImage,
           estimatedReadingTime,
           body,
-          categories
+          categories[]->{
+            title,
+            slug
+          }
         }`;
         
         const postData = await sanityClient.fetch(query, { slug });
-        setPost(postData);
+        
+        if (postData) {
+          setPost(postData);
+          
+          // Generate table of contents from body content
+          const toc = postData.body
+            ?.filter((block: any) => block.style && ['h1', 'h2', 'h3', 'h4'].includes(block.style))
+            .map((block: any) => ({
+              id: block.children[0]?.text?.toLowerCase().replace(/\s+/g, '-') || '',
+              title: block.children[0]?.text || '',
+              level: parseInt(block.style.replace('h', '')) || 1,
+            })) || [];
+          
+          setTableOfContents(toc);
+        }
       } catch (error) {
         console.error('Error fetching post:', error);
-        // Fallback to mock data for development
-        const mockPost: BlogPostData = {
-          _id: '1',
-          title: 'Character Prefix Conditioning',
-          slug: { current: 'character-prefix-conditioning' },
-          excerpt: 'A clever algorithm for more accurate code completion sampling.',
-          publishedAt: '2025-01-06',
-          author: { name: 'Jacob' },
-          estimatedReadingTime: 2,
-          body: [],
-          categories: ['Setup', 'Problem']
-        };
-        setPost(mockPost);
       } finally {
         setIsLoading(false);
       }
@@ -106,7 +118,6 @@ const BlogPost = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background relative">
-        {/* Background Component */}
         <div className="fixed inset-0 z-0">
           <EtheralShadow
             color="#209aab"
@@ -140,7 +151,6 @@ const BlogPost = () => {
   if (!post) {
     return (
       <div className="min-h-screen bg-background relative">
-        {/* Background Component */}
         <div className="fixed inset-0 z-0">
           <EtheralShadow
             color="#209aab"
@@ -173,7 +183,6 @@ const BlogPost = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      {/* Background Component */}
       <div className="fixed inset-0 z-0">
         <EtheralShadow
           color="#209aab"
@@ -198,7 +207,6 @@ const BlogPost = () => {
         </div>
         
         <div className="container mx-auto px-4 py-8 max-w-4xl">
-          {/* Article header */}
           <article className="prose prose-lg max-w-none">
             <div className="mb-8">
               <p className="text-sm text-muted-foreground mb-4">
@@ -213,12 +221,42 @@ const BlogPost = () => {
                 {post.excerpt}
               </p>
 
+              {/* Categories */}
+              {post.categories && post.categories.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {post.categories.map((category) => (
+                    <Badge key={category.slug.current} variant="secondary">
+                      {category.title}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+
+              {/* Main Image */}
+              {post.mainImage && (
+                <div className="mb-8">
+                  <img
+                    src={urlFor(post.mainImage).width(1200).url()}
+                    alt={post.mainImage.alt || post.title}
+                    className="w-full rounded-lg"
+                  />
+                </div>
+              )}
+
               {/* Author info */}
               <div className="flex items-center gap-3 mb-8">
-                <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                  <span className="text-sm font-medium text-primary-foreground">
-                    {getAuthorInitials(post.author.name)}
-                  </span>
+                <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center overflow-hidden">
+                  {post.author.image ? (
+                    <img
+                      src={urlFor(post.author.image).width(40).height(40).url()}
+                      alt={post.author.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-sm font-medium text-primary-foreground">
+                      {getAuthorInitials(post.author.name)}
+                    </span>
+                  )}
                 </div>
                 <div className="flex flex-col">
                   <span className="text-sm font-medium text-foreground">Posted By {post.author.name}</span>
@@ -228,71 +266,23 @@ const BlogPost = () => {
             </div>
 
             {/* Table of Contents */}
-            <BlogTableOfContents sections={tableOfContents} />
+            {tableOfContents.length > 0 && (
+              <BlogTableOfContents sections={tableOfContents} />
+            )}
 
             {/* Article content */}
             <div className="text-foreground space-y-8">
-              <p className="text-lg leading-relaxed">
-                The first in a series of problems that give a glimpse into the work we do at Cursor.
-              </p>
-
-              {/* Setup section */}
-              <div id="setup">
-                <h2 className="text-2xl font-bold text-foreground mb-4">Setup</h2>
-                <div className="space-y-4 text-muted-foreground">
-                  <p>
-                    When using a language model for code completion, we typically want the model to produce a completion that 
-                    begins with what the user has typed.
-                  </p>
-                  <p>
-                    However, modern language models operate on sequences of tokens, not characters, so naively tokenizing the 
-                    user's input and sending it to the model produces wrong results if the user's cursor doesn't happen to lie on a 
-                    token boundary.
-                  </p>
-                  <p>
-                    Instead, we need an algorithm that samples a sequence of tokens conditional on a prefix of characters, rather than 
-                    the more typical case of sampling conditional on a prefix of tokens.
-                  </p>
-                  <p>
-                    We call this <strong>character prefix conditioning</strong>, an algorithm for sampling a sequence of tokens conditioned on a 
-                    character prefix.
-                  </p>
-                  <p>
-                    We want to sample a sequence of tokens s = t₁, t₂, ..., tₙ from a distribution specified by an autoregressive model 
-                    p(s) given by
-                  </p>
-                  <div className="bg-muted p-4 rounded-lg font-mono text-center">
-                    p(s) = p(t₁, t₂, ..., tₙ) = ∏ᵢ₌₁ⁿ p(tᵢ|t₁, ..., tᵢ₋₁)
-                  </div>
-                  <p>
-                    subject to the constraint that s starts with a character prefix P, i.e. P is a prefix of repr(s₁) + repr(s₂) + ⋯ + repr(sₙ) 
-                    where + means string concatenation and repr maps a token to the character it represents.
-                  </p>
-                  <p>
-                    We define q(s) = p(s | s starts with P). It's sufficient to find a way to sample autoregressively from q(s), that is, to 
-                    sample from q(tₖ|t₁, ..., tₖ₋₁) for each k.
-                  </p>
-                </div>
-              </div>
-
-              {/* Problem section */}
-              <div id="problem">
-                <h2 className="text-2xl font-bold text-foreground mb-4">Problem</h2>
-                <div className="space-y-4 text-muted-foreground">
-                  <p>
-                    Can you construct an efficient algorithm for sampling from q(tₖ|t₁, ..., tₖ₋₁), that minimizes calls to the original 
-                    language model? A description of the algorithm is great. An actual implementation is excellent.
-                  </p>
-                  <p>
-                    Feel free to email me your solutions at <a href="mailto:problems@cursor.com" className="text-primary hover:underline">problems@cursor.com</a>.
-                  </p>
-                </div>
-              </div>
+              {post.body && post.body.length > 0 ? (
+                <PortableText value={post.body} />
+              ) : (
+                <p className="text-lg leading-relaxed text-muted-foreground">
+                  No content available for this post.
+                </p>
+              )}
             </div>
           </article>
         </div>
 
-        {/* Footer */}
         <Footer />
       </div>
     </div>

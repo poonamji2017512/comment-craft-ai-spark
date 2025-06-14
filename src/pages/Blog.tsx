@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Footer } from '@/components/ui/footer-section';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Home, User, Briefcase, FileText } from 'lucide-react';
-import { sanityClient } from '@/lib/sanity';
+import { sanityClient, urlFor } from '@/lib/sanity';
 import { NavBar } from '@/components/ui/tubelight-navbar';
 import { Component as EtheralShadow } from '@/components/ui/etheral-shadow';
 
@@ -18,15 +19,24 @@ interface BlogPost {
   publishedAt: string;
   author: {
     name: string;
-    image?: string;
+    image?: {
+      asset: {
+        _ref: string;
+      };
+    };
   };
   mainImage?: {
     asset: {
       _ref: string;
     };
+    alt?: string;
   };
   estimatedReadingTime: number;
-  categories: string[];
+  categories?: {
+    title: string;
+    slug: { current: string };
+  }[];
+  featured?: boolean;
 }
 
 const Blog = () => {
@@ -44,19 +54,21 @@ const Blog = () => {
           slug,
           excerpt,
           publishedAt,
-          author->{name, image},
+          author->{
+            name, 
+            image
+          },
           mainImage,
           estimatedReadingTime,
-          categories,
+          categories[]->{
+            title,
+            slug
+          },
           featured
         }`;
         const allPosts = await sanityClient.fetch(query);
-        const featured = allPosts.filter((post: BlogPost & {
-          featured: boolean;
-        }) => post.featured).slice(0, 2);
-        const regular = allPosts.filter((post: BlogPost & {
-          featured: boolean;
-        }) => !post.featured);
+        const featured = allPosts.filter((post: BlogPost) => post.featured).slice(0, 2);
+        const regular = allPosts.filter((post: BlogPost) => !post.featured);
         setFeaturedPosts(featured);
         setPosts(regular);
       } catch (error) {
@@ -74,7 +86,7 @@ const Blog = () => {
             name: 'Jacob'
           },
           estimatedReadingTime: 2,
-          categories: ['AI', 'Algorithm']
+          categories: [{ title: 'AI', slug: { current: 'ai' } }, { title: 'Algorithm', slug: { current: 'algorithm' } }]
         }, {
           _id: '2',
           title: 'Inference Characteristics of Llama',
@@ -87,7 +99,7 @@ const Blog = () => {
             name: 'Aman'
           },
           estimatedReadingTime: 19,
-          categories: ['AI', 'Performance']
+          categories: [{ title: 'AI', slug: { current: 'ai' } }, { title: 'Performance', slug: { current: 'performance' } }]
         }, {
           _id: '3',
           title: 'Series C and Scale',
@@ -100,7 +112,7 @@ const Blog = () => {
             name: 'Anysphere Team'
           },
           estimatedReadingTime: 1,
-          categories: ['Company', 'Funding']
+          categories: [{ title: 'Company', slug: { current: 'company' } }, { title: 'Funding', slug: { current: 'funding' } }]
         }, {
           _id: '4',
           title: 'Small Improvements to Pricing',
@@ -113,7 +125,7 @@ const Blog = () => {
             name: 'Michael'
           },
           estimatedReadingTime: 1,
-          categories: ['Product', 'Pricing']
+          categories: [{ title: 'Product', slug: { current: 'product' } }, { title: 'Pricing', slug: { current: 'pricing' } }]
         }, {
           _id: '5',
           title: 'Early Team',
@@ -126,7 +138,7 @@ const Blog = () => {
             name: 'Sualeh Asif'
           },
           estimatedReadingTime: 2,
-          categories: ['Company', 'Team']
+          categories: [{ title: 'Company', slug: { current: 'company' } }, { title: 'Team', slug: { current: 'team' } }]
         }, {
           _id: '6',
           title: 'Series B and Automating Code',
@@ -139,7 +151,7 @@ const Blog = () => {
             name: 'Anysphere Team'
           },
           estimatedReadingTime: 1,
-          categories: ['Company', 'Funding']
+          categories: [{ title: 'Company', slug: { current: 'company' } }, { title: 'Funding', slug: { current: 'funding' } }]
         }];
         setFeaturedPosts(mockPosts.slice(0, 2));
         setPosts(mockPosts.slice(2));
@@ -183,7 +195,6 @@ const Blog = () => {
   }
 
   return <div className="min-h-screen bg-background relative">
-      {/* Background Component */}
       <div className="fixed inset-0 z-0">
         <EtheralShadow
           color="#209aab"
@@ -198,7 +209,6 @@ const Blog = () => {
         <NavBar items={navItems} />
         
         <div className="container mx-auto px-4 py-20 max-w-7xl">
-          {/* Header */}
           <div className="mb-16 text-left px-[45px]">
             <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
               Blog
@@ -208,7 +218,6 @@ const Blog = () => {
             </p>
           </div>
 
-          {/* Featured Section */}
           {featuredPosts.length > 0 && <div className="mb-20 px-[45px]">
               <div className="mb-8">
                 <h2 className="text-2xl font-bold text-foreground mb-2">Featured</h2>
@@ -218,6 +227,15 @@ const Blog = () => {
               </div>
               <div className="grid md:grid-cols-2 gap-8">
                 {featuredPosts.map(post => <Card key={post._id} className="cursor-pointer hover:shadow-lg transition-all duration-200 bg-card/80 backdrop-blur-sm border-border h-[450px] flex flex-col" onClick={() => handlePostClick(post.slug.current)}>
+                    {post.mainImage && (
+                      <div className="aspect-video overflow-hidden rounded-t-lg">
+                        <img
+                          src={urlFor(post.mainImage).width(600).height(300).url()}
+                          alt={post.mainImage.alt || post.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
                     <CardHeader className="pb-4 flex-shrink-0">
                       <CardTitle className="text-xl font-semibold text-foreground line-clamp-2 mb-3">
                         {post.title}
@@ -225,13 +243,30 @@ const Blog = () => {
                       <CardDescription className="text-muted-foreground line-clamp-4 text-base leading-relaxed">
                         {post.excerpt}
                       </CardDescription>
+                      {post.categories && post.categories.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {post.categories.slice(0, 3).map((category) => (
+                            <Badge key={category.slug.current} variant="outline" className="text-xs">
+                              {category.title}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
                     </CardHeader>
                     <CardContent className="pt-0 mt-auto">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                          <span className="text-sm font-medium text-primary-foreground">
-                            {getAuthorInitials(post.author.name)}
-                          </span>
+                        <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center overflow-hidden">
+                          {post.author.image ? (
+                            <img
+                              src={urlFor(post.author.image).width(40).height(40).url()}
+                              alt={post.author.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-sm font-medium text-primary-foreground">
+                              {getAuthorInitials(post.author.name)}
+                            </span>
+                          )}
                         </div>
                         <div className="flex flex-col">
                           <span className="text-sm font-medium text-foreground">By {post.author.name}</span>
@@ -243,7 +278,6 @@ const Blog = () => {
               </div>
             </div>}
 
-          {/* All Posts Section */}
           <div className="px-[45px]">
             <div className="mb-8">
               <h2 className="text-2xl font-bold text-foreground mb-2">All posts</h2>
@@ -253,6 +287,15 @@ const Blog = () => {
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {posts.map(post => <Card key={post._id} className="cursor-pointer hover:shadow-lg transition-all duration-200 bg-card/80 backdrop-blur-sm border-border h-[408px] flex flex-col" onClick={() => handlePostClick(post.slug.current)}>
+                  {post.mainImage && (
+                    <div className="aspect-video overflow-hidden rounded-t-lg">
+                      <img
+                        src={urlFor(post.mainImage).width(400).height(200).url()}
+                        alt={post.mainImage.alt || post.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
                   <CardHeader className="pb-4 flex-shrink-0">
                     <CardTitle className="text-lg font-semibold text-foreground line-clamp-2 mb-3">
                       {post.title}
@@ -260,13 +303,30 @@ const Blog = () => {
                     <CardDescription className="text-muted-foreground line-clamp-4 leading-relaxed">
                       {post.excerpt}
                     </CardDescription>
+                    {post.categories && post.categories.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {post.categories.slice(0, 2).map((category) => (
+                          <Badge key={category.slug.current} variant="outline" className="text-xs">
+                            {category.title}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
                   </CardHeader>
                   <CardContent className="pt-0 mt-auto">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                        <span className="text-xs font-medium text-primary-foreground">
-                          {getAuthorInitials(post.author.name)}
-                        </span>
+                      <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center overflow-hidden">
+                        {post.author.image ? (
+                          <img
+                            src={urlFor(post.author.image).width(32).height(32).url()}
+                            alt={post.author.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-xs font-medium text-primary-foreground">
+                            {getAuthorInitials(post.author.name)}
+                          </span>
+                        )}
                       </div>
                       <div className="flex flex-col">
                         <span className="text-sm font-medium text-foreground">By {post.author.name}</span>
