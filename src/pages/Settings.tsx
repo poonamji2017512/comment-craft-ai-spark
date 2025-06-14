@@ -39,6 +39,7 @@ interface OnboardingData {
   never_say?: string;
   content_boundaries?: string;
   additional_guidelines?: string;
+  [key: string]: string | undefined; // Add index signature for Json compatibility
 }
 
 interface UserSettings {
@@ -68,7 +69,7 @@ const Settings = () => {
   const [profileData, setProfileData] = useState({
     full_name: userProfile?.full_name || '',
     email: user?.email || '',
-    introduction: userProfile?.introduction || '',
+    introduction: (userProfile as any)?.introduction || '',
     preferred_tone: 'Bold Founder'
   });
 
@@ -130,7 +131,6 @@ const Settings = () => {
     };
   };
 
-  // Categorized AI models for better UX
   const aiModelCategories = {
     google: {
       name: "Google Gemini",
@@ -197,7 +197,7 @@ const Settings = () => {
       setProfileData({
         full_name: userProfile.full_name || '',
         email: userProfile.email || user?.email || '',
-        introduction: userProfile.introduction || '',
+        introduction: (userProfile as any)?.introduction || '',
         preferred_tone: 'Bold Founder'
       });
     }
@@ -442,7 +442,7 @@ const Settings = () => {
         notification_prefs: settingsToSave.notification_prefs as any,
         ai_features: settingsToSave.ai_features as any,
         daily_comment_target: settingsToSave.dailyCommentTarget || 20,
-        onboarding_data: settingsToSave.onboarding_data || {}
+        onboarding_data: settingsToSave.onboarding_data as any || {}
       };
 
       let error;
@@ -776,7 +776,6 @@ const Settings = () => {
           </Card>
         </TabsContent>
 
-        {/* AI & API Tab with 3-column grid layout */}
         <TabsContent value="ai" className="space-y-6">
           <Card className="bg-card border-border">
             <CardHeader>
@@ -887,7 +886,6 @@ const Settings = () => {
           <AIModelUsageChart />
         </TabsContent>
 
-        {/* Platforms Tab */}
         <TabsContent value="platforms">
           <Card className="bg-card border-border">
             <CardHeader>
@@ -967,7 +965,6 @@ const Settings = () => {
           </Card>
         </TabsContent>
 
-        {/* Tone & Style Tab */}
         <TabsContent value="tone">
           <Card className="bg-card border-border">
             <CardHeader>
@@ -1037,7 +1034,6 @@ const Settings = () => {
           </Card>
         </TabsContent>
 
-        {/* Workflow Tab */}
         <TabsContent value="workflow">
           <Card className="bg-card border-border">
             <CardHeader>
@@ -1158,7 +1154,6 @@ const Settings = () => {
           </Card>
         </TabsContent>
 
-        {/* History Tab */}
         <TabsContent value="history" className="space-y-6">
           <Card className="bg-card border-border">
             <CardHeader>
@@ -1194,7 +1189,6 @@ const Settings = () => {
           </Card>
         </TabsContent>
 
-        {/* Billing Tab - Now using BillingSettings component */}
         <TabsContent value="billing">
           <BillingSettings />
         </TabsContent>
