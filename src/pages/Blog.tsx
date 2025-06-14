@@ -1,7 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import LandingPageNavbar from '@/components/LandingPageNavbar';
 import { Footer } from '@/components/ui/footer-section';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -150,7 +148,6 @@ const Blog = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <LandingPageNavbar />
         <div className="container mx-auto px-4 py-20">
           <div className="text-center">Loading...</div>
         </div>
@@ -160,7 +157,6 @@ const Blog = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <LandingPageNavbar />
       
       <div className="container mx-auto px-4 py-20 max-w-6xl">
         {/* Header */}

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { HeroSection } from "@/components/ui/hero-section-1";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,7 +38,6 @@ const faqItems = [
 
 const Landing = () => {
   return <div className="min-h-screen bg-background">
-      <LandingPageNavbar />
       <HeroSection />
       
       {/* Features Section */}
