@@ -1,3 +1,4 @@
+
 import React from "react";
 import { HeroSection } from "@/components/ui/hero-section-1";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,16 +52,16 @@ const Landing = () => {
             </p>
           </div>
           
-          <ul className="grid grid-cols-1 grid-rows-none gap-4 md:grid-cols-12 md:grid-rows-4 lg:gap-4 xl:max-h-[50rem] xl:grid-rows-3">
-            <GridItem area="md:[grid-area:1/1/2/7] xl:[grid-area:1/1/2/5]" icon={<Brain className="h-4 w-4" />} title="Campaign Planning & Post Creation" description="Intelligent content planning with AI-powered post creation and scheduling" />
-            <GridItem area="md:[grid-area:1/7/2/13] xl:[grid-area:1/5/2/9]" icon={<Bot className="h-4 w-4" />} title="One-Click DMs & Smart Comments" description="10 preset personas + custom creation with natural replies in 10 different tones" />
-            <GridItem area="md:[grid-area:2/1/3/7] xl:[grid-area:1/9/2/13]" icon={<Smartphone className="h-4 w-4" />} title="7 Platform Support" description="LinkedIn, X, Reddit, Threads, Bluesky, Facebook, YouTube" />
-            <GridItem area="md:[grid-area:2/7/3/13] xl:[grid-area:2/1/3/5]" icon={<Globe className="h-4 w-4" />} title="50+ Languages" description="Go global without losing your tone with multi-language support" />
-            <GridItem area="md:[grid-area:3/1/3/7] xl:[grid-area:2/5/3/9]" icon={<Flame className="h-4 w-4" />} title="Meme Generator" description="Viral content that stays on-brand with AI-powered meme creation" />
-            <GridItem area="md:[grid-area:3/7/4/13] xl:[grid-area:2/9/3/13]" icon={<BarChart3 className="h-4 w-4" />} title="Advanced Analytics" description="In-depth insights, customizable dashboards, and ROI tracking" />
-            <GridItem area="md:[grid-area:4/1/5/7] xl:[grid-area:3/1/4/5]" icon={<Users2 className="h-4 w-4" />} title="Team Collaboration" description="Multi-user access, role-based permissions, and approval workflows" />
-            <GridItem area="md:[grid-area:4/7/5/13] xl:[grid-area:3/5/4/9]" icon={<DollarSign className="h-4 w-4" />} title="Ad Campaign Management" description="Create, manage, and optimize paid ads with A/B testing across platforms" />
-            <GridItem area="md:[grid-area:5/1/6/13] xl:[grid-area:3/9/4/13]" icon={<Link2 className="h-4 w-4" />} title="Custom API Integrations" description="Flexible connections with CRM, marketing, and project management tools" />
+          <ul className="grid grid-cols-1 grid-rows-none gap-4 md:grid-cols-12 md:grid-rows-6 lg:gap-4 xl:max-h-[60rem] xl:grid-rows-4">
+            <GridItem area="md:[grid-area:1/1/3/7] xl:[grid-area:1/1/3/7]" icon={<Brain className="h-4 w-4" />} title="Campaign Planning & Post Creation" description="Intelligent content planning with AI-powered post creation and scheduling" />
+            <GridItem area="md:[grid-area:1/7/2/11] xl:[grid-area:1/7/2/11]" icon={<Bot className="h-4 w-4" />} title="One-Click DMs & Smart Comments" description="10 preset personas + custom creation with natural replies in 10 different tones" />
+            <GridItem area="md:[grid-area:1/11/2/13] xl:[grid-area:1/11/2/13]" icon={<Smartphone className="h-4 w-4" />} title="7 Platform Support" description="LinkedIn, X, Reddit, Threads, Bluesky, Facebook, YouTube" />
+            <GridItem area="md:[grid-area:2/7/3/10] xl:[grid-area:2/7/3/10]" icon={<Globe className="h-4 w-4" />} title="50+ Languages" description="Go global without losing your tone with multi-language support" />
+            <GridItem area="md:[grid-area:2/10/4/13] xl:[grid-area:2/10/4/13]" icon={<Flame className="h-4 w-4" />} title="Meme Generator" description="Viral content that stays on-brand with AI-powered meme creation" />
+            <GridItem area="md:[grid-area:3/1/4/4] xl:[grid-area:3/1/4/4]" icon={<BarChart3 className="h-4 w-4" />} title="Advanced Analytics" description="In-depth insights, customizable dashboards, and ROI tracking" />
+            <GridItem area="md:[grid-area:3/4/4/7] xl:[grid-area:3/4/4/7]" icon={<Users2 className="h-4 w-4" />} title="Team Collaboration" description="Multi-user access, role-based permissions, and approval workflows" />
+            <GridItem area="md:[grid-area:4/1/5/6] xl:[grid-area:4/1/5/6]" icon={<DollarSign className="h-4 w-4" />} title="Ad Campaign Management" description="Create, manage, and optimize paid ads with A/B testing across platforms" />
+            <GridItem area="md:[grid-area:4/6/5/10] xl:[grid-area:4/6/5/10]" icon={<Link2 className="h-4 w-4" />} title="Custom API Integrations" description="Flexible connections with CRM, marketing, and project management tools" />
           </ul>
         </div>
       </section>
