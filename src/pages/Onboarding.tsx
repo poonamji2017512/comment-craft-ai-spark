@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -58,6 +57,10 @@ const Onboarding = () => {
     }
   };
 
+  const handleSkip = () => {
+    navigate('/dashboard');
+  };
+
   const handleFinish = async () => {
     if (!user) {
       toast.error('You must be logged in to save settings');
@@ -66,50 +69,76 @@ const Onboarding = () => {
 
     setIsLoading(true);
     try {
-      // Save user settings
-      const settingsData = {
-        user_id: user.id,
-        theme: 'dark',
-        language: 'en',
-        summary_length: 'medium',
-        ai_tone: 'friendly',
-        ai_model: 'gemini-2.5-pro',
-        dashboard_view: 'recent',
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        use_custom_api_key: false,
-        custom_api_key: '',
-        daily_comment_target: formData.dailyTarget,
-        notification_prefs: {
-          email_notifications: false,
-          meeting_processed: true,
-          summary_ready: true,
-          task_due: true,
-          frequency: 'real-time'
-        },
-        ai_features: {
-          auto_summarization: true,
-          action_item_detection: true,
-          topic_extraction: true
-        },
-        // Store onboarding data in settings
-        onboarding_data: {
-          frequent_phrases: formData.phrases,
-          brand_ctas: formData.ctas,
-          always_say: formData.alwaysSay,
-          never_say: formData.neverSay,
-          content_boundaries: formData.boundaries,
-          additional_guidelines: formData.guidelines
-        }
+      // Check if user settings already exist
+      const { data: existingSettings } = await supabase
+        .from('user_settings')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      // Prepare onboarding data
+      const onboardingData = {
+        frequent_phrases: formData.phrases,
+        brand_ctas: formData.ctas,
+        always_say: formData.alwaysSay,
+        never_say: formData.neverSay,
+        content_boundaries: formData.boundaries,
+        additional_guidelines: formData.guidelines
       };
 
-      const { error: settingsError } = await supabase
-        .from('user_settings')
-        .insert(settingsData);
+      if (existingSettings) {
+        // Update existing settings
+        const { error: settingsError } = await supabase
+          .from('user_settings')
+          .update({
+            daily_comment_target: formData.dailyTarget,
+            onboarding_data: onboardingData
+          })
+          .eq('user_id', user.id);
 
-      if (settingsError) {
-        console.error('Error saving settings:', settingsError);
-        toast.error('Failed to save settings');
-        return;
+        if (settingsError) {
+          console.error('Error updating settings:', settingsError);
+          toast.error('Failed to save settings');
+          return;
+        }
+      } else {
+        // Create new settings
+        const settingsData = {
+          user_id: user.id,
+          theme: 'dark',
+          language: 'en',
+          summary_length: 'medium',
+          ai_tone: 'friendly',
+          ai_model: 'gemini-2.5-pro',
+          dashboard_view: 'recent',
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          use_custom_api_key: false,
+          custom_api_key: '',
+          daily_comment_target: formData.dailyTarget,
+          notification_prefs: {
+            email_notifications: false,
+            meeting_processed: true,
+            summary_ready: true,
+            task_due: true,
+            frequency: 'real-time'
+          },
+          ai_features: {
+            auto_summarization: true,
+            action_item_detection: true,
+            topic_extraction: true
+          },
+          onboarding_data: onboardingData
+        };
+
+        const { error: settingsError } = await supabase
+          .from('user_settings')
+          .insert(settingsData);
+
+        if (settingsError) {
+          console.error('Error saving settings:', settingsError);
+          toast.error('Failed to save settings');
+          return;
+        }
       }
 
       // Update user profile with description
@@ -124,8 +153,8 @@ const Onboarding = () => {
 
       if (profileError) {
         console.error('Error updating profile:', profileError);
-        toast.error('Failed to update profile');
-        return;
+        // Don't fail the whole process if profile update fails
+        console.warn('Profile update failed, but continuing...');
       }
 
       toast.success('Onboarding completed! Welcome to AI Comment Agent!');
@@ -315,13 +344,22 @@ const Onboarding = () => {
             <p className="text-sm text-gray-400 mb-6 leading-relaxed">
               Your AI is configured and ready to go. You can change any of these settings later from your Settings page.
             </p>
-            <Button 
-              onClick={handleFinish}
-              disabled={isLoading}
-              className="w-full py-3 px-4 bg-white text-black rounded-md text-sm font-semibold hover:bg-gray-100 transition-all"
-            >
-              {isLoading ? 'Setting up...' : 'Go to Dashboard'}
-            </Button>
+            <div className="flex gap-3">
+              <Button 
+                onClick={handleSkip}
+                variant="outline"
+                className="flex-1 py-3 px-4 border border-gray-700 text-gray-400 hover:text-white hover:bg-gray-900"
+              >
+                Skip for Now
+              </Button>
+              <Button 
+                onClick={handleFinish}
+                disabled={isLoading}
+                className="flex-1 py-3 px-4 bg-white text-black rounded-md text-sm font-semibold hover:bg-gray-100 transition-all"
+              >
+                {isLoading ? 'Setting up...' : 'Go to Dashboard'}
+              </Button>
+            </div>
           </div>
         );
 
@@ -404,13 +442,22 @@ const Onboarding = () => {
                 ← Previous
               </button>
               
-              <button
-                onClick={currentStep === totalSteps ? handleFinish : handleNext}
-                disabled={isLoading}
-                className="flex-1 py-2 px-4 bg-white text-black rounded-md text-sm font-semibold hover:bg-gray-100 transition-all"
-              >
-                {isLoading ? 'Saving...' : currentStep === totalSteps ? 'Finish Setup' : 'Continue'}
-              </button>
+              <div className="flex gap-2 flex-1">
+                <button
+                  onClick={handleSkip}
+                  className="flex-1 py-2 px-4 border border-gray-700 rounded-md text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-900 transition-all"
+                >
+                  Skip
+                </button>
+                
+                <button
+                  onClick={currentStep === totalSteps ? handleFinish : handleNext}
+                  disabled={isLoading}
+                  className="flex-1 py-2 px-4 bg-white text-black rounded-md text-sm font-semibold hover:bg-gray-100 transition-all"
+                >
+                  {isLoading ? 'Saving...' : currentStep === totalSteps ? 'Finish Setup' : 'Continue'}
+                </button>
+              </div>
             </div>
           )}
 
@@ -418,9 +465,22 @@ const Onboarding = () => {
         </div>
       </div>
 
-      <div className="w-1/2 bg-gray-600 flex items-center justify-center">
-        <div className="text-8xl opacity-30">
-          {stepVisuals[currentStep] || '✨'}
+      <div className="w-1/2 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center relative overflow-hidden">
+        {/* Background pattern */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-20 left-20 w-32 h-32 bg-white rounded-full blur-3xl"></div>
+          <div className="absolute bottom-40 right-20 w-48 h-48 bg-blue-400 rounded-full blur-3xl"></div>
+          <div className="absolute top-1/2 left-1/3 w-24 h-24 bg-purple-400 rounded-full blur-2xl"></div>
+        </div>
+        
+        {/* Main visual */}
+        <div className="relative z-10 text-center">
+          <div className="text-8xl opacity-80 mb-4">
+            {stepVisuals[currentStep] || '✨'}
+          </div>
+          <div className="text-white/60 text-sm font-medium">
+            AI Comment Agent
+          </div>
         </div>
       </div>
     </div>
