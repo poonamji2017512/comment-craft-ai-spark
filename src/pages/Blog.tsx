@@ -4,7 +4,7 @@ import { Footer } from '@/components/ui/footer-section';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Home, User, Briefcase, FileText } from 'lucide-react';
-import { sanityClient } from '@/lib/sanity';
+import { sanityClient, queries, urlFor } from '@/lib/sanity';
 import { NavBar } from '@/components/ui/tubelight-navbar';
 import { Component as EtheralShadow } from '@/components/ui/etheral-shadow';
 
@@ -38,25 +38,9 @@ const Blog = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const query = `*[_type == "post"] | order(publishedAt desc) {
-          _id,
-          title,
-          slug,
-          excerpt,
-          publishedAt,
-          author->{name, image},
-          mainImage,
-          estimatedReadingTime,
-          categories,
-          featured
-        }`;
-        const allPosts = await sanityClient.fetch(query);
-        const featured = allPosts.filter((post: BlogPost & {
-          featured: boolean;
-        }) => post.featured).slice(0, 2);
-        const regular = allPosts.filter((post: BlogPost & {
-          featured: boolean;
-        }) => !post.featured);
+        const allPosts = await sanityClient.fetch(queries.allPosts);
+        const featured = allPosts.filter((post: BlogPost & { featured: boolean }) => post.featured).slice(0, 2);
+        const regular = allPosts.filter((post: BlogPost & { featured: boolean }) => !post.featured);
         setFeaturedPosts(featured);
         setPosts(regular);
       } catch (error) {
@@ -147,6 +131,7 @@ const Blog = () => {
         setIsLoading(false);
       }
     };
+
     fetchPosts();
   }, []);
 
@@ -174,15 +159,18 @@ const Blog = () => {
   ];
 
   if (isLoading) {
-    return <div className="min-h-screen bg-background">
+    return (
+      <div className="min-h-screen bg-background">
         <NavBar items={navItems} />
         <div className="container mx-auto px-4 py-20">
           <div className="text-center">Loading...</div>
         </div>
-      </div>;
+      </div>
+    );
   }
 
-  return <div className="min-h-screen bg-background relative">
+  return (
+    <div className="min-h-screen bg-background relative">
       {/* Background Component */}
       <div className="fixed inset-0 z-0">
         <EtheralShadow
@@ -209,7 +197,8 @@ const Blog = () => {
           </div>
 
           {/* Featured Section */}
-          {featuredPosts.length > 0 && <div className="mb-20 px-[45px]">
+          {featuredPosts.length > 0 && (
+            <div className="mb-20 px-[45px]">
               <div className="mb-8">
                 <h2 className="text-2xl font-bold text-foreground mb-2">Featured</h2>
                 <p className="text-lg text-muted-foreground">
@@ -217,7 +206,21 @@ const Blog = () => {
                 </p>
               </div>
               <div className="grid md:grid-cols-2 gap-8">
-                {featuredPosts.map(post => <Card key={post._id} className="cursor-pointer hover:shadow-lg transition-all duration-200 bg-card/80 backdrop-blur-sm border-border h-[450px] flex flex-col" onClick={() => handlePostClick(post.slug.current)}>
+                {featuredPosts.map((post) => (
+                  <Card
+                    key={post._id}
+                    className="cursor-pointer hover:shadow-lg transition-all duration-200 bg-card/80 backdrop-blur-sm border-border h-[450px] flex flex-col"
+                    onClick={() => handlePostClick(post.slug.current)}
+                  >
+                    {post.mainImage && (
+                      <div className="w-full h-48 overflow-hidden rounded-t-lg">
+                        <img
+                          src={urlFor(post.mainImage).width(600).height(300).url()}
+                          alt={post.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
                     <CardHeader className="pb-4 flex-shrink-0">
                       <CardTitle className="text-xl font-semibold text-foreground line-clamp-2 mb-3">
                         {post.title}
@@ -239,9 +242,11 @@ const Blog = () => {
                         </div>
                       </div>
                     </CardContent>
-                  </Card>)}
+                  </Card>
+                ))}
               </div>
-            </div>}
+            </div>
+          )}
 
           {/* All Posts Section */}
           <div className="px-[45px]">
@@ -252,7 +257,21 @@ const Blog = () => {
               </p>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {posts.map(post => <Card key={post._id} className="cursor-pointer hover:shadow-lg transition-all duration-200 bg-card/80 backdrop-blur-sm border-border h-[408px] flex flex-col" onClick={() => handlePostClick(post.slug.current)}>
+              {posts.map((post) => (
+                <Card
+                  key={post._id}
+                  className="cursor-pointer hover:shadow-lg transition-all duration-200 bg-card/80 backdrop-blur-sm border-border h-[408px] flex flex-col"
+                  onClick={() => handlePostClick(post.slug.current)}
+                >
+                  {post.mainImage && (
+                    <div className="w-full h-40 overflow-hidden rounded-t-lg">
+                      <img
+                        src={urlFor(post.mainImage).width(400).height(200).url()}
+                        alt={post.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
                   <CardHeader className="pb-4 flex-shrink-0">
                     <CardTitle className="text-lg font-semibold text-foreground line-clamp-2 mb-3">
                       {post.title}
@@ -274,14 +293,16 @@ const Blog = () => {
                       </div>
                     </div>
                   </CardContent>
-                </Card>)}
+                </Card>
+              ))}
             </div>
           </div>
         </div>
 
         <Footer />
       </div>
-    </div>;
+    </div>
+  );
 };
 
 export default Blog;
