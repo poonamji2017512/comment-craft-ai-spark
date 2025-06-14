@@ -1,7 +1,5 @@
-
 import React from "react";
-import LandingPageNavbar from "@/components/LandingPageNavbar";
-import { Button } from "@/components/ui/button";
+import { HeroSection } from "@/components/ui/hero-section-1";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check, Star, Zap, Shield, Users } from "lucide-react";
@@ -9,33 +7,8 @@ import { Check, Star, Zap, Shield, Users } from "lucide-react";
 const Landing = () => {
   return (
     <div className="min-h-screen bg-background">
-      <LandingPageNavbar />
+      <HeroSection />
       
-      {/* Hero Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto text-center">
-          <Badge variant="secondary" className="mb-6">
-            AI-Powered Comment Generation
-          </Badge>
-          <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
-            Your AI Comment
-            <span className="text-primary"> Companion</span>
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
-            Generate thoughtful, engaging comments and replies with AI assistance. 
-            Perfect for social media, forums, and professional networks.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="text-lg px-8 py-6">
-              Get Started Free
-            </Button>
-            <Button variant="outline" size="lg" className="text-lg px-8 py-6">
-              Watch Demo
-            </Button>
-          </div>
-        </div>
-      </section>
-
       {/* Features Section */}
       <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/50">
         <div className="max-w-7xl mx-auto">
@@ -117,9 +90,12 @@ const Landing = () => {
                     Standard support
                   </li>
                 </ul>
-                <Button className="w-full mt-6" variant="outline">
-                  Get Started
-                </Button>
+                
+                <a href="/dashboard">
+                  <button className="w-full mt-6 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 variant-outline">
+                    Get Started
+                  </button>
+                </a>
               </CardContent>
             </Card>
 
@@ -152,9 +128,11 @@ const Landing = () => {
                     Custom tone settings
                   </li>
                 </ul>
-                <Button className="w-full mt-6">
-                  Upgrade to Pro
-                </Button>
+                <a href="/dashboard">
+                  <button className="w-full mt-6 rounded-md inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90">
+                    Upgrade to Pro
+                  </button>
+                </a>
               </CardContent>
             </Card>
 
@@ -184,9 +162,11 @@ const Landing = () => {
                     API access
                   </li>
                 </ul>
-                <Button className="w-full mt-6" variant="outline">
-                  Upgrade to Ultra
-                </Button>
+                <a href="/dashboard">
+                  <button className="w-full mt-6 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 variant-outline">
+                    Upgrade to Ultra
+                  </button>
+                </a>
               </CardContent>
             </Card>
           </div>
@@ -194,7 +174,7 @@ const Landing = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/50">
+      <section id="testimonials" className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4">
@@ -241,9 +221,11 @@ const Landing = () => {
           <p className="text-xl text-muted-foreground mb-8">
             Join thousands of users who are already creating better content with AI
           </p>
-          <Button size="lg" className="text-lg px-8 py-6">
-            Start Free Trial
-          </Button>
+          <a href="/dashboard">
+            <button className="rounded-md inline-flex items-center justify-center whitespace-nowrap text-lg font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 h-11 rounded-md px-8 text-lg px-8 py-6 bg-primary text-primary-foreground hover:bg-primary/90">
+              Start Free Trial
+            </button>
+          </a>
         </div>
       </section>
 
