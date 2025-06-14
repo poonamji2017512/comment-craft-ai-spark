@@ -2,43 +2,63 @@
 import { useEffect } from 'react';
 import { toast } from 'sonner';
 
-const MILESTONE_MESSAGES = [
-  "🎉 Amazing! You've made 10 comments! Keep the momentum going!",
-  "🚀 Fantastic! 20 comments completed! You're on fire!",
-  "⭐ Incredible! 25 comments done! You're a commenting superstar!",
-  "🏆 Outstanding! 30 comments achieved! Your engagement is impressive!",
-  "🎯 Phenomenal! 40 comments completed! You're crushing your goals!",
-  "💫 Spectacular! 50 comments reached! You're an engagement champion!",
-  "🌟 Legendary! 60 comments done! Your consistency is remarkable!",
-  "🔥 Unstoppable! 70 comments completed! You're in the zone!",
-  "💎 Exceptional! 80 comments achieved! You're a true professional!",
-  "👑 Magnificent! 90 comments done! You're nearly at 100!",
-  "🎊 INCREDIBLE! 100 comments completed! You're a commenting master!"
-];
+const MILESTONE_PERCENTAGES = [10, 25, 40, 60, 80, 100];
 
-const getMilestoneMessage = (count: number): string => {
-  const milestoneIndex = Math.floor(count / 10) - 1;
-  if (milestoneIndex < MILESTONE_MESSAGES.length) {
-    return MILESTONE_MESSAGES[milestoneIndex];
+const generateMotivationalMessage = (currentCount: number, target: number, percentage: number): string => {
+  const motivationalPhrases = [
+    "🎉 Amazing progress! You're absolutely crushing it!",
+    "🚀 Fantastic work! Your dedication is paying off!",
+    "⭐ Incredible momentum! You're on fire today!",
+    "🏆 Outstanding effort! Keep pushing forward!",
+    "🎯 Phenomenal progress! You're unstoppable!",
+    "💫 Spectacular achievement! Your consistency shines!",
+    "🌟 Legendary dedication! You're in the zone!",
+    "🔥 Unstoppable energy! You're making it happen!",
+    "💎 Exceptional commitment! You're a true professional!",
+    "👑 Magnificent progress! You're absolutely dominating!",
+  ];
+
+  const baseMessage = motivationalPhrases[Math.floor(Math.random() * motivationalPhrases.length)];
+  
+  if (percentage === 100) {
+    return `🎊 INCREDIBLE! You've completed your daily target of ${target} comments! ${baseMessage} You're a commenting master!`;
+  } else if (percentage >= 80) {
+    return `${baseMessage} You're ${percentage}% there with ${currentCount} comments - almost at your ${target} target!`;
+  } else if (percentage >= 60) {
+    return `${baseMessage} You've hit ${percentage}% of your goal with ${currentCount} comments! ${target - currentCount} more to go!`;
+  } else if (percentage >= 40) {
+    return `${baseMessage} You're ${percentage}% of the way with ${currentCount} comments! Halfway there!`;
+  } else if (percentage >= 25) {
+    return `${baseMessage} You've reached ${percentage}% with ${currentCount} comments! Building great momentum!`;
+  } else {
+    return `${baseMessage} You're ${percentage}% there with ${currentCount} comments! Great start towards your ${target} target!`;
   }
-  // For counts beyond 100, generate dynamic messages
-  return `🌟 Amazing! You've completed ${count} comments! Your dedication is inspiring!`;
 };
 
-const isMilestone = (count: number): boolean => {
-  return count > 0 && (count % 10 === 0 || count === 25 || count === 35 || count === 45);
+const shouldShowMilestone = (currentCount: number, target: number): boolean => {
+  const percentage = Math.round((currentCount / target) * 100);
+  return MILESTONE_PERCENTAGES.includes(percentage) && currentCount > 0;
 };
 
 export const useMilestoneTracking = (currentCount: number, dailyTarget: number = 20) => {
   useEffect(() => {
-    if (isMilestone(currentCount)) {
-      const message = getMilestoneMessage(currentCount);
-      const progressPercentage = Math.round((currentCount / dailyTarget) * 100);
+    if (shouldShowMilestone(currentCount, dailyTarget)) {
+      const percentage = Math.round((currentCount / dailyTarget) * 100);
+      const milestoneKey = `milestone-${percentage}-${new Date().toDateString()}`;
       
-      toast.success(message, {
-        description: `Daily progress: ${currentCount}/${dailyTarget} comments (${progressPercentage}%)`,
-        duration: 5000,
-      });
+      // Check if we've already shown this milestone today
+      const hasShownMilestone = sessionStorage.getItem(milestoneKey);
+      if (!hasShownMilestone) {
+        const message = generateMotivationalMessage(currentCount, dailyTarget, percentage);
+        
+        toast.success(message, {
+          description: `Progress: ${currentCount}/${dailyTarget} comments (${percentage}% complete)`,
+          duration: 6000,
+        });
+        
+        // Mark this milestone as shown for today
+        sessionStorage.setItem(milestoneKey, 'true');
+      }
     }
   }, [currentCount, dailyTarget]);
 

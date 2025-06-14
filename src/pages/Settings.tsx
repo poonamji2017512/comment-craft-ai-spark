@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -133,20 +132,6 @@ const Settings = () => {
     { value: 'UTC', label: 'UTC (Coordinated Universal Time)' }
   ].sort((a, b) => a.label.localeCompare(b.label));
 
-  // Generate compliment messages for reaching targets
-  const getComplimentMessage = (targetReached: number) => {
-    const compliments = [
-      `🎉 Incredible! You've reached your daily target of ${targetReached} comments! You're absolutely crushing it!`,
-      `🌟 Amazing work! ${targetReached} comments completed - you're a commenting superstar!`,
-      `🚀 Fantastic achievement! You've hit your target of ${targetReached} comments today. Keep up the excellent work!`,
-      `⭐ Outstanding! Your dedication to reach ${targetReached} comments is truly inspiring!`,
-      `🎯 Perfect! You've successfully completed your daily goal of ${targetReached} comments. You're unstoppable!`,
-      `💫 Brilliant! Reaching ${targetReached} comments shows your commitment to excellence!`,
-      `🏆 Exceptional work! Your ${targetReached} comment target is complete - you're a true professional!`
-    ];
-    return compliments[Math.floor(Math.random() * compliments.length)];
-  };
-
   // Check if user has reached their target and show congratulations
   useEffect(() => {
     const currentCount = userProfile?.daily_prompt_count || 0;
@@ -156,7 +141,7 @@ const Settings = () => {
       const hasShownToday = sessionStorage.getItem(`target-reached-${new Date().toDateString()}`);
       if (!hasShownToday) {
         setTimeout(() => {
-          toast.success(getComplimentMessage(target), {
+          toast.success(`🎊 INCREDIBLE! You've completed your daily target of ${target} comments!`, {
             duration: 6000,
             description: `You've successfully completed ${currentCount} comments today!`
           });
@@ -177,30 +162,6 @@ const Settings = () => {
     }
     loadUserSettings();
   }, [userProfile, user]);
-
-  const validateNotificationPrefs = (data: any): NotificationPrefs => {
-    if (data && typeof data === 'object' && !Array.isArray(data)) {
-      return {
-        email_notifications: typeof data.email_notifications === 'boolean' ? data.email_notifications : defaultNotificationPrefs.email_notifications,
-        meeting_processed: typeof data.meeting_processed === 'boolean' ? data.meeting_processed : defaultNotificationPrefs.meeting_processed,
-        summary_ready: typeof data.summary_ready === 'boolean' ? data.summary_ready : defaultNotificationPrefs.summary_ready,
-        task_due: typeof data.task_due === 'boolean' ? data.task_due : defaultNotificationPrefs.task_due,
-        frequency: typeof data.frequency === 'string' ? data.frequency : defaultNotificationPrefs.frequency
-      };
-    }
-    return defaultNotificationPrefs;
-  };
-
-  const validateAIFeatures = (data: any): AIFeatures => {
-    if (data && typeof data === 'object' && !Array.isArray(data)) {
-      return {
-        auto_summarization: typeof data.auto_summarization === 'boolean' ? data.auto_summarization : defaultAIFeatures.auto_summarization,
-        action_item_detection: typeof data.action_item_detection === 'boolean' ? data.action_item_detection : defaultAIFeatures.action_item_detection,
-        topic_extraction: typeof data.topic_extraction === 'boolean' ? data.topic_extraction : defaultAIFeatures.topic_extraction
-      };
-    }
-    return defaultAIFeatures;
-  };
 
   const loadUserSettings = async () => {
     if (!user) return;
@@ -243,161 +204,14 @@ const Settings = () => {
     }
   };
 
-  const handleProfileUpdate = async () => {
-    if (!user) {
-      toast.error('You must be logged in to update profile');
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const { error } = await supabase
-        .from('user_profiles')
-        .update({
-          full_name: profileData.full_name,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', user.id);
-
-      if (error) {
-        console.error('Error updating profile:', error);
-        toast.error('Failed to update profile');
-        return;
-      }
-
-      toast.success('Profile updated successfully!');
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error('An unexpected error occurred');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const validateApiKey = async () => {
-    if (!userSettings.custom_api_key) {
-      toast.error('Please enter an API key');
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      // Simple validation - check if key format looks correct
-      const isValidFormat = (userSettings.custom_api_key.length > 20) && 
-                           (userSettings.custom_api_key.startsWith('sk-') || 
-                            userSettings.custom_api_key.startsWith('AIza'));
-      
-      setApiKeyValid(isValidFormat);
-      
-      if (isValidFormat) {
-        toast.success('API key format appears valid');
-      } else {
-        toast.error('API key format appears invalid');
-      }
-    } catch (error) {
-      console.error('Error validating API key:', error);
-      setApiKeyValid(false);
-      toast.error('Failed to validate API key');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleExportData = async () => {
-    if (!user) {
-      toast.error('You must be logged in to export data');
-      return;
-    }
-
-    try {
-      // Fetch user's generated comments
-      const { data: comments, error: commentsError } = await supabase
-        .from('generated_comments')
-        .select('*')
-        .eq('user_id', user.id);
-
-      if (commentsError) {
-        console.error('Error fetching comments:', commentsError);
-        toast.error('Failed to fetch comments data');
-        return;
-      }
-
-      // Fetch user settings
-      const { data: settings, error: settingsError } = await supabase
-        .from('user_settings')
-        .select('*')
-        .eq('user_id', user.id);
-
-      if (settingsError) {
-        console.error('Error fetching settings:', settingsError);
-        toast.error('Failed to fetch settings data');
-        return;
-      }
-
-      const exportData = {
-        user_profile: userProfile,
-        generated_comments: comments,
-        user_settings: settings,
-        export_date: new Date().toISOString()
-      };
-
-      // Create and download JSON file
-      const dataStr = JSON.stringify(exportData, null, 2);
-      const dataBlob = new Blob([dataStr], { type: 'application/json' });
-      const url = URL.createObjectURL(dataBlob);
-      
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `ai-comment-data-${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      toast.success('Data exported successfully!');
-    } catch (error) {
-      console.error('Error exporting data:', error);
-      toast.error('Failed to export data');
-    }
-  };
-
-  const handleClearData = async () => {
-    if (!user) {
-      toast.error('You must be logged in to clear data');
-      return;
-    }
-
-    const confirmed = window.confirm(
-      'Are you sure you want to delete all your generated comments? This action cannot be undone.'
-    );
-
-    if (!confirmed) return;
-
-    setIsLoading(true);
-    try {
-      const { error } = await supabase
-        .from('generated_comments')
-        .delete()
-        .eq('user_id', user.id);
-
-      if (error) {
-        console.error('Error clearing data:', error);
-        toast.error('Failed to clear data');
-        return;
-      }
-
-      toast.success('All comment data has been cleared');
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error('An unexpected error occurred');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleDailyTargetChange = async (newTarget: number) => {
-    if (newTarget < 1 || newTarget > 100) {
-      toast.error('Daily target must be between 1 and 100');
+    if (newTarget < 1) {
+      toast.error('Daily target must be at least 1');
+      return;
+    }
+
+    if (newTarget > 1000) {
+      toast.error('Daily target cannot exceed 1000');
       return;
     }
 
@@ -971,7 +785,7 @@ const Settings = () => {
                   <Input 
                     type="number" 
                     min="1" 
-                    max="100"
+                    max="1000"
                     value={userSettings.dailyCommentTarget || 20}
                     onChange={(e) => {
                       const value = parseInt(e.target.value);
@@ -981,23 +795,31 @@ const Settings = () => {
                     }}
                     onBlur={(e) => {
                       const value = parseInt(e.target.value);
-                      if (!isNaN(value) && value >= 1 && value <= 100) {
+                      if (!isNaN(value) && value >= 1 && value <= 1000) {
                         handleDailyTargetChange(value);
                       } else {
                         setUserSettings(prev => ({ ...prev, dailyCommentTarget: 20 }));
-                        toast.error('Please enter a valid target between 1 and 100');
+                        toast.error('Please enter a valid target between 1 and 1000');
+                      }
+                    }}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        const value = parseInt(e.currentTarget.value);
+                        if (!isNaN(value) && value >= 1 && value <= 1000) {
+                          handleDailyTargetChange(value);
+                        }
                       }
                     }}
                     placeholder="20" 
-                    className="bg-background border-border text-foreground w-24" 
+                    className="bg-background border-border text-foreground w-32" 
                   />
                   <Button 
                     onClick={() => {
                       const target = userSettings.dailyCommentTarget || 20;
-                      if (target >= 1 && target <= 100) {
+                      if (target >= 1 && target <= 1000) {
                         handleDailyTargetChange(target);
                       } else {
-                        toast.error('Please enter a valid target between 1 and 100');
+                        toast.error('Please enter a valid target between 1 and 1000');
                       }
                     }}
                     variant="outline"
@@ -1008,23 +830,29 @@ const Settings = () => {
                   </Button>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Set your daily goal for comment generation (1-100). You'll receive milestone notifications and congratulations when you reach your target!
+                  Set your daily goal for comment generation (1-1000). You'll receive milestone notifications at 10%, 25%, 40%, 60%, 80%, and 100% progress with personalized motivational messages!
                 </p>
                 {userProfile && (
-                  <div className="mt-2">
-                    <div className="flex items-center justify-between text-sm">
+                  <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+                    <div className="flex items-center justify-between text-sm mb-2">
                       <span className="text-muted-foreground">Today's Progress:</span>
                       <span className="text-foreground font-medium">
                         {userProfile.daily_prompt_count || 0} / {userSettings.dailyCommentTarget || 20}
                       </span>
                     </div>
-                    <div className="w-full bg-muted rounded-full h-2 mt-1">
+                    <div className="w-full bg-muted rounded-full h-3 mb-2">
                       <div 
-                        className="bg-primary h-2 rounded-full transition-all duration-300" 
+                        className="bg-primary h-3 rounded-full transition-all duration-500 ease-out" 
                         style={{ 
                           width: `${Math.min(((userProfile.daily_prompt_count || 0) / (userSettings.dailyCommentTarget || 20)) * 100, 100)}%` 
                         }}
                       ></div>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {Math.round(((userProfile.daily_prompt_count || 0) / (userSettings.dailyCommentTarget || 20)) * 100)}% complete
+                      {(userProfile.daily_prompt_count || 0) < (userSettings.dailyCommentTarget || 20) && 
+                        ` • ${(userSettings.dailyCommentTarget || 20) - (userProfile.daily_prompt_count || 0)} comments remaining`
+                      }
                     </div>
                   </div>
                 )}
