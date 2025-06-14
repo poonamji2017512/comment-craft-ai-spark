@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Home, User, Briefcase, FileText } from 'lucide-react';
@@ -117,7 +118,17 @@ const BlogPost = () => {
         </div>
 
         <div className="relative z-10">
-          <NavBar items={navItems} />
+          <div className="flex items-center justify-between p-4">
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate('/blog')}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              BACK TO THE MAIN BLOG
+            </Button>
+            <NavBar items={navItems} />
+          </div>
           <div className="container mx-auto px-4 py-20">
             <div className="text-center">Loading...</div>
           </div>
@@ -141,7 +152,17 @@ const BlogPost = () => {
         </div>
 
         <div className="relative z-10">
-          <NavBar items={navItems} />
+          <div className="flex items-center justify-between p-4">
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate('/blog')}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              BACK TO THE MAIN BLOG
+            </Button>
+            <NavBar items={navItems} />
+          </div>
           <div className="container mx-auto px-4 py-20">
             <div className="text-center">Post not found</div>
           </div>
@@ -164,19 +185,19 @@ const BlogPost = () => {
       </div>
 
       <div className="relative z-10">
-        <NavBar items={navItems} />
-        
-        <div className="container mx-auto px-4 py-8 max-w-4xl">
-          {/* Back button */}
+        <div className="flex items-center justify-between p-4">
           <Button 
             variant="ghost" 
             onClick={() => navigate('/blog')}
-            className="mb-8 text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             BACK TO THE MAIN BLOG
           </Button>
-
+          <NavBar items={navItems} />
+        </div>
+        
+        <div className="container mx-auto px-4 py-8 max-w-4xl">
           {/* Article header */}
           <article className="prose prose-lg max-w-none">
             <div className="mb-8">
