@@ -54,7 +54,11 @@ const Onboarding = () => {
   };
 
   const handleSkip = () => {
-    navigate('/dashboard');
+    if (currentStep < maxSteps) {
+      setCurrentStep(prev => prev + 1);
+    } else {
+      navigate('/dashboard');
+    }
   };
 
   const handleFinish = async () => {
@@ -287,7 +291,7 @@ const Onboarding = () => {
 
   return (
     <>
-      <style jsx>{`
+      <style>{`
         * {
           margin: 0;
           padding: 0;
