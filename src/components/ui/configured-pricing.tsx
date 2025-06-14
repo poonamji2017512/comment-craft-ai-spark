@@ -29,13 +29,8 @@ const pricingTiers = [
         included: true,
       },
       {
-        name: "LinkedIn, X (Twitter), Reddit, Threads",
-        description: "Support for major social platforms",
-        included: true,
-      },
-      {
-        name: "Bluesky, Facebook, YouTube replies",
-        description: "Extended platform support",
+        name: "LinkedIn, X (Twitter), Reddit, Threads, Bluesky, Facebook, YouTube replies",
+        description: "Support for all major social platforms",
         included: true,
       },
       {
@@ -71,18 +66,8 @@ const pricingTiers = [
         included: true,
       },
       {
-        name: "Unlimited access to other standard models",
-        description: "No limits on any model usage",
-        included: true,
-      },
-      {
-        name: "LinkedIn, X (Twitter), Reddit, Threads",
-        description: "Support for major social platforms",
-        included: true,
-      },
-      {
-        name: "Bluesky, Facebook, YouTube replies",
-        description: "Extended platform support",
+        name: "LinkedIn, X (Twitter), Reddit, Threads, Bluesky, Facebook, YouTube replies",
+        description: "Support for all major social platforms",
         included: true,
       },
       {

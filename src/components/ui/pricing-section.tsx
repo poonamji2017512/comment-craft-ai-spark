@@ -61,6 +61,22 @@ function PricingSection({ tiers, className }: PricingSectionProps) {
     "border-none shadow-lg",
   )
 
+  const getDisplayPrice = (tier: PricingTier) => {
+    if (isYearly) {
+      // Calculate monthly equivalent for yearly plans
+      const monthlyEquivalent = Math.round(tier.price.yearly / 12)
+      return monthlyEquivalent
+    }
+    return tier.price.monthly
+  }
+
+  const getDisplayText = (tier: PricingTier) => {
+    if (isYearly) {
+      return `$${tier.price.yearly} billed annually`
+    }
+    return "month"
+  }
+
   return (
     <section
       className={cn(
@@ -137,12 +153,17 @@ function PricingSection({ tiers, className }: PricingSectionProps) {
                 <div className="mb-6">
                   <div className="flex items-baseline gap-2">
                     <span className="text-4xl font-bold text-zinc-900 dark:text-zinc-100">
-                      ${isYearly ? tier.price.yearly : tier.price.monthly}
+                      ${getDisplayPrice(tier)}
                     </span>
                     <span className="text-sm text-zinc-500 dark:text-zinc-400">
-                      /{isYearly ? "year" : "month"}
+                      /{isYearly ? "month" : "month"}
                     </span>
                   </div>
+                  {isYearly && (
+                    <div className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                      {getDisplayText(tier)}
+                    </div>
+                  )}
                   <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
                     {tier.description}
                   </p>
@@ -182,14 +203,11 @@ function PricingSection({ tiers, className }: PricingSectionProps) {
                       ? buttonStyles.highlight
                       : buttonStyles.default,
                   )}
-                  asChild
                 >
-                  <a href="/dashboard">
-                    <span className="relative z-10 flex items-center justify-center gap-2">
-                      Continue with {tier.name}
-                      <ArrowRightIcon className="w-4 h-4" />
-                    </span>
-                  </a>
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    Continue with {tier.name}
+                    <ArrowRightIcon className="w-4 h-4" />
+                  </span>
                 </Button>
               </div>
             </div>
