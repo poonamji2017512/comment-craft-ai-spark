@@ -15,6 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import BillingSettings from "@/components/BillingSettings";
+import AIModelUsageChart from "@/components/AIModelUsageChart";
 import { useMilestoneTracking } from "@/hooks/useMilestoneTracking";
 import { User, Settings as SettingsIcon, Bell, Database, Key, Trash2, Download, Eye, EyeOff, Check, X, Palette, MessageSquare, Shield, CreditCard, Users, Workflow, Crown, Mail, ExternalLink, Puzzle, Twitter, Linkedin, Globe, Clock } from "lucide-react";
 
@@ -669,11 +670,12 @@ const Settings = () => {
                     {category.models.map((model) => (
                       <div
                         key={model.value}
-                        className={`border rounded-lg p-4 cursor-not-allowed transition-colors ${
+                        className={`border rounded-lg p-4 cursor-pointer transition-colors hover:border-primary/50 ${
                           userSettings.ai_model === model.value
                             ? 'border-primary bg-primary/5'
-                            : 'border-border'
+                            : 'border-border hover:bg-muted/50'
                         }`}
+                        onClick={() => saveUserSettings({ ai_model: model.value })}
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
@@ -760,6 +762,9 @@ const Settings = () => {
               )}
             </CardContent>
           </Card>
+
+          {/* AI Model Usage Analytics */}
+          <AIModelUsageChart />
         </TabsContent>
 
         {/* Platforms Tab */}
