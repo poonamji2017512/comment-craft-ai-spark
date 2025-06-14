@@ -1,10 +1,13 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import AuthModal from '@/components/AuthModal';
+
 const BlogNavbar = () => {
   const navigate = useNavigate();
   const [showAuthModal, setShowAuthModal] = useState(false);
+
   const scrollToSection = (sectionId: string) => {
     // If we're not on the landing page, navigate there first
     if (window.location.pathname !== '/landing') {
@@ -18,13 +21,15 @@ const BlogNavbar = () => {
       }
     }
   };
-  return <>
+
+  return (
+    <>
       <nav className="bg-background border-b border-border sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 max-w-7xl">
           <div className="flex items-center justify-between mx-[43px]">
             <div className="flex items-center space-x-8">
               <h1 className="text-xl font-bold text-foreground cursor-pointer hover:text-primary transition-colors" onClick={() => navigate('/landing')}>
-                Interact
+                Home
               </h1>
               <div className="hidden md:flex items-center space-x-6">
                 <button onClick={() => scrollToSection('features')} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
@@ -55,6 +60,8 @@ const BlogNavbar = () => {
       </nav>
 
       <AuthModal open={showAuthModal} onOpenChange={setShowAuthModal} />
-    </>;
+    </>
+  );
 };
+
 export default BlogNavbar;
