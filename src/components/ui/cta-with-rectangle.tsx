@@ -4,6 +4,8 @@
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import { useState } from "react"
+import AuthModal from "@/components/AuthModal"
 
 interface CTAProps {
   badge?: {
@@ -28,53 +30,66 @@ export function CTASection({
   withGlow = true,
   className,
 }: CTAProps) {
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  const handleCTAClick = () => {
+    setShowAuthModal(true);
+  };
+
   return (
-    <section className={cn("overflow-hidden pt-0 md:pt-0", className)}>
-      <div className="relative mx-auto flex max-w-container flex-col items-center gap-6 px-8 py-12 text-center sm:gap-8 md:py-24">
-        {/* Badge */}
-        {badge && (
-          <Badge
-            variant="outline"
-            className="opacity-0 animate-fade-in-up delay-100"
-          >
-            <span className="text-muted-foreground">{badge.text}</span>
-          </Badge>
-        )}
+    <>
+      <section className={cn("overflow-hidden pt-0 md:pt-0", className)}>
+        <div className="relative mx-auto flex max-w-container flex-col items-center gap-6 px-8 py-12 text-center sm:gap-8 md:py-24">
+          {/* Badge */}
+          {badge && (
+            <Badge
+              variant="outline"
+              className="opacity-0 animate-fade-in-up delay-100"
+            >
+              <span className="text-muted-foreground">{badge.text}</span>
+            </Badge>
+          )}
 
-        {/* Title */}
-        <h2 className="text-3xl font-semibold sm:text-5xl opacity-0 animate-fade-in-up delay-200">
-          {title}
-        </h2>
+          {/* Title */}
+          <h2 className="text-3xl font-semibold sm:text-5xl opacity-0 animate-fade-in-up delay-200">
+            {title}
+          </h2>
 
-        {/* Description */}
-        {description && (
-          <p className="text-muted-foreground opacity-0 animate-fade-in-up delay-300">
-            {description}
-          </p>
-        )}
+          {/* Description */}
+          {description && (
+            <p className="text-muted-foreground opacity-0 animate-fade-in-up delay-300">
+              {description}
+            </p>
+          )}
 
-        {/* Action Button */}
-        <div className="flex flex-col items-center gap-3">
-          <Button
-            variant={action.variant || "default"}
-            size="lg"
-            className="opacity-0 animate-fade-in-up delay-500"
-            asChild
-          >
-            <a href={action.href}>Start Your 3-Day Free Trial</a>
-          </Button>
-          
-          {/* Required line under button */}
-          <p className="text-sm text-muted-foreground opacity-0 animate-fade-in-up delay-600">
-            No credit card required. Cancel anytime. Full Pro access.
-          </p>
+          {/* Action Button */}
+          <div className="flex flex-col items-center gap-3">
+            <Button
+              variant={action.variant || "default"}
+              size="lg"
+              className="opacity-0 animate-fade-in-up delay-500"
+              onClick={handleCTAClick}
+            >
+              Start Your 3-Day Free Trial
+            </Button>
+            
+            {/* Required line under button */}
+            <p className="text-sm text-muted-foreground opacity-0 animate-fade-in-up delay-600">
+              No credit card required. Cancel anytime. Full Pro access.
+            </p>
+          </div>
+
+          {/* Glow Effect */}
+          {withGlow && (
+            <div className="fade-top-lg pointer-events-none absolute inset-0 rounded-2xl shadow-glow opacity-0 animate-scale-in delay-700" />
+          )}
         </div>
-
-        {/* Glow Effect */}
-        {withGlow && (
-          <div className="fade-top-lg pointer-events-none absolute inset-0 rounded-2xl shadow-glow opacity-0 animate-scale-in delay-700" />
-        )}
-      </div>
-    </section>
+      </section>
+      
+      <AuthModal 
+        open={showAuthModal} 
+        onOpenChange={setShowAuthModal}
+      />
+    </>
   )
 }

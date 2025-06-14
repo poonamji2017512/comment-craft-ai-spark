@@ -1,8 +1,11 @@
+
 import React from 'react';
 import { ArrowRight, ChevronRight, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AnimatedGroup } from '@/components/ui/animated-group';
 import { cn } from '@/lib/utils';
+import AuthModal from '@/components/AuthModal';
+
 const transitionVariants = {
   container: {
     hidden: {
@@ -33,9 +36,23 @@ const transitionVariants = {
     }
   }
 };
+
 export function HeroSection() {
+  const [showAuthModal, setShowAuthModal] = React.useState(false);
+
+  const handleCTAClick = () => {
+    setShowAuthModal(true);
+  };
+
+  const handleNavClick = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return <>
-            <HeroHeader />
+            <HeroHeader onNavClick={handleNavClick} onAuthClick={setShowAuthModal} />
             <main className="overflow-hidden">
                 <div aria-hidden className="z-[2] absolute inset-0 pointer-events-none isolate opacity-50 contain-strict hidden lg:block">
                     <div className="w-[35rem] h-[80rem] -translate-y-[350px] absolute left-0 top-0 -rotate-45 rounded-full bg-[radial-gradient(68.54%_68.72%_at_55.02%_31.46%,hsla(0,0%,85%,.08)_0,hsla(0,0%,55%,.02)_50%,hsla(0,0%,45%,0)_80%)]" />
@@ -74,7 +91,7 @@ export function HeroSection() {
                         <div className="mx-auto max-w-7xl px-6">
                             <div className="text-center sm:mx-auto lg:mr-auto lg:mt-0">
                                 <AnimatedGroup variants={transitionVariants}>
-                                    <a href="#link" className="hover:bg-background dark:hover:border-t-border bg-muted group mx-auto flex w-fit items-center gap-4 rounded-full border p-1 pl-4 shadow-md shadow-black/5 transition-all duration-300 dark:border-t-white/5 dark:shadow-zinc-950">
+                                    <a href="#features" onClick={(e) => { e.preventDefault(); handleNavClick('features'); }} className="hover:bg-background dark:hover:border-t-border bg-muted group mx-auto flex w-fit items-center gap-4 rounded-full border p-1 pl-4 shadow-md shadow-black/5 transition-all duration-300 dark:border-t-white/5 dark:shadow-zinc-950">
                                         <span className="text-foreground text-sm">🦾 AI Social Media Manager</span>
                                         <span className="dark:border-background block h-4 w-0.5 border-l bg-white dark:bg-zinc-700"></span>
 
@@ -110,10 +127,8 @@ export function HeroSection() {
                 item: transitionVariants.item
               }} className="mt-12 flex flex-col items-center justify-center gap-2 md:flex-row">
                                     <div key={1} className="bg-foreground/10 rounded-[14px] border p-0.5">
-                                        <Button asChild size="lg" className="rounded-xl px-5 text-base">
-                                            <a href="#link">
-                                                <span className="text-nowrap">Start 3-Day Free Trial</span>
-                                            </a>
+                                        <Button onClick={handleCTAClick} size="lg" className="rounded-xl px-5 text-base">
+                                            <span className="text-nowrap">Start 3-Day Free Trial</span>
                                         </Button>
                                     </div>
                                 </AnimatedGroup>
@@ -197,24 +212,37 @@ export function HeroSection() {
                     </div>
                 </section>
             </main>
+            
+            <AuthModal 
+              open={showAuthModal} 
+              onOpenChange={setShowAuthModal}
+            />
         </>;
 }
+
 const menuItems = [{
   name: 'Features',
-  href: '#link'
+  href: 'features'
 }, {
-  name: 'Solution',
-  href: '#link'
+  name: 'Testimonials',
+  href: 'testimonials'
 }, {
   name: 'Pricing',
-  href: '#link'
+  href: 'pricing'
 }, {
   name: 'About',
-  href: '#link'
+  href: '#about'
 }];
-const HeroHeader = () => {
+
+interface HeroHeaderProps {
+  onNavClick: (sectionId: string) => void;
+  onAuthClick: (show: boolean) => void;
+}
+
+const HeroHeader = ({ onNavClick, onAuthClick }: HeroHeaderProps) => {
   const [menuState, setMenuState] = React.useState(false);
   const [isScrolled, setIsScrolled] = React.useState(false);
+
   React.useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -222,6 +250,16 @@ const HeroHeader = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleNavItemClick = (href: string) => {
+    if (href.startsWith('#')) {
+      onNavClick(href.substring(1));
+    } else {
+      onNavClick(href);
+    }
+    setMenuState(false);
+  };
+
   return <header>
             <nav data-state={menuState && 'active'} className="fixed z-20 w-full px-2 group">
                 <div className={cn('mx-auto mt-2 max-w-6xl px-6 transition-all duration-300 lg:px-12', isScrolled && 'bg-background/50 max-w-4xl rounded-2xl border backdrop-blur-lg lg:px-5')}>
@@ -241,9 +279,12 @@ const HeroHeader = () => {
                         <div className="absolute inset-0 m-auto hidden size-fit lg:block">
                             <ul className="flex gap-8 text-sm">
                                 {menuItems.map((item, index) => <li key={index}>
-                                        <a href={item.href} className="text-muted-foreground hover:text-accent-foreground block duration-150">
+                                        <button 
+                                          onClick={() => handleNavItemClick(item.href)} 
+                                          className="text-muted-foreground hover:text-accent-foreground block duration-150"
+                                        >
                                             <span>{item.name}</span>
-                                        </a>
+                                        </button>
                                     </li>)}
                             </ul>
                         </div>
@@ -252,27 +293,37 @@ const HeroHeader = () => {
                             <div className="lg:hidden">
                                 <ul className="space-y-6 text-base">
                                     {menuItems.map((item, index) => <li key={index}>
-                                            <a href={item.href} className="text-muted-foreground hover:text-accent-foreground block duration-150">
+                                            <button 
+                                              onClick={() => handleNavItemClick(item.href)} 
+                                              className="text-muted-foreground hover:text-accent-foreground block duration-150"
+                                            >
                                                 <span>{item.name}</span>
-                                            </a>
+                                            </button>
                                         </li>)}
                                 </ul>
                             </div>
                             <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
-                                <Button asChild variant="outline" size="sm" className={cn(isScrolled && 'lg:hidden')}>
-                                    <a href="#">
-                                        <span>Login</span>
-                                    </a>
+                                <Button 
+                                  onClick={() => onAuthClick(true)} 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className={cn(isScrolled && 'lg:hidden')}
+                                >
+                                    <span>Sign In</span>
                                 </Button>
-                                <Button asChild size="sm" className={cn(isScrolled && 'lg:hidden')}>
-                                    <a href="#">
-                                        <span>Sign Up</span>
-                                    </a>
+                                <Button 
+                                  onClick={() => onAuthClick(true)} 
+                                  size="sm" 
+                                  className={cn(isScrolled && 'lg:hidden')}
+                                >
+                                    <span>Sign Up</span>
                                 </Button>
-                                <Button asChild size="sm" className={cn(isScrolled ? 'lg:inline-flex' : 'hidden')}>
-                                    <a href="#">
-                                        <span>Get Started</span>
-                                    </a>
+                                <Button 
+                                  onClick={() => onAuthClick(true)} 
+                                  size="sm" 
+                                  className={cn(isScrolled ? 'lg:inline-flex' : 'hidden')}
+                                >
+                                    <span>Get Started</span>
                                 </Button>
                             </div>
                         </div>
@@ -281,6 +332,7 @@ const HeroHeader = () => {
             </nav>
         </header>;
 };
+
 const Logo = () => {
   return <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect width="32" height="32" rx="16" fill="url(#paint0_linear_106_715)" />

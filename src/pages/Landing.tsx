@@ -1,3 +1,4 @@
+
 import React from "react";
 import { HeroSection } from "@/components/ui/hero-section-1";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -95,7 +96,9 @@ const Landing = () => {
       </section>
 
       {/* Pricing Section */}
-      <ConfiguredPricing />
+      <div id="pricing">
+        <ConfiguredPricing />
+      </div>
 
       {/* FAQ Section */}
       <FaqSection
@@ -118,7 +121,7 @@ const Landing = () => {
         title="Ready to Build Your Brand Without Burnout?"
         description="Join thousands of businesses already using Interact to automate their social media engagement and grow their online presence."
         action={{
-          text: "👉 Start Your 3-Day Free Trial",
+          text: "Start Your 3-Day Free Trial",
           href: "/signup",
           variant: "default"
         }}
@@ -135,6 +138,7 @@ interface GridItemProps {
   title: string;
   description: React.ReactNode;
 }
+
 const GridItem = ({
   area,
   icon,
